@@ -1,0 +1,5 @@
+\section{Privacy in Split and Hybrid Inference}\label{sec:lit:split}
+
+Split inference partitions a model between a client and a server; the client keeps the first blocks and ships intermediate activations~\todo{cite split learning; Vepakomma et al.; collaborative inference surveys}. Attacks on split learning for vision models reconstruct the input image from the cut-layer activations~\todo{cite He et al. 2019; Pasquini et al. 2021}. For language models the threat is text reconstruction from the hidden states that cross the cut~\todo{cite recent split-inference LLM attacks and defenses}. Defenses add noise, prune the activations, or apply differential privacy to the cut layer, and the information-theoretic view measures what the released states still reveal~\todo{cite information-bottleneck and mutual-information defenses}.
+
+The proposal's threat model is the honest-but-curious server in such a system, with one difference from the cited attacks: the server does not know which model produced the states.

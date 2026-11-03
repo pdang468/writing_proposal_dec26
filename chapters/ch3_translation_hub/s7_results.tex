@@ -1,0 +1,31 @@
+\section{Results}\label{sec:hub:results}
+
+\paragraph{Corpus A.} The inversion hub passes Gate G1: free-run word-F1 above 0.95 in every cross direction. The true hub output decoded by the three decoders (Gate G2) scores 0.946 macro word-F1 on the 500 development prompts; the wrong-memory control scores 0.121. Retraining the projectors on the raw hub output reproduces 0.949; training them on the L2-normalized hub output loses 0.15, almost all of it in the SmolLM decoder, so projectors read the raw hub output throughout.
+
+\paragraph{Legal corpora.} The legal128w hub passes G1 at 0.955 to 0.984 across cross directions, and its G2 on the 500 development prompts is 0.982. The legal10s hub reaches cross word-F1 0.9705 against a shuffled floor of 0.044, and G2 0.9756 on the pieces. The legal128w hub reused on the pieces reached only 0.773, below the 0.85 threshold, which is why the pieces have their own hub. \todo{legal256w G1 pending on the cluster (V8.6 chain).}
+
+\begin{table}[H]
+\caption{Hub ceilings. Free-run macro word-F1 of the true hub output through the three frozen decoders (Gate G2), 500 development prompts per corpus. Result; sources in comments.}
+\label{tab:hub:g2}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Corpus & G2 word-F1 & Wrong memory & Shuffled floor (G1) \\
+\midrule
+Corpus A & 0.946 & 0.121 & \todo{} \\ % mixed-v8-s0b.json; oct_w5c-noise.json
+legal128w & 0.982 & \todo{} & $<$0.20 \\ % oct_w5c-report; legal128w/v6_3/report
+legal10s & 0.976 & \todo{} & 0.044 \\ % oct_w5b-report
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Per-direction table.} \placeholder{Table of free-run word-F1 and exact match for all nine directions on Corpus A and legal128w, from \texttt{results/v6\_3/hpc-final/} and \texttt{results/legal128w/v6\_3/report.md}.}
+
+\paragraph{Robustness of the decoders to hub error.} How fast does the read-out degrade when the hub output is wrong by a controlled amount? Isotropic or covariance-shaped noise of relative norm $r$ (times the hub's RMS radius $\rho_H$) was added to every true hub row and the result decoded free-run. At $r = 0.4$ the covariance-shaped loss is 0.059 on legal128w and 0.057 on Corpus A; at $r = 0.8$ it is 0.588 against 0.411. Below $r \approx 0.5$ the two corpora degrade alike; beyond it legal text degrades faster. Section~\ref{sec:attack:leak} places the unseen-model maps on those curves.
+
+\begin{figure}[ht]
+\centering
+\placeholder{Figure: word-F1 against relative hub error $r$, isotropic and covariance-shaped, legal128w and Corpus A; from \texttt{oct\_w5c-noise.json} on each corpus.}
+\caption{Decoder tolerance to hub error.}
+\label{fig:hub:noise}
+\end{figure}

@@ -1,0 +1,43 @@
+\section{Weakly Supervised Loss, One Ingredient at a Time}\label{sec:attack:hybrid}
+
+\paragraph{Question.} Added to the supervised residual, does the matching term raise word-F1 at budgets 10, 30, and 100, and which ingredient of the loss carries the gain?
+
+\paragraph{Path to the loss.} The first mixed loss (V7.4) paired the ABC term with a \emph{contrastive} supervised term and beat the contrastive fit at every budget, but its endpoint decoded at 0.12 against the ridge regression's 0.88: the contrastive term placed states by direction and lost their location. Replacing it by the residual (V7.5) fixed the location; $\alpha = 1$ then equaled ridge (0.884 against 0.879), and $\alpha = 0.5$ lost 0.2 to 0.6. At $\alpha = 0.75$ the hybrid beat ridge only at budget 30 (V7.6, +0.066, three seeds). Splitting the blind bracket (V7.7) showed that ABC alone and the moment penalty alone gave nothing at budget 10, while both together gave +0.145 over ridge. A clean grid (V7.8) found $\alpha = 0.9$ under a cosine score ahead of the benchmark at budgets 10 to 100 on Corpus A, and the legal128 corpus was built.
+
+\paragraph{Setting of the step-wise grid (V7.9).} From the bare loss, one ingredient is added per step and the previous step's best setting carried: (1) score and $\alpha$; (2) $\tau$; (3) blind batch $B$; (4) ridge on or off; (5) moment penalty on or off. Selection per step is the highest mean macro word-F1 over budgets 10, 30, and 100 on the development prompts; for the switches, on if on minus off exceeds +0.02 with the bootstrap lower bound above zero. Seeds 2 and 3 then reran every cell with seed 1's selections.
+
+\paragraph{Result.} Table~\ref{tab:attack:steps} gives the selected cell at each step and the effect of each ingredient. The endpoint, squared-distance score, $\alpha = 0.95$, $\tau = 2\,d_{\text{sq}} = 0.1152$, $B = 2048$, ridge on, moment off, reaches 0.657, 0.732, and 0.809 at budgets 10, 30, and 100 over three seeds, against the benchmark's 0.348, 0.536, and 0.758. At 300 and 1,000 the hybrid (0.855, 0.878) and the benchmark (0.845, 0.876) are within 0.01.
+
+\begin{table}[H]
+\caption{Step-wise grid on Corpus A. Macro word-F1, mean over three seeds; brackets are three-seed bootstrap intervals. Result; \texttt{mixed-v7\_9-s\{1,2,3\}.json}.}
+\label{tab:attack:steps}
+\centering
+\small
+\begin{tabular}{llccccc}
+\toprule
+Step & Selected (selection) & 10 & 30 & 100 & 300 & 1000 \\
+\midrule
+1 & squared distance, $\alpha = 0.95$ & 0.399 & 0.545 & 0.707 & 0.825 & 0.879 \\
+2 & $\tau = 2\,d_{\text{sq}}$ & 0.509 & 0.628 & 0.732 & 0.829 & 0.881 \\
+3 & $B = 2048$ & 0.601 & 0.722 & 0.775 & 0.837 & 0.883 \\
+4 & ridge on (endpoint) & 0.657 [0.651, 0.661] & 0.732 [0.732, 0.733] & 0.809 [0.805, 0.813] & 0.855 & 0.878 \\
+5 & moment off & 0.657 & 0.732 & 0.809 & 0.855 & 0.878 \\
+\midrule
+ref & $\alpha = 1$, ridge (benchmark) & 0.348 & 0.536 & 0.758 & 0.845 & 0.876 \\
+\midrule
+\multicolumn{7}{l}{Effect of each step, selected minus carried, seed 1 (paired prompt bootstrap)} \\
+1 & squared distance minus cosine & +0.049 [+0.037, +0.059] & +0.042 & +0.037 & +0.005 & $-0.002$ \\
+1 & $\alpha = 0.95$ minus $\alpha = 1$ & +0.109 [+0.100, +0.119] & +0.092 & +0.050 & +0.007 & $-0.006$ \\
+2 & $\tau$ $2d$ minus $1d$ & +0.091 [+0.083, +0.100] & +0.087 & +0.025 & +0.004 & +0.004 \\
+3 & $B$ 2048 minus 512 & +0.083 [+0.075, +0.091] & +0.094 & +0.049 & +0.009 & +0.002 \\
+4 & ridge on minus off & +0.052 [+0.044, +0.060] & +0.010 [+0.003, +0.017] & +0.031 & +0.021 & $-0.005$ \\
+5 & moment on minus off & +0.001 & +0.002 & $-0.002$ & +0.001 & $-0.000$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Later refinements.} The temperature peak sits at $2\,d_{\text{sq}}$ among multipliers from 0.1 to 10; at $10\,d_{\text{sq}}$ the hybrid equals the benchmark (V7.10). A blind batch of 8,192 adds +0.03 at budget 10 (V8); rescaling $\tau$ to that batch changes nothing within 0.006 (V8.2). With the whole training pool as the blind batch (V8.5) the gain at budgets 1, 3, 5, and 10 is +0.004, +0.025, +0.059, and +0.059 over batch 8,192, intervals excluding zero, one seed. The V8 endpoint on Corpus A is 0.726, 0.781, and 0.831 at budgets 10, 30, and 100.
+
+\paragraph{Where the hybrid fails to read.} Every cell at $\alpha \le 0.5$, and cosine at $\alpha = 0.75$ at budgets 10 and 30, sits within 0.02 of its wrong-memory control. Every cell at $\alpha \ge 0.9$ exceeds its control by at least 0.25. The matching term helps only as a small correction to a map the pairs already anchor.
+
+\paragraph{Reading.} H4 holds at budgets 10 to 100 with lower bounds well above 0.03; H5 holds at 300 and 1,000. Four ingredients each contribute at the low end, score, $\alpha$, $\tau$, and batch, and all four effects shrink to within 0.01 by budget 300. The gain is a low-budget phenomenon.

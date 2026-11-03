@@ -1,0 +1,11 @@
+\section{Inversion of Embeddings and Hidden States}\label{sec:lit:inversion}
+
+Inversion recovers the input tokens from a model's internal vectors. Three families matter here.
+
+\paragraph{Sentence-embedding inversion.} Vec2Text~\todo{cite Morris et al. 2023} trains a corrector that iterates toward the text whose embedding matches a target, and recovers most of a 32-token input from a black-box embedding API. Follow-ups extend the attack to multilingual encoders and to defenses by noise~\todo{cite}. Every such inverter is trained for one target embedding model.
+
+\paragraph{Hidden-state inversion in decoder LLMs.} The logit lens and tuned lens~\todo{cite nostalgebraist; Belrose et al.} read token identity from intermediate residual streams through the model's own unembedding. Direct inversion of split-inference activations~\todo{cite; e.g.\ work on attacks against split learning of transformers} trains an inverter on the activations of the known model. Both require the model's weights or vocabulary.
+
+\paragraph{Prompt reconstruction from outputs.} Output2Prompt and logit-based reconstruction~\todo{cite} recover the prompt from the model's generations or next-token distributions. They attack the output interface rather than the hidden state, and also assume a known model.
+
+\todo{One table: method, what the attacker observes, what the attacker must know about the model, reported recovery metric.}

@@ -1,0 +1,7 @@
+\section{Unpaired and Weakly Supervised Alignment}\label{sec:lit:unpaired}
+
+Unsupervised alignment of embedding spaces began with adversarial training plus Procrustes refinement~\todo{cite Conneau et al. 2018, MUSE} and with Wasserstein--Procrustes and Gromov--Wasserstein formulations~\todo{cite Grave et al. 2019; Alvarez-Melis and Jaakkola 2018}. Cross-domain similarity local scaling (CSLS) corrects hubness in the nearest-neighbor retrieval such methods rely on. Vec2vec~\todo{cite Jha et al. 2025} translates text embeddings between encoders with no paired data at all, through adversarial losses and cycle consistency, and shows that the translated embeddings leak document content.
+
+Weakly supervised variants add a few seed pairs to an otherwise unsupervised objective~\todo{cite Artetxe et al. 2017 (25 word pairs); Patra et al. 2019 semi-supervised}. The proposal's loss belongs to that family: a supervised residual on the paired rows plus a soft-matching term on unpaired batches. Chapter~\ref{ch:attack} reports that the matching term alone does not read a decoder LLM's middle-block states (Section~\ref{sec:attack:blind}), and that the combination gains only when pairs are few.
+
+\todo{Position the ABC (align--back--classify) soft-matching loss against InfoNCE, Sinkhorn/OT matching, and cycle consistency; state what each reads and what each assumes about the two distributions.}

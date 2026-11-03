@@ -1,0 +1,9 @@
+\section{Threat Model and Access}\label{sec:attack:threat}
+
+The attacker observes state sequences from block 12 of Pythia-1B (width 2048), a model absent from hub training. At inversion time the attacker holds neither the text nor the token identities behind those states, and cannot query Pythia. The attacker holds the frozen hub, its three decoders, and a pool of unpaired Pythia state sequences from the same domain as the target.
+
+\paragraph{Anchors and budget.} An \emph{anchor} is a correspondence linking an unseen model's state sequence to its text or to a hub model's state sequence for that text. Supervised anchors are supplied; inferred anchors are discovered by matching and may be wrong. A \emph{paired sequence} is one text processed by both Pythia and a hub model, aligned by character span into token groups; it is the unit of \emph{budget}. In the leak experiments the unit is finer: one \emph{leaked row}, one aligned token group with its Pythia state and its hub output.
+
+\paragraph{What a pair reveals.} Alignment by character span requires the tokenizer of the unseen model for the calibration prompts only. The agreed scope accepts tokenizer access in the calibration setting and forbids it at inversion time. A pair therefore reveals the unseen model's states for a known text, nothing about other texts.
+
+\paragraph{Second unseen model.} Llama-3.2-1B at layer 12 is read once, on Corpus A, to test whether the Pythia results depend on the model (Section~\ref{sec:attack:leak}).

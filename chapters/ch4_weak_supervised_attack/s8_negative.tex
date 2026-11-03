@@ -1,0 +1,27 @@
+\section{Negative Results}\label{sec:attack:negative}
+
+Each row changed one thing against the carried settings and failed its own prediction. They bound the method and stay out of the main narrative.
+
+\begin{table}[H]
+\caption{Discarded changes. Each number is against the carried setting at the stated budget. Result; report paths in \texttt{documents/experiment-log.md}.}
+\label{tab:attack:negative}
+\centering
+\small
+\begin{tabular}{llll}
+\toprule
+Version & Change & Outcome & Verdict \\
+\midrule
+V4.1 & frequency and position clues for blind maps & clues break the null; both gate designs fail & no-go \\
+V5 & learned hub slots instead of interpolation & slots 0.762 against interpolation 0.790, interval below 0 & no-go \\
+V7.3 & pseudo-anchors from the decoder's own output & position rule +0.007; log-prob rule collapses to 2 to 5 tokens (0.041) & no-go \\
+V7.4 & contrastive supervised term & endpoint 0.12 against ridge 0.88 (location error) & replaced by residual \\
+V8 & two-layer SiLU adapter & $-0.12$ at budget 10 against affine & no-go \\
+V8 & projectors on normalized hub output & $-0.15$ (SmolLM collapse) & no-go \\
+V8.2 & $\tau$ rescaled to batch 8192 & within 0.006, three seeds & no change \\
+w43 & decoder-side fine-tune of the map on teacher-forced KL & content-word CE $-0.20$ nats at budget 10, word-F1 +0.01 & no gain in the read-out \\
+w44c & Llama-3.2-3B as a stronger decoder & $-0.273$ against SmolLM on hybrid memories & no-go \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Reading.} The map's capacity is not the limit (two-layer loses), the decoder's capacity is not the limit (Llama-3B loses), and self-generated anchors do not replace supplied ones. What remains is the information in the pairs and in the unpaired pool, which is where the hybrid acts.

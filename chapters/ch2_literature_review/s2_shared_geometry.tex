@@ -1,0 +1,5 @@
+\section{Shared Representation Geometry}\label{sec:lit:geometry}
+
+The Platonic Representation Hypothesis~\todo{cite Huh et al. 2024} argues that representations of different models, trained on different data and even modalities, converge toward one statistical model of the world, and measures the convergence by kernel alignment. Earlier work on representational similarity (CKA, SVCCA)~\todo{cite Kornblith et al.; Raghu et al.} supplies the measurement tools. Cross-lingual word-embedding alignment~\todo{cite Mikolov et al. 2013; Conneau et al. 2018} showed that a linear, often orthogonal, map aligns two independently trained embedding spaces when the spaces are approximately isomorphic.
+
+The relevance to the proposal is the function class. If two LLMs' hidden-state spaces are related by a near-linear map, an affine adapter is an appropriate starting family for attaching an unseen model, and the empirical question becomes how many paired examples identify that map. Section~\ref{sec:attack:negative} tests a two-layer adapter against the affine one and finds no gain.

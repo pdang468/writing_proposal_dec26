@@ -1,0 +1,9 @@
+\section{Blind Matching Does Not Read the States}\label{sec:attack:blind}
+
+\paragraph{Question.} Without any anchor, does a matching loss on unpaired batches yield a readable map?
+
+\paragraph{Setting.} Three versions asked the question with increasing care. V4 trained blind maps on single hidden states against a known-reference anchor. V6 matched whole state sequences, on SmolLM as a pseudo-unknown model that had taken part in hub training. V7 and V7.2 trained the ABC loss, with temperature and PCA variations, Gromov--Wasserstein matching, and a neighborhood-structure loss, on Pythia against the V6.3 hub, with the InfoNCE value tested as a proxy for word-F1.
+
+\paragraph{Result.} Exact match was 0.0000 in every blind condition of V4, while the anchored reference reached 0.65 to 0.82. In V6 the sequence-matched ABC map scored word-F1 0.040 against a no-memory floor of 0.031, while direct anchors scored 0.560 and paired anchors 0.772. In V7 the trained blind maps scored 0.07 to 0.08 against wrong-memory controls of 0.04 to 0.09, with the true hub output at 0.946; in V7.2 blind ABC, Gromov--Wasserstein, and the neighborhood loss all stayed at the control. InfoNCE tracked word-F1 across families (Spearman 0.83 over 27 maps) but not within the blind family (Spearman $-0.75$ over 9 maps), so the blind loss cannot select among its own maps either.
+
+\paragraph{Reading.} H3 holds on every test: the matching term alone does not identify the map. The blind losses do shape the output distribution (effective rank, moment statistics, and landmark cosines all look healthy) without placing individual states, which is the failure mode an attacker cannot detect from the loss. The result bounds the method: pairs are necessary. The next section asks how few.

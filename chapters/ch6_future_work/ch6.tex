@@ -1,5 +1,15 @@
 \chapter{Future Work}\label{ch:future}
 
-%% Sections live in their own files: \input{chapters/ch6_future_work/s1_name}
+The remaining work for the dissertation, in the order it gates later steps.
 
-TODO.
+\begin{enumerate}
+\item \textbf{Close the open measurements.} Seeds 2 and 3 on legal128w for the exact-90 leak and the budget curve; the legal256w hub gate and its V8.6 chain; a comparable legal10s hub; the sealed test splits read once, after every selection is frozen.
+\item \textbf{Long context.} The hub and the attack on legal256w and longer windows: whether the opening-word shortfall grows with length, and whether the cap rule and end-of-sequence behavior hold beyond 128 tokens.
+\item \textbf{Refining and discovering pairs.} Unpaired matching as a tool on the pairs themselves: correct misaligned rows, extend a leaked row to its neighbors, and admit inferred anchors only under a check that reads no true text. V7.3 shows the naive form fails; the question is whether a few supplied pairs make inferred ones reliable.
+\item \textbf{Semantic fidelity.} A read-out that separates correct recovery from plausible hallucination: entity and number recall, the rewrite rung with its wrong-memory control, and a human-judged sample. The information-theoretic framing of Section~\ref{sec:attack:discussion} fixes what each metric measures.
+\item \textbf{Other unseen models and blocks.} Larger unseen models, other depths than one middle block, and models whose tokenizer differs more from the hub models', to find where the affine family stops sufficing.
+\item \textbf{Defenses.} Noise and projection at the cut layer measured against the hybrid attacker, with the decoder-tolerance curve of Figure~\ref{fig:hub:noise} as the reference for how much perturbation the read-out survives.
+\item \textbf{Hub economy.} The parity and parameter-count comparison against pairwise translators at this scale, which the V1/V2 experiments measured for text encoders and the hub chapter leaves as a placeholder.
+\end{enumerate}
+
+\placeholder{Timeline: a Gantt chart of items 1 to 7 against the defense date (\texttt{pgfgantt} is loaded).}

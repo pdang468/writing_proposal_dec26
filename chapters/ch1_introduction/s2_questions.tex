@@ -1,0 +1,11 @@
+\section{Research Questions}\label{sec:intro:questions}
+
+The proposal fixes the threat model first and asks three questions under it.
+
+\paragraph{Threat model.} The attacker observes hidden-state sequences from one middle block of an unseen decoder-only LLM. The attacker knows neither the tokenizer nor the vocabulary of that model and cannot query it. The attacker owns the translation hub and its three white-box models. In the relaxed setting, the attacker also holds a \emph{budget} of calibration prompts: texts processed by both the unseen model and one hub model, so that the two hidden-state sequences can be aligned by character span. Each such text is a paired sequence; the budget counts paired sequences, or, in the leak experiments, individual paired token rows.
+
+\paragraph{Q1: Does one hub invert several models?} Can one shared space, trained on three models, let each model's frozen decoder recover the tokens from every other model's hidden states, at a word-level F1 close to the models' own decoding? Chapter~\ref{ch:hub} answers Q1.
+
+\paragraph{Q2: How much calibration attaches an unseen model?} With the hub frozen, how does reconstruction F1 of an unseen model grow with the number of paired sequences, under an affine map and a supervised fit? Chapter~\ref{ch:attack}, Section~\ref{sec:attack:budget}, answers Q2.
+
+\paragraph{Q3: Does unpaired matching reduce that requirement?} The attacker holds many unpaired hidden states from the unseen model and many hub outputs from the same domain. Can a matching term on those unpaired batches, added to the supervised fit, raise F1 when paired supervision is scarce, and does the gain persist as the budget grows? Section~\ref{sec:attack:hybrid} and Section~\ref{sec:attack:leak} answer Q3, the second under a leak of about 100 paired token rows.

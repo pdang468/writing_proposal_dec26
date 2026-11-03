@@ -1,0 +1,3 @@
+\section{The Gap}\label{sec:lit:gap}
+
+Known-model inversion is mature, and shared geometry across models is established, but no prior work inverts the middle-block hidden states of a model whose architecture, tokenizer, and vocabulary the attacker does not hold, with a frozen decoder of another model as the read-out, under a measured calibration budget. The closest work, vec2vec, translates pooled sentence embeddings between encoders and reads content through attribute inference rather than token-level reconstruction. The proposal fills that gap and measures its boundary: the budget at which an affine map attaches an unseen decoder LLM to a shared hub, and the regime in which unpaired matching lowers that budget.

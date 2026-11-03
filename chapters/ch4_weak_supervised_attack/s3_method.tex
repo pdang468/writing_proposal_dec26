@@ -1,0 +1,26 @@
+\section{Map, Losses, and Protocol}\label{sec:attack:method}
+
+\subsection{The map}
+The map is affine: $\hat m = W s + b$ from the centered 2048-dimensional Pythia state $s$ to the 512-dimensional hub. Only $W$ and $b$ receive gradients; the hub, the projectors, and the decoders stay frozen. Training runs 3,000 AdamW updates from a fixed initializer. \todo{learning rate and schedule from \texttt{configs/v7\_2.yaml}.}
+
+\subsection{The loss}
+With supervision fraction $\alpha \in [0,1]$,
+\begin{equation}
+\mathcal{L}(\alpha) = \alpha\,\big(\mathcal{L}_{\text{res}} + \lambda\,\mathcal{R}\big) + (1-\alpha)\,\big(\mathcal{L}_{\text{ABC}} + \eta\,\mathcal{M}\big).
+\label{eq:attack:loss}
+\end{equation}
+
+\begin{description}
+\item[Residual $\mathcal{L}_{\text{res}}$ (reads the pairs).] The mean squared distance between the map's output and its true hub partner over the paired rows, divided by $\rho_H^2$, the squared RMS radius of the hub's training pool. $\alpha = 1$ is a ridge-regularized regression.
+\item[Ridge penalty $\mathcal{R}$.] $\lambda/\rho_H^2$ times the squared Frobenius norm of the map's effective weight; $\lambda = 1$.
+\item[ABC loss $\mathcal{L}_{\text{ABC}}$ (reads no pair).] On a blind batch of $B$ Pythia rows and $B$ hub outputs, each mapped Pythia vector is soft-matched to the hub batch under a score at temperature $\tau$; the matched average is then required to identify its own source vector again, as a cross-entropy, averaged over both directions. The score is the negative squared distance over $\rho_H^2$.
+\item[Moment penalty $\mathcal{M}$.] The squared distance of the batch mean of the map's outputs to the hub mean over $\rho_H^2$, plus the squared relative error of the output radius. It reads two statistics of the hub and no hub vector.
+\end{description}
+
+The temperature $\tau$ is set from the hub alone: $d_{\text{sq}}$, the median gap between the best and second-best squared-distance score over 100 hub batches of 512 rows (0.0576 on Corpus A, 0.0649 on legal128w, 0.0874 on legal10s), times a multiplier chosen in Section~\ref{sec:attack:hybrid}. The supervised fit is written $\alpha = 1$; the hybrid is $\alpha < 1$ with the ABC term on; blind is $\alpha = 0$.
+
+\subsection{Read-out}
+The map's output enters each of the three frozen decoders through the frozen projector of that corpus, and the decoder regenerates the prompt free-run with the cap of memory rows plus a margin. \textbf{Macro word-F1} averages over the evaluation prompts, then over the three decoders. Corpus A reads 500 development prompts; legal128w reads 500 development prompts for selection and 4,500 confirmation prompts for every decision. Differences are paired prompt bootstraps, 1,000 or 2,000 resamples, 95 percent percentile intervals. Each cell's \textbf{wrong-memory control} decodes the same map's outputs for another prompt. \textbf{Gap closed} is the fraction of the distance from the no-memory floor to a fit on the full calibration pool that a cell recovers.
+
+\subsection{Selection discipline}
+Every setting is selected on development prompts and labeled a selection. Each version carries the previous version's selected settings, changes one thing, and states its prediction before the run. A run that changes the claim is a new version. Discarded methods leave the main narrative (Section~\ref{sec:attack:negative}). Seeds: three where stated; one otherwise, labeled.

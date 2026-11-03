@@ -1,0 +1,21 @@
+\section{Corpora}\label{sec:hub:corpora}
+
+One hub is trained per corpus; the unseen-model experiments of Chapter~\ref{ch:attack} read the hub of the same corpus. Table~\ref{tab:hub:corpora} lists them.
+
+\begin{table}[H]
+\caption{Corpora. Splits are cluster-disjoint by near-duplicate content; test rows are sealed.}
+\label{tab:hub:corpora}
+\centering
+\begin{tabular}{llll}
+\toprule
+Name & Text & Length & Train / val / test \\
+\midrule
+Corpus A & Natural Questions query strings & about 10 words & 40{,}000 / 5{,}000 / \todo{} \\
+legal128, legal256 & Pile-of-Law documents, cut at the first word & 64--128, 128--256 tokens & 40{,}000 / 5{,}000 / 5{,}000 \\
+legal128w, legal256w & same documents, one window per document at a uniformly drawn start & 64--128, 128--256 tokens & 40{,}000 / 5{,}000 / 5{,}000 \\
+legal10s & legal128w documents cut into ten-word sentence-start pieces & 10 words & 40{,}000 / 5{,}000 / 5{,}000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Corpus A is the development corpus of the whole line. The legal corpora come from five approved Pile-of-Law subsets (contracts, EDGAR filings, consumer-complaint narratives, resource contracts, terms of service), round-robin with an 80 percent cap on EDGAR, filtered to the token range under every tokenizer (Pythia, OLMo, Qwen, SmolLM), at least eight distinct words, at most 30 percent digits, deduplicated by exact text, normalized hash, and 200-character prefix. The window corpora replace the opening cut because document openings repeat across filings: under the opening rule EDGAR lost 2,477 rows to prefix duplicates against 588 under the window rule. legal10s matches Corpus A's length on legal text, so that length and domain can be separated (Section~\ref{sec:attack:leak}).

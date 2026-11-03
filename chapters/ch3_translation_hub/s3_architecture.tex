@@ -1,0 +1,19 @@
+\section{Architecture}\label{sec:hub:arch}
+
+Three white-box models supply hidden states from one middle block each: Qwen3.5-0.8B at block 18 (width 1024), OLMo-2-1B at block 12 (width 2048), and SmolLM2-1.7B at block 18 (width 2048). Figure~\ref{fig:hub:arch} shows the path from a hidden state to a decoded token.
+
+\begin{figure}[ht]
+\centering
+\placeholder{Figure: hidden state $s_t$ $\to$ per-model source adapter $\to$ shared trunk $\to$ 512-d hub output $m_t$ $\to$ per-model projector $\to$ frozen decoder, as memory rows; nine directions. Source: \texttt{v6\_3/plan.md} Section 3.}
+\caption{Translation hub. Each source model has its own adapter; the trunk and the 512-dimensional hub output are shared; each decoder has its own projector.}
+\label{fig:hub:arch}
+\end{figure}
+
+\begin{itemize}
+\item \textbf{Source adapter}, one per model: a linear layer from the model's width to 1024, then a pre-layer-norm SiLU residual MLP (1024 to 2048 to 1024).
+\item \textbf{Shared trunk:} one residual MLP of the same shape, followed by a shared linear layer from 1024 to 512. Its output is the hub output $m_t$.
+\item \textbf{Projector}, one per decoder: a linear layer from 512 to the decoder's width, with bias.
+\item \textbf{Decoder:} the frozen model itself. The projected hub outputs of a prompt enter the decoder as memory rows ahead of its native start token; the decoder then generates.
+\end{itemize}
+
+The hub maps each token alone. It carries no positional signal and no attention across tokens, so any context in the hub output was already in the hidden state. A variant with a two-layer transformer per source adapter (V6.2 variant B) scored higher on teacher-forced continuation (cross Acc@1 0.987 against 0.954); the inversion hub keeps the per-token form because the read-out of interest, free-run inversion, passed its gate without the transformer, and because a per-token hub is what an affine map from an unseen model can target.

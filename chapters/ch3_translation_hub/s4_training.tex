@@ -1,0 +1,14 @@
+\section{Training Objective}\label{sec:hub:training}
+
+Each training prompt is processed by all three models, and the three state sequences are aligned token-group by token-group through their character spans. Training visits the nine directions: six cross directions at weight one and three self directions at weight one third.
+
+The loss has three terms:
+\begin{equation}
+\mathcal{L} = \mathcal{L}_{\text{dec}} + 0.1\,\mathcal{L}_{\text{InfoNCE}} + 1.0\,\mathcal{L}_{\text{geom}},
+\qquad
+\mathcal{L}_{\text{dec}} = \tfrac{6}{7}\,\overline{\text{CE}}_{\text{cross}} + \tfrac{1}{7}\,\overline{\text{CE}}_{\text{self}} .
+\label{eq:hub:loss}
+\end{equation}
+$\mathcal{L}_{\text{dec}}$ is the teacher-forced cross-entropy of the frozen decoder over the input tokens: the decoder reads the projected hub outputs $m_1 \ldots m_T$ as memory, then its native start token, then the true tokens $x_1 \ldots x_T$, and every label is the same-position input token $x_t$ in the decoder's vocabulary, followed by the decoder's end-of-sequence token. $\mathcal{L}_{\text{InfoNCE}}$ is an ordered-pair contrastive term that pulls the hub outputs of aligned token groups across models together. $\mathcal{L}_{\text{geom}}$ penalizes drift of pairwise distances within a batch. \todo{Write out the InfoNCE and geometry terms from \texttt{v6\_3/plan.md} Section 4 and \texttt{src/v6\_3}.}
+
+Only the adapters, the trunk, and the projectors receive gradients. The three models stay frozen. Training runs on 40,000 prompts; 5,000 validation prompts select the checkpoint by teacher-forced cross Acc@1, evaluated every 250 updates, taking the earliest checkpoint within 0.002 of the best. The test split is never read during hub training. \todo{Optimizer, learning rate, batch, update count from \texttt{configs/v6\_3.yaml}.}

@@ -1,0 +1,11 @@
+\section{Read-out and Controls}\label{sec:hub:readout}
+
+The primary read-out is free-run inversion: for each validation prompt, the projected hub outputs of one source model enter one decoder as memory, the decoder generates from its start token until end-of-sequence or a cap of the memory's row count plus a margin, and the generated text is scored against the true prompt by word-F1 and exact match. The macro score averages over prompts, then over directions.
+
+Two controls bound the read-out from below.
+\begin{itemize}
+\item \textbf{Shuffled memory:} the same hub outputs in a random row order. A decoder that reads only the bag of tokens, not their order, scores high here.
+\item \textbf{Wrong memory:} the hub outputs of another prompt. A decoder that ignores the memory scores the same here as with the true memory.
+\end{itemize}
+
+Two gates carry the controls into later chapters. \textbf{Gate G1} is the hub's own cross-direction free-run word-F1 on its validation split, required to exceed 0.90 with the shuffled floor below 0.20 (0.85 for the ten-word legal pieces). \textbf{Gate G2} is the word-F1 of the \emph{true} hub output of one source model decoded by the three decoders on the evaluation prompts of a corpus; it is the ceiling that any map from an unseen model into that hub can reach, and every unseen-model result in Chapter~\ref{ch:attack} is read against it.

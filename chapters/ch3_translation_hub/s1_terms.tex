@@ -1,0 +1,17 @@
+\section{Terms}\label{sec:hub:terms}
+
+The following words keep one meaning throughout the proposal.
+
+\begin{description}
+\item[Hidden state] The vector a language model produces at one token position in one layer. The proposal reads one middle block per model.
+\item[State sequence] The hidden states of one prompt, one per token, in order.
+\item[Hub] The shared space into which every model's hidden states are mapped, so that a state from any model can be decoded by any other. The hub is 512-dimensional and is trained on three white-box models.
+\item[Hub output] The vector a hidden state becomes after mapping into the hub.
+\item[Source adapter] The trained map from one model's hidden states into the hub.
+\item[Projector] The map from the hub into one decoder's input space.
+\item[Decoder] The frozen language model that turns projected hub outputs back into text. The three hub models serve as decoders.
+\item[Direction] One source model paired with one decoder model, for example Qwen block 18 $\to$ hub $\to$ OLMo decoder. Nine directions cover three models including self.
+\item[Inversion] Recovering the tokens that produced the states. Continuation, by contrast, predicts the next token from a state sequence.
+\item[Teacher-forced] The decoder receives the true previous tokens. \textbf{Free-run:} the decoder receives its own previous outputs.
+\item[Word-F1] Overlap between decoded and true prompt words, the harmonic mean of word precision and recall, averaged over prompts. \textbf{Exact match:} the fraction of prompts decoded verbatim. \textbf{Acc@1:} the fraction of positions whose top predicted token is the true one under teacher forcing.
+\end{description}
