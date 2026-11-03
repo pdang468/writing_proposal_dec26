@@ -1,0 +1,45 @@
+%% Packages and global settings. Moved out of the template's main file.
+
+\usepackage{amsmath,amssymb,amsthm,amsfonts}
+\usepackage[]{mcode}
+\usepackage{graphicx}                       % template had [draft]: it hides figures
+\DeclareGraphicsExtensions{.pdf,.png,.jpg,.eps}
+\graphicspath{{figures/}}                   % call figures as {ch3/name}
+\usepackage{epstopdf}
+\usepackage{array,multirow,makecell,caption}
+\usepackage{booktabs}
+\usepackage[flushleft]{threeparttable}
+\usepackage{pbox}
+\usepackage{enumerate}
+\usepackage[stable]{footmisc}
+\usepackage{pgfgantt}
+\usepackage{xcolor}
+\usepackage{xfrac}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{hyphenat}
+\usepackage{bbm}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+
+\renewcommand\footnotelayout{\fontsize{11}{7}\selectfont}
+
+%% Captions: bold label, no separator, left aligned (NJIT format).
+\captionsetup{labelfont={bf}}
+\captionsetup[table]{font={stretch=1}}
+\captionsetup[figure]{font={stretch=1}}
+\captionsetup{justification=raggedright,singlelinecheck=false}
+\DeclareCaptionLabelSeparator{none}{ }
+\captionsetup{labelsep=none}
+
+\renewcommand\bibname{REFERENCES}
+
+%% Line breaking from the template.
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
+
+%% Printer offsets, if ever needed.
+%\hoffset = 0.0625in
+%\voffset = 0.1in

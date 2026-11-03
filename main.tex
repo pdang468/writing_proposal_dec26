@@ -1,0 +1,49 @@
+%% Main driver. Preamble lives in preamble/, text in frontmatter/ and chapters/.
+%% Set this file as the main document in Overleaf (Menu -> Main document).
+
+\documentclass[12pt]{thesis}
+\input{preamble/packages}
+\input{preamble/macros}
+
+%% Fast compiles: list only the chapters you are working on.
+%% Cross-references and page numbers of the others stay intact.
+%\includeonly{chapters/ch3_translation_hub/ch3}
+
+\begin{document}
+
+%% Hyphenation and paragraph controls from the NJIT template.
+\hyphenpenalty=1000
+\tolerance=1000
+\exhyphenpenalty=1000
+\uchyph=0
+\looseness=2
+
+%% ---------------------------------------------------------------- front matter
+\abstract{\input{frontmatter/abstract}}
+\input{frontmatter/approval}
+\input{frontmatter/biography}
+\dedication{\input{frontmatter/dedication}}
+\acknowledgment{\input{frontmatter/acknowledgment}}
+\input{frontmatter/symbols}
+\input{frontmatter/glossary}
+\initthesis
+
+\tableofcontents
+\listoftables
+\listoffigures
+\makelistofsymbols    % comment out if not needed
+\makeglossaryofterms  % comment out if not needed
+
+%% ---------------------------------------------------------------- body
+\startbody
+\include{chapters/ch1_introduction/ch1}
+\include{chapters/ch2_literature_review/ch2}
+\include{chapters/ch3_translation_hub/ch3}
+\include{chapters/ch4_weak_supervised_attack/ch4}
+\include{chapters/ch5_conclusion/ch5}
+\include{chapters/ch6_future_work/ch6}
+
+%% ---------------------------------------------------------------- references
+\bibliography{bib/library}
+
+\end{document}
