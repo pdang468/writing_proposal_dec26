@@ -1,10 +1,15 @@
 %% 350 words or less. Present tense, third person. No page number.
-%% Round 1 draft (Hunt style), minimal corrections 2026-11-04; numbers from the reports.
+%% Round 1 draft, author's version; only the experiment numbers corrected (2026-11-04).
 
-Token identity of a large language model (LLM) can be recovered from its hidden states, as prior work shows. Recovery, however, requires knowledge of the model: its architecture, tokenizer, and vocabulary. Prior work also shows that the representation spaces of different LLMs share geometry. Shared geometry opens a second route: the hidden states of an unknown model can be aligned with a common space built from known models, and the known models' decoders then recover the tokens. The route removes the architecture requirement; the tokenizer is needed only for a small set of calibration prompts.
+From previous works, token identity of large langauge model could be recover from the hidden representation. This ability allows prompt reconstruction given the information about the LLM architecture, tokenizer and vocabulary set.
+Prior work also demonstrate that hidden representation of different tranformer model has high similarity in geometry distribution.
+Based on these information, the geometry information of an unknown model could be align with a common geometry space for token inversion task. This approach by pass the conditnioning leading to the ability of token recovery with no information about model architecture.
 
-This work first builds a translation hub from three public models, Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B, so that the hidden states of any one model decode into the original tokens through any of the three frozen decoders. An unseen model, Pythia-1B, is then attached to the frozen hub by one affine map. The map is trained on a small leak of paired hidden states, and on unpaired hidden states through a matching term. The combined loss raises recovery where paired supervision is scarce.
+This work starts with building a transitional hub from 3 public model, Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B, where each model hidden representation could be decoded into original token using any auto progressive decoder.
+Given the trained hub and limited leakd hidden represetantion alignment hidden space of an assuming unknonw model, Pythia-1B , a simple mapping function could be trained to recover the token identify of input prompts. This training approach utilize both supervised and cycle unsupervised into a hybrid matching to boost the recovery accucary in the restricted information conditions.
 
-In the white-box setting, the true hub output decodes at word-F1 0.95 on question prompts and 0.98 on legal text through the three frozen decoders. With a leak of 90 token rows, one per prompt, the supervised map alone reaches 0.35 on question prompts and 0.11 on legal text. The combined loss raises those to 0.60 and 0.33, one seed, 500 and 4,500 evaluation prompts. The contributions are (a) a translation hub whose decoders recover the prompt from any of its models' hidden states, and (b) a loss that joins supervised and unpaired information so that a leak of about one hundred rows attaches an unseen model.
+The results shows that in the white-box settings, the translation hub could archieve 0.95 F1 on question prompts and 0.98 on legal text. And with a leak of 90 token rows, one per prompt. The hybrid mapping achieves 0.60 F1 in Natural Question corpus, and 0.33 in legal dataset, booosting from 0.35 and 0.11 of training with supervised data only. Two significant comtribution of this work includde
+a. a reliable translation hub
+b. a simple architecture matching unifycing both supervised and unsupervised information to archieve high score in recovery testing.
 
-Future work tests the limits of the hub, the corpus, and the leak: longer documents, refining and discovering pairs through matching, and other unseen models.
+Future work of this proposal would testing the limitation of hub, corpus, information. Working with time series data of hidden represernataion and temporal information.
