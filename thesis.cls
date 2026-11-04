@@ -441,6 +441,8 @@
 % ACNJ 28/01/2001  : COPYRIGHT PAGE FOR NJIT THESIS FORMATTING STYLE
 
 \def\advisor#1#2{\gdef\@advisorname{#1}\gdef\@advisortitle{#2}}
+\def\coadvisor#1#2{\gdef\@coadvisorname{#1}\gdef\@coadvisortitle{#2}}
+\def\@coadvisorname{}
 \def\@advisorname{\@latex@warning@no@line{No \noexpand\advisorname given}}
 \def\@advisortitle{\@latex@warning@no@line{No \noexpand\advisortitle given}}
 
@@ -484,6 +486,13 @@
 	\rule{\textwidth}{1.0pt}
 	\@advisorname, Dissertation Advisor \hfill Date
 	\par \@advisortitle
+	\ifx\@coadvisorname\@empty\else
+		\vfill
+		\flushleft{}
+		\rule{\textwidth}{1.0pt}
+		\@coadvisorname, Dissertation Co-Advisor \hfill Date
+		\par \@coadvisortitle
+	\fi
 	{\@for \committee:=\@committee \do{
 			\vfill
 			\flushleft{}
