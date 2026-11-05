@@ -65,3 +65,16 @@ A reader spends attention in two places: on working out *where* the information 
 ## When to break a principle
 
 Any of these may be broken on purpose, and the reader will read the break as deliberate only if the principle is kept everywhere else. Break "old before new" to startle with a result; break "subject meets verb" to hold a qualification the reader must see first; break "one point" for a parallel list. Say to yourself what the break trades away; if the answer is "nothing", it is not a deliberate break, it is a draft.
+
+
+## Worked examples, from the proposal chapters
+
+Each pair shows the sentence as drafted and as it reads after the principle is applied. The principle is named by its subject, not by a number.
+
+- **The subject is the method, the argument, or the quantity.** "We fit an affine map on the paired rows" becomes "An affine map, fitted on the paired rows, sends Pythia's states into the hub."
+- **Subject meets verb at once.** "The map, fitted on paired sequences aligned by character span into token groups, reaches 0.35" becomes "Fitted on paired sequences, the map reaches 0.35."
+- **The verb names the action.** "The hub is used to invert the states" becomes "The hub decoders invert the states." "The allocation of information to features" becomes "the method allocates information to features."
+- **One point per sentence, the new point at the end.** "The gain is largest at low budgets and is gone by 300 prompts. Four ingredients each contribute to it."
+- **Old before new.** "...sends Pythia's states into the hub. The hub's frozen decoders then regenerate the prompt." Not: "...into the hub. Free-run decoding by three frozen models regenerates the prompt."
+- **Length by structure, not by count.** "The two-layer adapter loses 0.12; the normalized projector loses 0.15; the stronger decoder loses 0.27."
+- **Paragraph shape.** "Spreading ninety leaked rows over ninety prompts beats one whole leaked prompt by a factor of two. [setting: legal128w, V8.7 settings, seed 1, 4,500 confirmation prompts] The scattered leak gives the hybrid 0.326 against 0.161 for the whole prompt of 78 rows; the supervised fit shows the same order at 0.106 against 0.087. Coverage of prompts, not count of rows, is what a leak buys. The next question is whether the words in those rows matter."
