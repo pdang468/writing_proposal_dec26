@@ -30,7 +30,7 @@ The hub joins Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B, reading one middle bloc
 
 \begin{figure}[ht]
 \centering
-\input{figures/ch3/hub_architecture} %% FIX: figure added; trained parts shaded, frozen models dashed
+\includegraphics[width=\textwidth]{ch3/hub_architecture} %% FIX: figure added (figures/scripts/make_hub_figures.py); trained parts shaded, frozen models dashed
 \caption{The translation hub sends each model's hidden states into one shared space, and every frozen decoder reads them back out. Each source model has its own adapter; the trunk and the 512-dimensional hub output are shared; each decoder has its own projector. Shaded boxes train; dashed boxes are the frozen models.}
 \label{fig:hub:arch}
 \end{figure}
@@ -81,6 +81,14 @@ legal128w & Qwen & \vf{0.961} (\vf{0.477}) & \vf{0.955} (\vf{0.426}) & \vf{0.986
 \end{tabular}
 \end{table}
 
+%% FIX: figure added; it draws the numbers of Table~\ref{tab:hub:directions}, so one of the two can go
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{ch3/direction_recovery}
+\caption{Every direction recovers the prompt on legal128w; on Corpus A the three directions into the Qwen decoder are the weak ones. Free-run word-F1 (exact match below) for each source model and decoder, \vf{5{,}000} validation prompts per corpus, one hub seed.}
+\label{fig:hub:directions}
+\end{figure}
+
 \subsection{The ceiling holds on legal text, with one hub per length}\label{sec:hub:legal}
 
 Legal text is longer and rarer in vocabulary than question text, and the hub holds on it. The legal128w hub, trained on windows of \vf{64} to \vf{128} tokens drawn from Pile-of-Law documents, passes G1 at \vf{0.955} to \vf{0.986} across cross directions (mean \vf{0.977}, shuffled \vf{0.152}), and its G2 on the \vf{500} development prompts reaches \vf{0.982}. % src: results/legal128w/v6_3/inversion.json; oct_w5c-report %% FIX: upper bound 0.986
@@ -105,6 +113,14 @@ legal10s & \vf{0.976} & \todo{} & \vf{0.044} \\ % src: oct_w5b-report
 \bottomrule
 \end{tabular}
 \end{table}
+
+%% FIX: figure added
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\textwidth]{ch3/hub_gates}
+\caption{Each of the four hubs clears the G1 threshold of \vf{0.90} and holds its shuffled-memory control below \vf{0.20}. G1 is read on \vf{5{,}000} validation prompts, G2 on \vf{500} development prompts; the legal256w control is the largest of its six cross directions, the others their mean. One hub seed per corpus.}
+\label{fig:hub:gates}
+\end{figure}
 
 The legal256w hub, on windows of \vf{128} to \vf{256} tokens, passes G1 at \vf{0.971} with a shuffled maximum of \vf{0.185}, and reaches G2 \vf{0.977}. % src: results/legal256w/v7_2/main/v8_6-report.md %% FIX: todo filled
 
