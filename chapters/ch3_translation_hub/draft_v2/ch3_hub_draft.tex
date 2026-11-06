@@ -118,7 +118,7 @@ legal10s & \vf{0.976} & \todo{} & \vf{0.044} \\ % src: oct_w5b-report
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.85\textwidth]{ch3/hub_gates}
-\caption{Each of the four hubs clears the G1 threshold of \vf{0.90} and holds its shuffled-memory control below \vf{0.20}. Across models (G1): each model's hub output decoded by the other two models, the mean of six source-decoder pairs, \vf{5{,}000} validation prompts. Ceiling (G2): the true hub output of OLMo decoded by all three decoders, \vf{500} development prompts. Shuffled control: the same hub outputs in random order; the legal256w control is the largest of its six cross directions, the others their mean. One hub seed per corpus.}
+\caption{On each of the four corpora the hub recovers the prompt at word-F1 above \vf{0.94}, and the shuffled control stays below \vf{0.19}. Cross-model recovery (G1): each model's hub output decoded by the other two models, the mean of six source-decoder pairs, \vf{5{,}000} validation prompts. Ceiling (G2): the true hub output of OLMo decoded by all three decoders, \vf{500} development prompts; no map from an unseen model can score above it. Shuffled control: the same hub outputs in random order; the legal256w control is the largest of its six cross directions, the others their mean. One hub seed per corpus.}
 \label{fig:hub:gates}
 \end{figure}
 

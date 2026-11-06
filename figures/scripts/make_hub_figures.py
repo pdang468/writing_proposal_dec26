@@ -138,20 +138,16 @@ def gates():
     for r in rows:
         print(r[0], [round(v, 4) for v in r[1:]])
     GRAY = "#9a9994"
-    fig, ax = plt.subplots(figsize=(5.8, 3.0))
+    fig, ax = plt.subplots(figsize=(5.2, 3.0))
     width = 0.28
-    series = [("across models (G1)", BLUE), ("ceiling (G2)", ORANGE), ("shuffled control", GRAY)]
+    series = [("cross-model recovery (G1)", BLUE), ("ceiling (G2)", ORANGE), ("shuffled control", GRAY)]
     for i, row in enumerate(rows):
         for k, (value, (_, color)) in enumerate(zip(row[1:], series)):
             x = i + (k - 1) * (width + 0.035)
             ax.bar(x, value, width, color=color, zorder=2)
             ax.text(x, value + 0.012, f"{value:.3f}", ha="center", va="bottom", fontsize=6.3, color=INK)
-    for y, text in ((0.90, "pass: above 0.90"), (0.20, "pass: below 0.20")):
-        ax.axhline(y, color=INK2, lw=0.7, ls=(0, (4, 3)), zorder=1)
-        ax.text(len(rows) - 0.42, y, text, fontsize=7.5, color=INK2, ha="left", va="center",
-                bbox=dict(fc=SURFACE, ec="none", pad=1.5), zorder=4)
     ax.set_xticks(range(len(rows)), [r[0] for r in rows])
-    ax.set_xlim(-0.5, len(rows) + 0.35)
+    ax.set_xlim(-0.5, len(rows) - 0.5)
     ax.set_ylim(0, 1.08)
     ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
     ax.set_ylabel("free-run word-F1")
