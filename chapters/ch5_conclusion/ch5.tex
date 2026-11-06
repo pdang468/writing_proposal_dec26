@@ -2,7 +2,7 @@
 
 The proposal set out to invert the hidden states of a language model whose architecture, tokenizer, and vocabulary the attacker does not hold. Three findings answer the research questions of Chapter~\ref{ch:intro}.
 
-\paragraph{Q1.} One per-token hub trained on three white-box models lets each frozen decoder regenerate the prompt from any model's hub output at free-run word-F1 of 0.95 on question prompts and 0.98 on legal text, against controls near 0.1 (Chapter~\ref{ch:hub}). The hub output is a sufficient target, with a known tolerance: a map within relative error 0.4 of the true hub output loses at most 0.06 at the decoder.
+\paragraph{Q1.} One per-token hub trained on three white-box models lets each frozen decoder regenerate the prompt from any model's hub output at free-run word-F1 of 0.95 on question prompts and 0.98 on legal text, against controls near 0.1 (Chapter~\ref{ch:hub}).
 
 \paragraph{Q2.} An affine map attaches an unseen model to that hub. A ridge-regularized fit on paired prompts reaches word-F1 0.35, 0.54, 0.76, 0.85, and 0.88 at 10, 30, 100, 300, and 1,000 pairs over three seeds (Section~\ref{sec:attack:budget}). Pairs are necessary: no blind matching loss read the states (Section~\ref{sec:attack:blind}).
 
