@@ -2,7 +2,7 @@
 
 H1 holds on every corpus tested: a per-token hub trained on three models lets each frozen decoder regenerate the prompt from any model's hub output at word-F1 of 0.95 to 0.98, against controls near 0.1. Three consequences carry into the next chapter.
 
-First, the hub output is a sufficient target. A map from an unseen model that lands within relative error 0.4 of the true hub output loses at most 0.06 of word-F1 at the decoder, so the unseen-model problem reduces to a regression problem in a 512-dimensional space with a known tolerance.
+First, the hub output is a sufficient target: the unseen-model problem reduces to a regression problem in a 512-dimensional space.
 
 Second, the ceiling is corpus-specific and known. Each unseen-model result is read as a fraction of the distance from the no-memory floor to G2.
 

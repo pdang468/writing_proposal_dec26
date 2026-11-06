@@ -20,12 +20,3 @@ legal10s & 0.976 & \todo{} & 0.044 \\ % oct_w5b-report
 \end{table}
 
 \paragraph{Per-direction table.} \placeholder{Table of free-run word-F1 and exact match for all nine directions on Corpus A and legal128w, from \texttt{results/v6\_3/hpc-final/} and \texttt{results/legal128w/v6\_3/report.md}.}
-
-\paragraph{Robustness of the decoders to hub error.} How fast does the read-out degrade when the hub output is wrong by a controlled amount? Isotropic or covariance-shaped noise of relative norm $r$ (times the hub's RMS radius $\rho_H$) was added to every true hub row and the result decoded free-run. At $r = 0.4$ the covariance-shaped loss is 0.059 on legal128w and 0.057 on Corpus A; at $r = 0.8$ it is 0.588 against 0.411. Below $r \approx 0.5$ the two corpora degrade alike; beyond it legal text degrades faster. Section~\ref{sec:attack:leak} places the unseen-model maps on those curves.
-
-\begin{figure}[ht]
-\centering
-\placeholder{Figure: word-F1 against relative hub error $r$, isotropic and covariance-shaped, legal128w and Corpus A; from \texttt{oct\_w5c-noise.json} on each corpus.}
-\caption{Decoder tolerance to hub error.}
-\label{fig:hub:noise}
-\end{figure}

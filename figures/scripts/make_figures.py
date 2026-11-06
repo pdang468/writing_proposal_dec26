@@ -1,10 +1,10 @@
-"""Figures for chapters 3 and 4, drawn from the result files of the research repo.
+"""Figure for chapter 4, drawn from the result files of the research repo.
 
     python figures/scripts/make_figures.py /path/to/representation_alignment
 
-Writes figures/ch3/noise_tolerance.{pdf,png} and figures/ch4/budget_curve.{pdf,png}.
-Sources: results/v7_2/main/oct_w5c-noise.json, results/legal128w/v7_2/main/oct_w5c-noise.json,
-results/v7_2/main/mixed-v7_9-s5.json. Seeds, prompt counts and cell names are read from those files.
+Writes figures/ch4/budget_curve.{pdf,png}.
+Sources: results/v7_2/main/mixed-v7_9-s5.json and, for the G2 ceiling, the zero-noise row of
+results/v7_2/main/oct_w5c-noise.json. Seeds, prompt counts and cell names are read from those files.
 """
 import json
 import sys
@@ -34,33 +34,6 @@ def save(fig, rel):
     fig.savefig(path.with_suffix(".png"), dpi=200)
     plt.close(fig)
     print(path.with_suffix(".pdf"))
-
-
-def noise():
-    files = {"legal128w": ROOT / "results/legal128w/v7_2/main/oct_w5c-noise.json",
-             "Corpus A": ROOT / "results/v7_2/main/oct_w5c-noise.json"}
-    style = {"legal128w": (BLUE, "o", "-"), "Corpus A": (ORANGE, "s", (0, (5, 2)))}
-    data = {name: json.loads(path.read_text()) for name, path in files.items()}
-    fig, axes = plt.subplots(1, 2, figsize=(6.3, 2.9), sharey=True)
-    for ax, (family, title) in zip(axes, [("iso", "Isotropic noise"), ("cov", "Covariance-shaped noise")]):
-        for name, d in data.items():
-            assert d["prompts"] == 500
-            levels = d["levels"]
-            ys = [d["sets"]["iso-r0" if r == 0 else f"{family}-r{r:g}"]["macro_word_f1"] for r in levels]
-            color, marker, ls = style[name]
-            ax.plot(levels, ys, color=color, marker=marker, ls=ls, lw=1.6, ms=4.5,
-                    markeredgecolor="white", markeredgewidth=0.6, label=name, clip_on=False)
-        ax.axvline(0.4, color=INK2, lw=0.6, ls=":")
-        ax.set_title(title, fontsize=9, color=INK, loc="left")
-        ax.set_xlabel(r"relative error $r$ (units of $\rho_H$)")
-        ax.set_xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
-        ax.set_ylim(0, 1.02)
-        ax.grid(axis="y")
-    axes[0].set_ylabel("macro word-F1")
-    axes[1].annotate("$r = 0.4$", (0.4, 0.06), xytext=(4, 0), textcoords="offset points", color=INK2, fontsize=8)
-    axes[0].legend(loc="lower left", fontsize=8, handlelength=2.6)
-    fig.tight_layout()
-    save(fig, "ch3/noise_tolerance")
 
 
 def budget():
@@ -103,5 +76,4 @@ def budget():
     save(fig, "ch4/budget_curve")
 
 
-noise()
 budget()
