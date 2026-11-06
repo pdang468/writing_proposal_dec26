@@ -140,28 +140,27 @@ def gates():
     GRAY = "#9a9994"
     fig, ax = plt.subplots(figsize=(5.8, 3.0))
     width = 0.28
-    series = [("G1: mean of six cross directions, validation", BLUE), ("G2: true hub output, development", ORANGE),
-              ("shuffled memory (control)", GRAY)]
+    series = [("across models (G1)", BLUE), ("ceiling (G2)", ORANGE), ("shuffled control", GRAY)]
     for i, row in enumerate(rows):
         for k, (value, (_, color)) in enumerate(zip(row[1:], series)):
             x = i + (k - 1) * (width + 0.035)
             ax.bar(x, value, width, color=color, zorder=2)
             ax.text(x, value + 0.012, f"{value:.3f}", ha="center", va="bottom", fontsize=6.3, color=INK)
-    for y, text in ((0.90, "G1 threshold\n0.90"), (0.20, "shuffled limit\n0.20")):
+    for y, text in ((0.90, "pass: above 0.90"), (0.20, "pass: below 0.20")):
         ax.axhline(y, color=INK2, lw=0.7, ls=(0, (4, 3)), zorder=1)
         ax.text(len(rows) - 0.42, y, text, fontsize=7.5, color=INK2, ha="left", va="center",
                 bbox=dict(fc=SURFACE, ec="none", pad=1.5), zorder=4)
     ax.set_xticks(range(len(rows)), [r[0] for r in rows])
-    ax.set_xlim(-0.5, len(rows) + 0.25)
+    ax.set_xlim(-0.5, len(rows) + 0.35)
     ax.set_ylim(0, 1.08)
     ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
     ax.set_ylabel("free-run word-F1")
     ax.tick_params(axis="x", length=0)
     ax.grid(axis="y", zorder=0)
     handles = [plt.Rectangle((0, 0), 1, 1, color=c) for _, c in series]
-    fig.legend(handles, [n for n, _ in series], loc="upper center", ncol=1, fontsize=7.5,
-               bbox_to_anchor=(0.5, 1.0), handlelength=1.4)
-    fig.tight_layout(rect=(0, 0, 1, 0.84))
+    fig.legend(handles, [n for n, _ in series], loc="upper center", ncol=3, fontsize=8,
+               bbox_to_anchor=(0.5, 1.0), handlelength=1.2, columnspacing=2.0)
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
     save(fig, "hub_gates")
 
 
