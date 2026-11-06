@@ -1,9 +1,9 @@
 \section{Hypothesis and Refutation Criteria}\label{sec:hub:hypothesis}
 
-\paragraph{Hypothesis H1.} One hub, trained jointly on the nine directions of three models, carries enough token identity that each frozen decoder regenerates the prompt from any model's hub output under free-run decoding.
+\paragraph{Hypothesis}
+Jointly train a translation hub with three models reserve the information of token identity. The projected results from hub when mapped in to any frozen decoder regenerate the prompt input under free decoding.   
 
-\paragraph{Prediction.} Free-run word-F1 on validation prompts, averaged over the six cross directions, exceeds 0.90, with the shuffled-memory control below 0.20. H1 is refuted if the cross mean falls below 0.90 or if the control approaches the trained value. Each direction is also reported alone.
+\paragraph{Why free-run as the metric.} Teacher forcing hands the decoder the true prefix, so a auto regressive decoder that recovers the next token cannot distinguish the effect of.
+Free-run removes that extra information. every token after the first comes from the decoder's own output, and a hub output that carries no identity collapses to a generic continuation. Teacher-forced Acc@1 selects the checkpoint and nothing else.
 
-\paragraph{Why free-run.} Teacher forcing hands the decoder the true prefix, so a decoder that recovers only the next token from context scores well without reading the hub. Free-run removes that crutch: every token after the first comes from the decoder's own output, and a hub output that carries no identity collapses to a generic continuation. Teacher-forced Acc@1 selects the checkpoint and nothing else.
-
-\paragraph{Why inversion rather than continuation.} An earlier generation of the hub (V3) trained the decoders to continue from another model's states and reached, at its final layer, teacher-forced Acc@1 of 0.943 with free-run exact match 0.586. Continuation, however, rewards fluent next tokens over faithful ones. The hub of this proposal (V6.3) retargets the decoder loss to the input tokens themselves, so the read-out measures what an attacker wants: the text that produced the states.
+\paragraph{Why inversion rather than continuation.} An earlier generation of the hub (V3) trained the decoders to continue from another model's states and reached teacher-forced Acc@1 of 0.987 against a floor of 0.323, with free-run exact match 0.586. Continuation, however, rewards fluent next tokens over faithful ones. The hub of this proposal (V6.3) retargets the decoder loss to the input tokens themselves, so the read-out measures what an attacker wants: the text that produced the states.

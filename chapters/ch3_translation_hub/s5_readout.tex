@@ -1,4 +1,4 @@
-\section{Read-out and Controls}\label{sec:hub:readout}
+\section{Evaluation and Controls}\label{sec:hub:readout}
 
 The primary read-out is free-run inversion: for each validation prompt, the projected hub outputs of one source model enter one decoder as memory, the decoder generates from its start token until end-of-sequence or a cap of the memory's row count plus a margin, and the generated text is scored against the true prompt by word-F1 and exact match. The macro score averages over prompts, then over directions.
 
