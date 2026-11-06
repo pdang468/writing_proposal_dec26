@@ -2,7 +2,7 @@
 
     python figures/scripts/make_hub_figures.py /path/to/representation_alignment
 
-Writes figures/ch3/{hub_architecture,direction_recovery,hub_gates}.{pdf,png}.
+Writes figures/ch3/{hub_architecture,direction_recovery,hub_translation,hub_ceiling}.{pdf,png}.
 Sources: results/v6_3/hpc-final/inversion.json, results/legal128w/v6_3/inversion.json (5,000 validation
 prompts each); both oct_w5c-noise.json zero-noise rows (G2, 500 development prompts);
 results/legal256w/v7_2/main/v8_6-readiness.json; results/legal10s/v7_2/main/oct_w5b-summary.json (G2) and
@@ -122,44 +122,77 @@ def directions():
     save(fig, "direction_recovery")
 
 
-def gates():
-    a, l128 = load("results/v6_3/hpc-final/inversion.json"), load("results/legal128w/v6_3/inversion.json")
-    l256 = load("results/legal256w/v7_2/main/v8_6-readiness.json")
-    l10_g2 = load("results/legal10s/v7_2/main/oct_w5b-summary.json")["decisions"]["Q1"]["g2"]
-    g2 = lambda rel: load(rel)["sets"]["iso-r0"]["macro_word_f1"]
-    shuffled = lambda d: d["cross_mean"]["shuffled"]["word_f1"]
-    rows = [  # corpus, G1 cross mean, G2, shuffled floor (cross mean; legal256w: largest cross direction)
-        ("Corpus A", a["cross_mean"]["hub"]["word_f1"], g2("results/v7_2/main/oct_w5c-noise.json"), shuffled(a)),
-        ("legal128w", l128["cross_mean"]["hub"]["word_f1"], g2("results/legal128w/v7_2/main/oct_w5c-noise.json"),
-         shuffled(l128)),
-        ("legal256w", l256["g1"]["cross_mean"], l256["g2"]["macro_f1"], l256["g1"]["shuffled_max"]),
-        ("legal10s", 0.9705, l10_g2, 0.044),  # G1 and shuffled: oct_w5b-report.md
-    ]
-    for r in rows:
-        print(r[0], [round(v, 4) for v in r[1:]])
-    GRAY = "#9a9994"
-    fig, ax = plt.subplots(figsize=(5.2, 3.0))
-    width = 0.28
-    series = [("cross-model recovery (G1)", BLUE), ("ceiling (G2)", ORANGE), ("shuffled control", GRAY)]
-    for i, row in enumerate(rows):
-        for k, (value, (_, color)) in enumerate(zip(row[1:], series)):
-            x = i + (k - 1) * (width + 0.035)
-            ax.bar(x, value, width, color=color, zorder=2)
-            ax.text(x, value + 0.012, f"{value:.3f}", ha="center", va="bottom", fontsize=6.3, color=INK)
-    ax.set_xticks(range(len(rows)), [r[0] for r in rows])
-    ax.set_xlim(-0.5, len(rows) - 0.5)
+def bar_axes(figsize):
+    fig, ax = plt.subplots(figsize=figsize)
     ax.set_ylim(0, 1.08)
     ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
     ax.set_ylabel("free-run word-F1")
     ax.tick_params(axis="x", length=0)
     ax.grid(axis="y", zorder=0)
-    handles = [plt.Rectangle((0, 0), 1, 1, color=c) for _, c in series]
-    fig.legend(handles, [n for n, _ in series], loc="upper center", ncol=3, fontsize=8,
-               bbox_to_anchor=(0.5, 1.0), handlelength=1.2, columnspacing=2.0)
-    fig.tight_layout(rect=(0, 0, 1, 0.93))
-    save(fig, "hub_gates")
+    return fig, ax
+
+
+def translation():
+    """G1: a prompt enters through one model and is decoded by another; mean of the six cross directions."""
+    a, l128 = load("results/v6_3/hpc-final/inversion.json"), load("results/legal128w/v6_3/inversion.json")
+    l256 = load("results/legal256w/v7_2/main/v8_6-readiness.json")["g1"]
+    rows = [  # corpus, cross mean, shuffled control (cross mean; legal256w: largest cross direction)
+        ("Corpus A", a["cross_mean"]["hub"]["word_f1"], a["cross_mean"]["shuffled"]["word_f1"]),
+        ("legal128w", l128["cross_mean"]["hub"]["word_f1"], l128["cross_mean"]["shuffled"]["word_f1"]),
+        ("legal256w", l256["cross_mean"], l256["shuffled_max"]),
+        ("legal10s", 0.9705, 0.044),  # oct_w5b-report.md; no result file in the local mirror
+    ]
+    series = [("hub output", BLUE), ("shuffled control", "#9a9994")]
+    fig, ax = bar_axes((4.6, 2.9))
+    width = 0.36
+    for i, row in enumerate(rows):
+        print("G1", row[0], [round(v, 4) for v in row[1:]])
+        for k, (value, (_, color)) in enumerate(zip(row[1:], series)):
+            x = i + (k - 0.5) * (width + 0.04)
+            ax.bar(x, value, width, color=color, zorder=2)
+            ax.text(x, value + 0.012, f"{value:.3f}", ha="center", va="bottom", fontsize=7.5, color=INK)
+    ax.set_xticks(range(len(rows)), [r[0] for r in rows])
+    fig.legend([plt.Rectangle((0, 0), 1, 1, color=c) for _, c in series], [n for n, _ in series],
+               loc="upper center", ncol=2, fontsize=8, bbox_to_anchor=(0.55, 1.0), handlelength=1.2, columnspacing=2.0)
+    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    save(fig, "hub_translation")
+
+
+def ceiling():
+    """G2: the true hub output of OLMo decoded by each frozen decoder, 500 development prompts."""
+    def from_noise(rel):
+        return {k: v["word_f1"] for k, v in load(rel)["sets"]["iso-r0"]["per_decoder"].items()}
+
+    def from_setting(rel):
+        g2 = load(rel)["setting"]["corpus"]["g2"]
+        assert g2["prompts"] == 500
+        return g2["per_decoder"]
+
+    rows = [
+        ("Corpus A", from_noise("results/v7_2/main/oct_w5c-noise.json")),
+        ("legal128w", from_setting("results/legal128w/v7_2/main/mixed-oct_w5b-L.json")),
+        ("legal256w", from_setting("results/legal256w/v7_2/main/mixed-v8_6-s1.json")),
+        ("legal10s", from_setting("results/legal10s/v7_2/main/mixed-oct_w5b-s1.json")),
+    ]
+    fig, ax = bar_axes((6.3, 3.0))
+    width = 0.26
+    ticks, labels = [], []
+    for i, (name, per) in enumerate(rows):
+        values = [per[m] for m, _ in MODELS]
+        print("G2", name, [round(v, 4) for v in values], "mean", round(sum(values) / 3, 4))
+        for k, ((_, label), value) in enumerate(zip(MODELS, values)):
+            x = i + (k - 1) * (width + 0.03)
+            ax.bar(x, value, width, color=ORANGE, zorder=2)
+            ax.text(x, value + 0.012, f"{value:.3f}", ha="center", va="bottom", fontsize=6.3, color=INK)
+            ticks.append(x)
+            labels.append(label)
+        ax.text(i, -0.11, name, ha="center", va="top", fontsize=9, color=INK, transform=ax.get_xaxis_transform())
+    ax.set_xticks(ticks, labels, fontsize=6.3)
+    fig.subplots_adjust(left=0.09, right=0.99, top=0.97, bottom=0.2)
+    save(fig, "hub_ceiling")
 
 
 architecture()
 directions()
-gates()
+translation()
+ceiling()

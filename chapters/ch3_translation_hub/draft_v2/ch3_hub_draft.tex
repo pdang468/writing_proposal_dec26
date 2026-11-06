@@ -114,12 +114,19 @@ legal10s & \vf{0.976} & \todo{} & \vf{0.044} \\ % src: oct_w5b-report
 \end{tabular}
 \end{table}
 
-%% FIX: figure added
+%% FIX: two figures added, one per gate
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.85\textwidth]{ch3/hub_gates}
-\caption{On each of the four corpora the hub recovers the prompt at word-F1 above \vf{0.94}, and the shuffled control stays below \vf{0.19}. Cross-model recovery (G1): each model's hub output decoded by the other two models, the mean of six source-decoder pairs, \vf{5{,}000} validation prompts. Ceiling (G2): the true hub output of OLMo decoded by all three decoders, \vf{500} development prompts; no map from an unseen model can score above it. Shuffled control: the same hub outputs in random order; the legal256w control is the largest of its six cross directions, the others their mean. One hub seed per corpus.}
-\label{fig:hub:gates}
+\includegraphics[width=0.7\textwidth]{ch3/hub_translation}
+\caption{The hub translates between models on every corpus. A prompt enters through one model and another model's frozen decoder regenerates it; the bars average the six source-decoder pairs (Gate G1), \vf{5{,}000} validation prompts. Shuffled control: the same hub outputs in random order; the legal256w control is the largest of its six pairs, the others their mean. One hub seed per corpus.}
+\label{fig:hub:translation}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.9\textwidth]{ch3/hub_ceiling}
+\caption{From one model's true hub output, each frozen decoder regenerates the prompt. The hub output of OLMo is decoded by the three decoders on \vf{500} development prompts per corpus; their mean is the ceiling G2 (\vf{0.946}, \vf{0.982}, \vf{0.977}, \vf{0.976}), the most a map from an unseen model into the hub can reach. The Qwen decoder on Corpus A is the one bar below \vf{0.96}.}
+\label{fig:hub:ceiling}
 \end{figure}
 
 The legal256w hub, on windows of \vf{128} to \vf{256} tokens, passes G1 at \vf{0.971} with a shuffled maximum of \vf{0.185}, and reaches G2 \vf{0.977}. % src: results/legal256w/v7_2/main/v8_6-report.md %% FIX: todo filled
