@@ -1,7 +1,9 @@
 %% Chapter 3, fresh draft v2 (2026-11-05). Structure: Murphy, PNAS 2024 (arXiv 2307.04755):
 %% introduction that ends on the claim; results by claim; discussion with trade-offs and limits; methods last.
-%% Every number is wrapped in \vf{} and carries a "% src:" comment. All are UNVERIFIED placeholders
-%% copied from the v1 chapter files (s1--s8); a verification pass must check each against the reports.
+%% Every number is wrapped in \vf{} and carries a "% src:" comment. Verified 2026-11-05 against the result
+%% files (oct_w5b, oct_w5c, both oct_w5c-noise.json, mixed-v8-s0b.json, V6.3, V6.2, V3, corpus records).
+%% Not yet checked: adapter/trunk shapes vs src/v6_3; the oct_w5 (w44a) report. Lines changed by the
+%% verification carry "%% FIX:" comments.
 %% Not \input by main.tex. To try it, replace the \input lines in ch3.tex with \input{.../draft_v2/ch3_hub_draft}.
 
 \providecommand{\vf}[1]{\textcolor{blue}{#1}}
@@ -13,9 +15,9 @@ A language model's hidden states hold the identity of the tokens that produced t
 
 The Platonic Representation Hypothesis offers a way around the demand \cite{huh2024platonic}. If models trained on similar data converge toward similar representations, then the hidden states of different models differ by a transformation, not by content. A space shared by several known models could then serve as a common target: the states of each model would map into it, and the decoders of every model would read out of it. An unseen model would need only a map into the shared space, not an inverter of its own.
 
-This chapter builds that shared space and tests whether it carries enough token identity to recover the prompt. The space, called the translation hub, joins three public models through small per-model adapters and one shared trunk. Each model's frozen decoder then regenerates the prompt from any model's hub output. Recovery reaches word-F1 of \vf{0.95} to \vf{0.98} across three corpora, against controls near \vf{0.1}. The hub output also tolerates error: a map that lands within a relative distance of \vf{0.4} of the true hub output loses at most \vf{0.06} of word-F1. The hub is therefore a fixed target with a known tolerance, and Chapter~\ref{ch:attack} attaches an unseen model to it.
+This chapter builds that shared space and tests whether it carries enough token identity to recover the prompt. The space, called the translation hub, joins three public models through small per-model adapters and one shared trunk. Each model's frozen decoder then regenerates the prompt from any model's hub output. Recovery reaches word-F1 of \vf{0.95} to \vf{0.98} across four corpora, against wrong-memory controls near \vf{0.1}. The hub output also tolerates noise: random error of relative size \vf{0.4} costs at most \vf{0.06} of word-F1. The hub is therefore a fixed target, and Chapter~\ref{ch:attack} attaches an unseen model to it. %% FIX: tolerance bounded to synthetic noise; four corpora with legal256w
 
-\paragraph{Question and prediction.} The chapter asks one question (Q1): does one shared space, trained on three white-box models, let each model's frozen decoder recover the input tokens from every model's hidden states? The prediction is that free-run word-F1 exceeds \vf{0.90} in every cross direction, with the shuffled-memory control below \vf{0.20}. The prediction fails if any cross direction falls below \vf{0.90}, or if a control approaches the trained score.
+\paragraph{Question and prediction.} The chapter asks one question (Q1): does one shared space, trained on three white-box models, let each model's frozen decoder recover the input tokens from every model's hidden states? The prediction is that free-run word-F1, averaged over the six cross directions, exceeds \vf{0.90}, with the shuffled-memory control below \vf{0.20}. The prediction fails if the cross mean falls below \vf{0.90}, or if a control approaches the trained score. Each direction is also reported alone, because a mean can hide one weak decoder. %% FIX: prediction stated on the cross mean, as Gate G1 was run
 
 Section~\ref{sec:hub:results} reports the results, Section~\ref{sec:hub:discussion} states what they establish and what they leave open, and Section~\ref{sec:hub:methods} gives the architecture, objective, read-out, and corpora.
 
@@ -42,30 +44,31 @@ Only the adapters, the trunk, and the projectors train. The three models stay fr
 
 The hub is judged by free-run inversion: a decoder receives the projected hub outputs of one prompt as memory, generates from its start token, and the generated text is scored against the true prompt. Two choices in that sentence matter, and each answers a weakness of the read-out it replaced.
 
-The first choice is inversion over continuation. An earlier hub (V3) trained the decoders to continue from another model's states. It reached teacher-forced Acc@1 of \vf{0.987} against a floor of \vf{0.323}, yet decoded only \vf{0.586} of prompts exactly under free-run. % src: V3 final report
+The first choice is inversion over continuation. An earlier hub (V3) trained the decoders to continue from another model's states. At its final layer it reached teacher-forced Acc@1 of \vf{0.943}, yet decoded only \vf{0.586} of prompts exactly under free-run. % src: results/v3/final/results-summary.md %% FIX: both numbers at the final layer
 Continuation rewards a fluent next token over a faithful one. The hub of this chapter (V6.3) sets every decoder label to the input token at the same position, so the score measures what an attacker wants: the text that produced the states.
 
 The second choice is free-run over teacher forcing. Teacher forcing hands the decoder the true previous tokens, and a decoder that predicts only from context then scores well without reading the hub at all. Free-run removes the true prefix: every token after the first comes from the decoder's own output, and a hub output that carries no identity collapses into a generic continuation. Teacher-forced Acc@1 selects the checkpoint during training; free-run word-F1 decides every claim.
 
 Two controls bound the read-out from below. Shuffled memory feeds the true hub outputs in a random order, so a decoder that reads only the bag of tokens still scores well. Wrong memory feeds the hub outputs of another prompt, so a decoder that ignores its memory scores the same as with the true one. A hub output carries token identity only if the trained score stands far above both controls.
 
-\subsection{Every cross direction recovers the prompt on question text}\label{sec:hub:corpusA}
+\subsection{The hub recovers question prompts, least well into the Qwen decoder}\label{sec:hub:corpusA}
 
-On Corpus A, short Natural Questions queries of about ten words, the hub recovers the prompt in every direction. Free-run word-F1 exceeds \vf{0.95} in each of the six cross directions on the validation split, which passes Gate G1, the hub's acceptance test. % src: results/v6_3/hpc-final
-The ceiling for later chapters is stricter. Gate G2 decodes the true hub output of one source model through all three decoders on the \vf{500} development prompts, and it scores \vf{0.946} macro word-F1 against \vf{0.121} for wrong memory. % src: mixed-v8-s0b.json; oct_w5c-noise.json
+On Corpus A, short Natural Questions queries of about ten words, the hub passes Gate G1, its acceptance test. Free-run word-F1 averages \vf{0.945} over the six cross directions on \vf{5{,}000} validation prompts, against \vf{0.120} for shuffled memory. % src: results/v6_3/hpc-final/inversion.json, report.json
+The mean hides one weak decoder. The two directions into Qwen fall below \vf{0.90}: OLMo $\to$ Qwen reaches \vf{0.881}, and SmolLM $\to$ Qwen \vf{0.874}. % src: same %% FIX: per-direction miss reported
+The ceiling for later chapters is a separate measure. Gate G2 decodes the true hub output of OLMo through all three decoders on the \vf{500} development prompts, and it scores \vf{0.946} macro word-F1 against \vf{0.121} for wrong memory. % src: G2 = corpus A oct_w5c-noise.json, zero-noise row; wrong memory = mixed-v8-s0b.json %% FIX: source
 Recovery therefore depends on the hub output of the right prompt, not on the decoder's prior over questions.
 
-The projectors read the raw hub output, not a normalized one. Retrained on the raw output, they reproduce \vf{0.949}; retrained on the L2-normalized output, they lose \vf{0.15}, almost all of it in the SmolLM decoder. % src: oct_w5c report
+The projectors read the raw hub output, not a normalized one. Retrained on the raw output, they reproduce \vf{0.949}; retrained on the L2-normalized output, they lose \vf{0.15} on average. The loss is uneven: directions into SmolLM fall from \vf{0.99} to about \vf{0.44}, while directions into Qwen rise by about \vf{0.09}. % src: mixed-v8-s0b.json %% FIX: source; split stated
 \rd{The norm of the hub output carries part of the token identity, so normalization discards information the decoders need.}
 
 \placeholder{Table: free-run word-F1 and exact match for all nine directions on Corpus A and legal128w, from \texttt{results/v6\_3/hpc-final/} and \texttt{results/legal128w/v6\_3/report.md}.}
 
 \subsection{The ceiling holds on legal text, with one hub per length}\label{sec:hub:legal}
 
-Legal text is longer, rarer in vocabulary, and more repetitive at its openings than question text, and the hub holds on it. The legal128w hub, trained on windows of \vf{64} to \vf{128} tokens drawn from Pile-of-Law documents, passes G1 at \vf{0.955} to \vf{0.984} across cross directions, and its G2 on the \vf{500} development prompts reaches \vf{0.982}. % src: oct_w5c-report; legal128w/v6_3/report
+Legal text is longer, rarer in vocabulary, and more repetitive at its openings than question text, and the hub holds on it. The legal128w hub, trained on windows of \vf{64} to \vf{128} tokens drawn from Pile-of-Law documents, passes G1 at \vf{0.955} to \vf{0.986} across cross directions (mean \vf{0.977}, shuffled \vf{0.152}), and its G2 on the \vf{500} development prompts reaches \vf{0.982}. % src: results/legal128w/v6_3/inversion.json; oct_w5c-report %% FIX: upper bound 0.986
 \rd{Longer prompts do not lower the ceiling; they raise it slightly, because each word sits in more context.}
 
-The ten-word legal pieces need a hub of their own. The legal128w hub, reused on the pieces, reached only \vf{0.773}, below the \vf{0.85} threshold set for the pieces. % src: oct_w5b-report
+The ten-word legal pieces need a hub of their own. The legal128w hub, reused on the pieces, reached a G2 of only \vf{0.773}, below the \vf{0.85} G2 threshold set for the pieces. % src: oct_w5b-report, oct_w5b-hub-gate.json %% FIX: G2, not G1
 A hub trained on the pieces themselves reaches cross word-F1 \vf{0.9705} against a shuffled floor of \vf{0.044}, and G2 \vf{0.9756}. % src: oct_w5b-report
 \rd{The hub thus learns the length of its prompts along with their content, and each corpus in this proposal is read through the hub trained on that corpus.}
 
@@ -77,36 +80,39 @@ A hub trained on the pieces themselves reaches cross word-F1 \vf{0.9705} against
 \toprule
 Corpus & G2 word-F1 & Wrong memory & Shuffled floor (G1) \\
 \midrule
-Corpus A & \vf{0.946} & \vf{0.121} & \todo{} \\ % src: mixed-v8-s0b.json; oct_w5c-noise.json
-legal128w & \vf{0.982} & \todo{} & $<$\vf{0.20} \\ % src: oct_w5c-report; legal128w/v6_3/report
+Corpus A & \vf{0.946} & \vf{0.121} & \vf{0.120} \\ % src: oct_w5c-noise.json (zero noise); mixed-v8-s0b.json; v6_3 report.json
+legal128w & \vf{0.982} & \todo{} & \vf{0.152} \\ % src: oct_w5c-report; legal128w/v6_3/inversion.json
+legal256w & \vf{0.977} & \todo{} & \vf{0.185} (max) \\ % src: results/legal256w/v7_2/main/v8_6-report.md %% FIX: row added
 legal10s & \vf{0.976} & \todo{} & \vf{0.044} \\ % src: oct_w5b-report
 \bottomrule
 \end{tabular}
 \end{table}
 
-\todo{legal256w G1 pending on the cluster (V8.6 chain); add a row or state its absence.}
+The legal256w hub, on windows of \vf{128} to \vf{256} tokens, passes G1 at \vf{0.971} with a shuffled maximum of \vf{0.185}, and reaches G2 \vf{0.977}. % src: results/legal256w/v7_2/main/v8_6-report.md %% FIX: todo filled
 
-\subsection{The decoders tolerate hub error up to a known radius}\label{sec:hub:noise}
+\subsection{The decoders tolerate small random error in the hub output}\label{sec:hub:noise}
 
-An unseen model will never land on the true hub output; it will land near it. The useful question is how near is near enough. Noise of a controlled size answers it: each true hub output receives isotropic or covariance-shaped noise of relative norm $r$, measured in units of the hub's RMS radius $\rho_H$, and the noisy outputs are decoded free-run (Figure~\ref{fig:hub:noise}).
+An unseen model will never land on the true hub output; it will land near it. The useful question is how near is near enough. Noise of a controlled size answers it: each true hub output receives isotropic or covariance-shaped noise of relative norm $r$, measured in units of the RMS radius $\rho_H$ of the training hub outputs, and the noisy outputs are decoded free-run (Figure~\ref{fig:hub:noise}).
 
 Small errors cost little. At $r = \vf{0.4}$, covariance-shaped noise lowers word-F1 by \vf{0.059} on legal128w and \vf{0.057} on Corpus A. % src: oct_w5c-noise.json, both corpora
 Large errors cost much, and they cost legal text more: at $r = \vf{0.8}$, the loss is \vf{0.588} on legal128w against \vf{0.411} on Corpus A. % src: same
-The two corpora degrade alike below $r \approx \vf{0.5}$ and part beyond it. \rd{The decoders of short questions can guess a damaged word from a narrow prior; the decoders of legal text face a wider vocabulary and guess worse.}
+The two corpora degrade alike at $r = \vf{0.4}$ and part by $r = \vf{0.6}$, where legal128w reaches \vf{0.261} against \vf{0.183} for Corpus A; no level between was run. % src: oct_w5c-noise.json %% FIX: no level near 0.5 was run \rd{The decoders of short questions can guess a damaged word from a narrow prior; the decoders of legal text face a wider vocabulary and guess worse.}
+
+Random noise is not the error a fitted map makes. Maps fitted from an unseen model decode \vf{0.04} to \vf{0.19} below the noise curve at their own error size, so the size of the error alone does not set the loss; its direction matters too. % src: oct_w5c-report.md %% FIX: bound on the tolerance claim
 
 \begin{figure}[ht]
 \centering
 \placeholder{Figure: word-F1 against relative hub error $r$, isotropic and covariance-shaped, legal128w and Corpus A; from \texttt{oct\_w5c-noise.json} on each corpus.}
-\caption{The decoders tolerate hub error up to about half the hub's radius; beyond it, legal text degrades faster than question text.}
+\caption{The decoders tolerate random hub error of relative size 0.4 at a cost of about 0.06; by 0.6, legal text degrades faster than question text.} %% FIX
 \label{fig:hub:noise}
 \end{figure}
 
 %% ------------------------------------------------------------------
 \section{Discussion}\label{sec:hub:discussion}
 
-The prediction holds on every corpus tested. One per-token hub, trained on three models, lets each frozen decoder recover the prompt from any model's hub output at word-F1 of \vf{0.95} to \vf{0.98}, against controls near \vf{0.1}. Token identity survives the passage through a shared space of \vf{512} dimensions, and three decoders that never trained on each other's states read it back.
+The prediction holds on every corpus tested: the cross mean exceeds \vf{0.90} and every control stays below \vf{0.20}. One per-token hub, trained on three models, lets the frozen decoders recover the prompt from the hub output at a G2 of \vf{0.95} to \vf{0.98}, against wrong-memory controls near \vf{0.1}. The prediction holds on the mean, not in every direction: on Corpus A the two directions into Qwen fall to \vf{0.874} and \vf{0.881}. %% FIX Token identity survives the passage through a shared space of \vf{512} dimensions, and three decoders that never trained on each other's states read it back.
 
-Three consequences carry into Chapter~\ref{ch:attack}. First, the hub output is a sufficient target. A map from an unseen model that lands within relative error \vf{0.4} of the true hub output loses at most \vf{0.06} of word-F1, so attaching an unseen model reduces to a regression into a \vf{512}-dimensional space with a known tolerance. Second, the ceiling is known for each corpus. Every unseen-model result is read as a fraction of the distance from the wrong-memory floor to G2, not as a bare score. Third, the hub adds no context of its own. Whatever a map from one block of an unseen model recovers, it recovers from that block's states, token by token.
+Three consequences carry into Chapter~\ref{ch:attack}. First, the hub output is a fixed target. Random error of relative size \vf{0.4} costs at most \vf{0.06} of word-F1, but fitted maps lose \vf{0.04} to \vf{0.19} more at the same error size, so attaching an unseen model is a regression into a \vf{512}-dimensional space whose tolerance depends on the direction of the error, not only its size. Chapter~\ref{ch:attack} measures that gap. %% FIX: tolerance bounded Second, the ceiling is known for each corpus. Every unseen-model result is read as a fraction of the distance from the wrong-memory floor to G2, not as a bare score. Third, the hub adds no context of its own. Whatever a map from one block of an unseen model recovers, it recovers from that block's states, token by token.
 
 The design trades breadth for a clean target. The per-token hub gives up the teacher-forced accuracy of a hub with attention, and in exchange every hub output depends on one hidden state, which an affine map can approach. One hub per corpus gives up a single universal space, and in exchange each ceiling is measured on the text it bounds. Both trades favor the attack of the next chapter over the generality of the hub.
 
@@ -160,17 +166,17 @@ The loss has three terms:
 \end{equation}
 The decoding term $\mathcal{L}_{\text{dec}}$ is the teacher-forced cross-entropy of the frozen decoder over the input tokens. The decoder reads the projected hub outputs $m_1 \ldots m_T$ as memory, then its native start token, then the true tokens $x_1 \ldots x_T$; every label is the input token $x_t$ at the same position, in the decoder's vocabulary, followed by the decoder's end-of-sequence token. The contrastive term $\mathcal{L}_{\text{InfoNCE}}$ pulls together the hub outputs of aligned token groups from different models. The geometry term $\mathcal{L}_{\text{geom}}$ penalizes drift in the pairwise distances within a batch. \todo{Write out the InfoNCE and geometry terms from \texttt{v6\_3/plan.md} Section 4 and \texttt{src/v6\_3}.}
 
-Training runs on \vf{40{,}000} prompts. Every \vf{250} updates, teacher-forced cross Acc@1 on \vf{5{,}000} validation prompts scores the checkpoint, and the earliest checkpoint within \vf{0.002} of the best is kept. The test split is never read during hub training. \todo{Optimizer, learning rate, batch size, and update count from \texttt{configs/v6\_3.yaml}.}
+Training runs on \vf{40{,}000} prompts. Every \vf{250} updates, teacher-forced cross Acc@1 on \vf{5{,}000} validation prompts scores the checkpoint, and the earliest checkpoint within \vf{0.002} of the best is kept. The test split is never read during hub training. AdamW updates the weights at learning rate \vf{3e-4}, batch \vf{32}, for \vf{2{,}500} updates. %% FIX: todo filled
 
 \subsection{Read-out, controls, and gates}\label{sec:hub:readout}
 
-For each prompt, the projected hub outputs of one source model enter one decoder as memory. The decoder generates from its start token until its end-of-sequence token or a cap of the memory's row count plus a margin. \todo{State the margin.} Word-F1 and exact match score the generated text against the true prompt. The macro score averages over prompts, then over directions.
+For each prompt, the projected hub outputs of one source model enter one decoder as memory. The decoder generates from its start token until its end-of-sequence token or a cap of the memory's row count plus a margin of \vf{8} tokens on Corpus A and \vf{32} on legal128w. %% FIX: todo filled Word-F1 and exact match score the generated text against the true prompt. The macro score averages over prompts, then over directions.
 
 The shuffled-memory and wrong-memory controls of Section~\ref{sec:hub:readout-choice} run on the same prompts as the trained read-out.
 
-Two gates carry the controls into later chapters. Gate G1 requires the hub's cross-direction free-run word-F1 on its validation split to exceed \vf{0.90}, with the shuffled floor below \vf{0.20}; the threshold is \vf{0.85} for the ten-word legal pieces. Gate G2 is the word-F1 of the true hub output of one source model, decoded by the three decoders on a corpus's evaluation prompts. G2 is the ceiling that any map from an unseen model into that hub can reach, and every unseen-model result in Chapter~\ref{ch:attack} is read against it.
+Two gates carry the controls into later chapters. Gate G1 requires the hub's free-run word-F1, averaged over the six cross directions on its validation split, to exceed \vf{0.90}, with the shuffled floor below \vf{0.20}. Gate G2 is the word-F1 of the true hub output of one source model, decoded by the three decoders on a corpus's evaluation prompts; on the ten-word legal pieces, G2 must exceed \vf{0.85}. %% FIX: 0.85 is a G2 threshold G2 is the ceiling that any map from an unseen model into that hub can reach, and every unseen-model result in Chapter~\ref{ch:attack} is read against it.
 
-The noise test of Section~\ref{sec:hub:noise} adds noise of relative norm $r\rho_H$ to every true hub output, where $\rho_H$ is the RMS radius of the hub outputs on the evaluation prompts. Isotropic noise draws each direction equally; covariance-shaped noise draws along the covariance of the hub outputs. \todo{Confirm the definition of $\rho_H$ and the covariance estimate from \texttt{oct\_w5c}.}
+The noise test of Section~\ref{sec:hub:noise} adds noise of relative norm $r\rho_H$ to every true hub output, where $\rho_H$ is the RMS radius of the training hub pool. Isotropic noise draws each direction equally; covariance-shaped noise draws along the covariance of the same training pool. %% FIX: training pool, not evaluation prompts
 
 \subsection{Corpora}\label{sec:hub:corpora}
 
@@ -184,7 +190,7 @@ One hub is trained per corpus, and the unseen-model experiments of Chapter~\ref{
 \toprule
 Name & Text & Length & Train / val / test \\
 \midrule
-Corpus A & Natural Questions query strings & about \vf{10} words & \vf{40{,}000} / \vf{5{,}000} / \todo{} \\
+Corpus A & Natural Questions query strings & about \vf{10} words & \vf{40{,}000} / \vf{5{,}000} / \vf{5{,}000} \\ %% FIX: configs/v3.yaml
 legal128, legal256 & Pile-of-Law documents, cut at the first word & \vf{64--128}, \vf{128--256} tokens & \vf{40{,}000} / \vf{5{,}000} / \vf{5{,}000} \\
 legal128w, legal256w & same documents, one window per document at a uniformly drawn start & \vf{64--128}, \vf{128--256} tokens & \vf{40{,}000} / \vf{5{,}000} / \vf{5{,}000} \\
 legal10s & legal128w documents cut into ten-word pieces at sentence starts & \vf{10} words & \vf{40{,}000} / \vf{5{,}000} / \vf{5{,}000} \\
@@ -192,7 +198,7 @@ legal10s & legal128w documents cut into ten-word pieces at sentence starts & \vf
 \end{tabular}
 \end{table}
 
-Corpus A is the development corpus for the whole line of work. The legal corpora draw on five Pile-of-Law subsets: contracts, EDGAR filings, consumer-complaint narratives, resource contracts, and terms of service. The subsets enter round-robin, with EDGAR capped at \vf{80} percent. Every document passes four filters: its length falls in the token range under all four tokenizers (Pythia, OLMo, Qwen, SmolLM); it holds at least \vf{eight} distinct words; at most \vf{30} percent of its characters are digits; and no other document matches its exact text, normalized hash, or first \vf{200} characters.
+Corpus A is the development corpus for the whole line of work. The legal corpora draw on five Pile-of-Law subsets: contracts, EDGAR filings, consumer-complaint narratives, resource contracts, and terms of service. The subsets enter round-robin, with EDGAR capped at \vf{80} percent. Every document passes four filters: its length falls in the token range under all four tokenizers (Pythia, OLMo, Qwen, SmolLM); it holds at least \vf{eight} distinct words; at most \vf{30} percent of its characters are digits; and no other document matches its exact text, normalized hash, or first \vf{200} characters. The legal10s pieces pass their own length and diversity filters: \vf{8} to \vf{24} tokens and at least \vf{five} distinct words. %% FIX
 
 The window corpora replace the opening cut because document openings repeat across filings. Under the opening rule, EDGAR lost \vf{2{,}477} rows to prefix duplicates; under the window rule, it lost \vf{588}. % src: legal corpus build log
 legal10s matches Corpus A's length on legal text, so that Chapter~\ref{ch:attack} can separate the effect of length from the effect of domain (Section~\ref{sec:attack:leak}).
