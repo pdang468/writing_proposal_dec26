@@ -183,19 +183,36 @@ Each model contributes one middle block: Qwen3.5-0.8B at block \vf{18} (width \v
 \end{itemize}
 
 \subsection{Training objective}\label{sec:hub:training}
+%% FIX: section rewritten from src/v6_2/losses.py, src/v3/losses.py, src/v4/geometry.py and configs/v6_3.yaml; InfoNCE and geometry terms written out, schedule filled
 
-Each training prompt passes through all three models, and the three state sequences are aligned token group by token group through their character spans. Training visits all nine directions: the six cross directions at weight one and the three self directions at weight one third.
+Each training prompt passes through all three models. The three tokenizers split the prompt differently, so the three state sequences are aligned by character span into token groups: one group holds, for each model, the tokens that cover the same span. Every update visits all nine directions, the six cross directions at weight one and the three self directions at weight one third.
 
 The loss has three terms:
 \begin{equation}
-\mathcal{L} = \mathcal{L}_{\text{dec}} + \vf{0.1}\,\mathcal{L}_{\text{InfoNCE}} + \vf{1.0}\,\mathcal{L}_{\text{geom}},
+\mathcal{L} = \mathcal{L}_{\text{dec}} + 0.1\,\mathcal{L}_{\text{InfoNCE}} + 1.0\,\mathcal{L}_{\text{geom}},
 \qquad
 \mathcal{L}_{\text{dec}} = \tfrac{6}{7}\,\overline{\text{CE}}_{\text{cross}} + \tfrac{1}{7}\,\overline{\text{CE}}_{\text{self}} .
 \label{eq:hub:loss}
 \end{equation}
-The decoding term $\mathcal{L}_{\text{dec}}$ is the teacher-forced cross-entropy of the frozen decoder over the input tokens. The decoder reads the projected hub outputs $m_1 \ldots m_T$ as memory, then its native start token, then the true tokens $x_1 \ldots x_T$; every label is the input token $x_t$ at the same position, in the decoder's vocabulary, followed by the decoder's end-of-sequence token. The contrastive term $\mathcal{L}_{\text{InfoNCE}}$ pulls together the hub outputs of aligned token groups from different models. The geometry term $\mathcal{L}_{\text{geom}}$ penalizes drift in the pairwise distances within a batch. \todo{Write out the InfoNCE and geometry terms from \texttt{v6\_3/plan.md} Section 4 and \texttt{src/v6\_3}.}
 
-Training runs on \vf{40{,}000} prompts. Every \vf{250} updates, teacher-forced cross Acc@1 on \vf{5{,}000} validation prompts scores the checkpoint, and the earliest checkpoint within \vf{0.002} of the best is kept. The test split is never read during hub training. AdamW updates the weights at learning rate \vf{3e-4}, batch \vf{32}, for \vf{2{,}500} updates. %% FIX: todo filled
+\paragraph{Decoding term.} $\mathcal{L}_{\text{dec}}$ is the teacher-forced cross-entropy of the frozen decoder over the input tokens. The decoder reads the projected hub outputs $m_1 \ldots m_T$ as memory, then its native start token, then the true tokens $x_1 \ldots x_T$. Every label is the input token $x_t$ at the same position, in the decoder's vocabulary, followed by the decoder's end-of-sequence token.
+
+\paragraph{Contrastive term.} $\mathcal{L}_{\text{InfoNCE}}$ ties the hub outputs of different models to each other. Each hub output is scaled to unit length, and the hub outputs of one token group are averaged, with the alignment weights, into one group vector per model, again of unit length. For each of the three model pairs, group $i$ of one model must identify group $i$ of the other among the groups of the batch:
+\begin{equation}
+\mathcal{L}_{\text{InfoNCE}}^{(a,b)} = -\frac{1}{2G}\sum_{i=1}^{G}\left[\log\frac{e^{g^a_i\cdot g^b_i/\tau}}{\sum_j e^{g^a_i\cdot g^b_j/\tau}} + \log\frac{e^{g^a_i\cdot g^b_i/\tau}}{\sum_j e^{g^a_j\cdot g^b_i/\tau}}\right],
+\qquad \tau = 0.05 ,
+\label{eq:hub:infonce}
+\end{equation}
+where $g^a_i$ is the vector of group $i$ under model $a$ and $G$ is the number of groups in the batch. The term averages over the three model pairs.
+
+\paragraph{Geometry term.} $\mathcal{L}_{\text{geom}}$ keeps the similarity structure of a batch. For a matrix $A$ of group vectors, $\Gamma(A) = AA^{\top}$ holds the inner products between groups, and $d(A,B)$ is the mean squared difference between the off-diagonal entries of $\Gamma(A)$ and $\Gamma(B)$. With $X_a$ the group vectors of model $a$'s hidden states and $Y_a$ those of its hub outputs, each centered by a mean fixed at initialization,
+\begin{equation}
+\mathcal{L}_{\text{geom}} = \tfrac{1}{2}\Big(\overline{d(X_a, Y_a)} + \overline{d(Y_a, Y_b)}\Big).
+\label{eq:hub:geom}
+\end{equation}
+The first average runs over the two models of each pair and asks the hub to keep each model's own similarities; the second runs over the three pairs and asks two models to agree inside the hub. The contrastive and geometry terms are computed once per batch, not once per direction.
+
+\paragraph{Schedule and selection.} Only the adapters, the trunk, and the projectors receive gradients; the three models stay frozen. Training runs on 40,000 prompts for 2,500 AdamW updates of 32 prompts each, at learning rate $3\times10^{-4}$ with 250 warmup updates and cosine decay to zero, weight decay 0.01 on the linear weights, and gradient clipping at 1.0; one seed. Every 250 updates, teacher-forced cross Acc@1 on the 5,000 validation prompts scores the checkpoint, and the earliest checkpoint within 0.002 of the best is kept. The same 5,000 prompts later give the free-run read-out of Gate G1, so G1 is not a held-out score. The test split is never read during hub training.
 
 \subsection{Read-out, controls, and gates}\label{sec:hub:readout}
 
