@@ -117,15 +117,15 @@ legal10s & \vf{0.976} & \todo{} & \vf{0.044} \\ % src: oct_w5b-report
 %% FIX: two figures added, one per gate
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.7\textwidth]{ch3/hub_translation}
-\caption{The hub translates between models on every corpus. A prompt enters through one model and another model's frozen decoder regenerates it; the bars average the six source-decoder pairs (Gate G1), \vf{5{,}000} validation prompts. Shuffled control: the same hub outputs in random order; the legal256w control is the largest of its six pairs, the others their mean. One hub seed per corpus.}
+\includegraphics[width=0.6\textwidth]{ch3/hub_translation}
+\caption{The hub translates between models on each of three corpora. A prompt enters through one model and another model's frozen decoder regenerates it; the bars average the six source-decoder pairs (Gate G1), \vf{5{,}000} validation prompts. Shuffled control: the same hub outputs in random order; the legal256w control is the largest of its six pairs, the others their mean. One hub seed per corpus.}
 \label{fig:hub:translation}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\textwidth]{ch3/hub_ceiling}
-\caption{From one model's true hub output, each frozen decoder regenerates the prompt. The hub output of OLMo is decoded by the three decoders on \vf{500} development prompts per corpus; their mean is the ceiling G2 (\vf{0.946}, \vf{0.982}, \vf{0.977}, \vf{0.976}), the most a map from an unseen model into the hub can reach. The Qwen decoder on Corpus A is the one bar below \vf{0.96}.}
+\includegraphics[width=0.75\textwidth]{ch3/hub_ceiling}
+\caption{From one model's true hub output, each frozen decoder regenerates the prompt. The hub output of OLMo is decoded by the three decoders on \vf{500} development prompts per corpus; their mean is the ceiling G2 (\vf{0.946}, \vf{0.982}, \vf{0.977}), the most a map from an unseen model into the hub can reach. The Qwen decoder on Corpus A is the one bar below \vf{0.97}. The bars repeat the OLMo row of Figure~\ref{fig:hub:directions} on the \vf{500} development prompts that Chapter~\ref{ch:attack} reads.}
 \label{fig:hub:ceiling}
 \end{figure}
 

@@ -5,8 +5,8 @@
 Writes figures/ch3/{hub_architecture,direction_recovery,hub_translation,hub_ceiling}.{pdf,png}.
 Sources: results/v6_3/hpc-final/inversion.json, results/legal128w/v6_3/inversion.json (5,000 validation
 prompts each); both oct_w5c-noise.json zero-noise rows (G2, 500 development prompts);
-results/legal256w/v7_2/main/v8_6-readiness.json; results/legal10s/v7_2/main/oct_w5b-summary.json (G2) and
-oct_w5b-report.md (G1 0.9705, shuffled 0.044; no result file in the local mirror, typed below).
+results/legal256w/v7_2/main/v8_6-readiness.json;
+mixed-oct_w5b-L.json and mixed-v8_6-s1.json (per-decoder G2). legal10s is left out of both bar figures.
 """
 import json
 import sys
@@ -140,10 +140,9 @@ def translation():
         ("Corpus A", a["cross_mean"]["hub"]["word_f1"], a["cross_mean"]["shuffled"]["word_f1"]),
         ("legal128w", l128["cross_mean"]["hub"]["word_f1"], l128["cross_mean"]["shuffled"]["word_f1"]),
         ("legal256w", l256["cross_mean"], l256["shuffled_max"]),
-        ("legal10s", 0.9705, 0.044),  # oct_w5b-report.md; no result file in the local mirror
     ]
     series = [("hub output", BLUE), ("shuffled control", "#9a9994")]
-    fig, ax = bar_axes((4.6, 2.9))
+    fig, ax = bar_axes((3.8, 2.9))
     width = 0.36
     for i, row in enumerate(rows):
         print("G1", row[0], [round(v, 4) for v in row[1:]])
@@ -172,9 +171,8 @@ def ceiling():
         ("Corpus A", from_noise("results/v7_2/main/oct_w5c-noise.json")),
         ("legal128w", from_setting("results/legal128w/v7_2/main/mixed-oct_w5b-L.json")),
         ("legal256w", from_setting("results/legal256w/v7_2/main/mixed-v8_6-s1.json")),
-        ("legal10s", from_setting("results/legal10s/v7_2/main/mixed-oct_w5b-s1.json")),
     ]
-    fig, ax = bar_axes((6.3, 3.0))
+    fig, ax = bar_axes((5.0, 3.0))
     width = 0.26
     ticks, labels = [], []
     for i, (name, per) in enumerate(rows):
@@ -188,7 +186,7 @@ def ceiling():
             labels.append(label)
         ax.text(i, -0.11, name, ha="center", va="top", fontsize=9, color=INK, transform=ax.get_xaxis_transform())
     ax.set_xticks(ticks, labels, fontsize=6.3)
-    fig.subplots_adjust(left=0.09, right=0.99, top=0.97, bottom=0.2)
+    fig.subplots_adjust(left=0.115, right=0.99, top=0.97, bottom=0.2)
     save(fig, "hub_ceiling")
 
 
