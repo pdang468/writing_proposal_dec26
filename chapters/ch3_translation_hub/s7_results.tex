@@ -1,8 +1,8 @@
 \section{Results}\label{sec:hub:results}
 
-\paragraph{Corpus A.} The inversion hub passes Gate G1: free-run word-F1 above 0.95 in every cross direction. The true hub output decoded by the three decoders (Gate G2) scores 0.946 macro word-F1 on the 500 development prompts; the wrong-memory control scores 0.121. Retraining the projectors on the raw hub output reproduces 0.949; training them on the L2-normalized hub output loses 0.15, almost all of it in the SmolLM decoder, so projectors read the raw hub output throughout.
+\paragraph{Corpus A.} The inversion hub passes Gate G1: free-run word-F1 averages 0.945 over the six cross directions on 5,000 validation prompts, against 0.120 for shuffled memory. The two cross directions into Qwen fall below 0.90 (OLMo $\to$ Qwen 0.881, SmolLM $\to$ Qwen 0.874). The true hub output decoded by the three decoders (Gate G2) scores 0.946 macro word-F1 on the 500 development prompts; the wrong-memory control scores 0.121. Retraining the projectors on the raw hub output reproduces 0.949; training them on the L2-normalized hub output loses 0.15 on average (directions into SmolLM fall from 0.99 to about 0.44, directions into Qwen rise by about 0.09), so projectors read the raw hub output throughout.
 
-\paragraph{Legal corpora.} The legal128w hub passes G1 at 0.955 to 0.984 across cross directions, and its G2 on the 500 development prompts is 0.982. The legal10s hub reaches cross word-F1 0.9705 against a shuffled floor of 0.044, and G2 0.9756 on the pieces. The legal128w hub reused on the pieces reached only 0.773, below the 0.85 threshold, which is why the pieces have their own hub. \todo{legal256w G1 pending on the cluster (V8.6 chain).}
+\paragraph{Legal corpora.} The legal128w hub passes G1 at 0.955 to 0.986 across cross directions (mean 0.977, shuffled 0.152), and its G2 on the 500 development prompts is 0.982. The legal10s hub reaches cross word-F1 0.9705 against a shuffled floor of 0.044, and G2 0.9756 on the pieces. The legal128w hub reused on the pieces reached a G2 of only 0.773, below the 0.85 G2 threshold, which is why the pieces have their own hub. The legal256w hub passes G1 at 0.971 with a shuffled maximum of 0.185, and reaches G2 0.977.
 
 \begin{table}[H]
 \caption{Hub ceilings. Free-run macro word-F1 of the true hub output through the three frozen decoders (Gate G2), 500 development prompts per corpus. Result; sources in comments.}
@@ -12,8 +12,9 @@
 \toprule
 Corpus & G2 word-F1 & Wrong memory & Shuffled floor (G1) \\
 \midrule
-Corpus A & 0.946 & 0.121 & \todo{} \\ % mixed-v8-s0b.json; oct_w5c-noise.json
-legal128w & 0.982 & \todo{} & $<$0.20 \\ % oct_w5c-report; legal128w/v6_3/report
+Corpus A & 0.946 & 0.121 & 0.120 \\ % mixed-v8-s0b.json; oct_w5c-noise.json
+legal128w & 0.982 & \todo{} & 0.152 \\ % oct_w5c-report; legal128w/v6_3/report
+legal256w & 0.977 & \todo{} & 0.185 (max) \\ % results/legal256w/v7_2/main/v8_6-report.md
 legal10s & 0.976 & \todo{} & 0.044 \\ % oct_w5b-report
 \bottomrule
 \end{tabular}

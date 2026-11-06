@@ -8,7 +8,7 @@ Based on these information, the geometry information of an unknown model could b
 This work starts with building a transitional hub from 3 public model, Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B, where each model hidden representation could be decoded into original token using any auto progressive decoder.
 Given the trained hub and limited leakd hidden represetantion alignment hidden space of an assuming unknonw model, Pythia-1B , a simple mapping function could be trained to recover the token identify of input prompts. This training approach utilize both supervised and cycle unsupervised into a hybrid matching to boost the recovery accucary in the restricted information conditions.
 
-The results shows that in the white-box settings, the translation hub could archieve 0.95 F1 on question prompts and 0.98 on legal text. And with a leak of 90 token rows, one per prompt. The hybrid mapping achieves 0.60 F1 in Natural Question corpus, and 0.33 in legal dataset, booosting from 0.35 and 0.11 of training with supervised data only. Two significant comtribution of this work includde
+The results shows that in the white-box settings, the translation hub could archieve 0.95 F1 on question prompts and 0.98 on legal text. And with a leak of 90 token rows (ten prompts with nine rows each in Natural Question, ninety prompts with one row each in the legal dataset). The hybrid mapping achieves 0.60 F1 in Natural Question corpus, and 0.33 in legal dataset, booosting from 0.35 and 0.11 of training with supervised data only. Two significant comtribution of this work includde
 a. a reliable translation hub
 b. a simple architecture matching unifycing both supervised and unsupervised information to archieve high score in recovery testing.
 

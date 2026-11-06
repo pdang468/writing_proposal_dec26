@@ -1,10 +1,10 @@
 \section{What the Hub Establishes}\label{sec:hub:discussion}
 
-H1 holds on every corpus tested: a per-token hub trained on three models lets each frozen decoder regenerate the prompt from any model's hub output at word-F1 of 0.95 to 0.98, against controls near 0.1. Three consequences carry into the next chapter.
+H1 holds on every corpus tested: a per-token hub trained on three models lets each frozen decoder regenerate the prompt from any model's hub output at a G2 of 0.95 to 0.98, against shuffled-memory controls of 0.044 to 0.185. H1 holds on the cross mean, not in every direction: on Corpus A the two cross directions into Qwen fall to 0.874 and 0.881. Three consequences carry into the next chapter.
 
 First, the hub output is a sufficient target: the unseen-model problem reduces to a regression problem in a 512-dimensional space.
 
-Second, the ceiling is corpus-specific and known. Each unseen-model result is read as a fraction of the distance from the no-memory floor to G2.
+Second, the ceiling is corpus-specific and known. Each unseen-model result is read against G2 and its wrong-memory control.
 
 Third, the hub carries no context of its own. Whatever an affine map from one block of an unseen model recovers, it recovers from the information in that block's states, token by token.
 

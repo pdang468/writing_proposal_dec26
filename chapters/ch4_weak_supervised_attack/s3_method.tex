@@ -1,7 +1,7 @@
 \section{Map, Losses, and Protocol}\label{sec:attack:method}
 
 \subsection{The map}
-The map is affine: $\hat m = W s + b$ from the centered 2048-dimensional Pythia state $s$ to the 512-dimensional hub. Only $W$ and $b$ receive gradients; the hub, the projectors, and the decoders stay frozen. Training runs 3,000 AdamW updates from a fixed initializer. \todo{learning rate and schedule from \texttt{configs/v7\_2.yaml}.}
+The map is affine: $\hat m = W s + b$ from the centered 2048-dimensional Pythia state $s$ to the 512-dimensional hub. Only $W$ and $b$ receive gradients; the hub, the projectors, and the decoders stay frozen. Training runs 3,000 AdamW updates from a fixed initializer, at learning rate $3\times10^{-4}$ with 300 warmup updates and no weight decay.
 
 \subsection{The loss}
 With supervision fraction $\alpha \in [0,1]$,

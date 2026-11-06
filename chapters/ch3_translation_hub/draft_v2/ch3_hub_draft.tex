@@ -139,7 +139,7 @@ The prediction holds on every corpus tested: the cross mean exceeds \vf{0.90} an
 Token identity survives the passage through a shared space of \vf{512} dimensions, and three decoders that never trained on each other's states read it back.
 
 Three consequences carry into Chapter~\ref{ch:attack}. First, the hub output is a fixed target, so attaching an unseen model is a regression into a \vf{512}-dimensional space.
-Second, the ceiling is known for each corpus. Every unseen-model result is read as a fraction of the distance from the wrong-memory floor to G2, not as a bare score. Third, the hub adds no context of its own. Whatever a map from one block of an unseen model recovers, it recovers from that block's states, token by token.
+Second, the ceiling is known for each corpus. Every unseen-model result is read against G2 and its wrong-memory control, not as a bare score. Third, the hub adds no context of its own. Whatever a map from one block of an unseen model recovers, it recovers from that block's states, token by token.
 
 The design trades breadth for a clean target. The per-token hub gives up the teacher-forced accuracy of a hub with attention, and in exchange every hub output depends on one hidden state, which an affine map can approach. One hub per corpus gives up a single universal space, and in exchange each ceiling is measured on the text it bounds. Both trades favor the attack of the next chapter over the generality of the hub.
 
