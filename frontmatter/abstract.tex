@@ -16,8 +16,8 @@ An unseen model, Pythia-1B, joins the hub through a lightweight affine map train
 The leaked rows work as initial anchors, and matching extends the mapping.
 
 The fully supervised translation hub sets the reference ceiling for recovery, reaching word-F1 scores of 0.95 on question prompts and 0.98 on legal text.
-With 90 leaked rows, one per prompt, matching raises the supervised map's word-F1 from 0.35 to 0.60 on question prompts and from 0.11 to 0.33 on legal text (500 and 4,500 prompts, respectively; one seed).
-The same leaked rows recover more of the prompt when the map also learns from unpaired hidden states.
+With 90 leaked rows, unsupervised matching raises the supervised map's word-F1 from 0.35 to 0.60 on question prompts and from 0.11 to 0.33 on legal text.
+With about 900 leaked rows, the gain narrows: matching raises word-F1 from 0.76 to 0.81 on question prompts and from 0.55 to 0.63 on legal text.
 
 The remaining work asks how much matching contributes, and where that contribution ends.
 Three tests press on that question: different leak budgets, corpus domains, and unseen models.
