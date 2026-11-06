@@ -17,15 +17,15 @@ Budget (paired prompts) & 10 & 30 & 100 & 300 & 1000 \\
 Residual only ($\alpha = 1$, no ridge) & 0.303 & 0.441 & 0.656 & 0.817 & 0.884 \\
 Residual + ridge ($\alpha = 1$; benchmark) & 0.348 & 0.536 & 0.758 & 0.845 & 0.876 \\
 Hub ceiling G2 & \multicolumn{5}{c}{0.946} \\
-Wrong-memory control & \multicolumn{5}{c}{0.05 to 0.09} \\
+Wrong-memory control & \multicolumn{5}{c}{0.10 to 0.15} \\ %% FIX: was 0.05 to 0.09; the cells of mixed-v7_9-s5.json give 0.104 to 0.145
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[ht]
 \centering
-\placeholder{Figure: word-F1 against budget (log axis), supervised and hybrid, three seeds with intervals, G2 ceiling and wrong-memory floor as horizontal lines. Scripts under \texttt{scripts/} (presentation figure scripts, w44 commit).}
-\caption{Budget curve on Corpus A.}
+\includegraphics[width=0.75\textwidth]{ch4/budget_curve} %% FIX: figure added; figures/scripts/make_figures.py, mixed-v7_9-s5.json
+\caption{Budget curve on Corpus A. Macro word-F1 over three decoders and 500 development prompts; lines are the three-seed mean, bands the range over seeds. The dotted line is the hub ceiling G2; the gray band is the wrong-memory control of the drawn cells.}
 \label{fig:attack:budget}
 \end{figure}
 

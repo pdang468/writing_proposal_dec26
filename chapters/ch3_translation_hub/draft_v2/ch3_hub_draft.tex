@@ -30,8 +30,8 @@ The hub joins Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B, reading one middle bloc
 
 \begin{figure}[ht]
 \centering
-\placeholder{Figure: hidden state $s_t$ $\to$ per-model source adapter $\to$ shared trunk $\to$ 512-d hub output $m_t$ $\to$ per-model projector $\to$ frozen decoder, as memory rows; nine directions. Source: \texttt{v6\_3/plan.md} Section 3.}
-\caption{The translation hub sends each model's hidden states into one shared space, and every frozen decoder reads them back out. Each source model has its own adapter; the trunk and the 512-dimensional hub output are shared; each decoder has its own projector.}
+\input{figures/ch3/hub_architecture} %% FIX: figure added; trained parts shaded, frozen models dashed
+\caption{The translation hub sends each model's hidden states into one shared space, and every frozen decoder reads them back out. Each source model has its own adapter; the trunk and the 512-dimensional hub output are shared; each decoder has its own projector. Shaded boxes train; dashed boxes are the frozen models.}
 \label{fig:hub:arch}
 \end{figure}
 
@@ -61,7 +61,25 @@ Recovery therefore depends on the hub output of the right prompt, not on the dec
 The projectors read the raw hub output, not a normalized one. Retrained on the raw output, they reproduce \vf{0.949}; retrained on the L2-normalized output, they lose \vf{0.15} on average. The loss is uneven: directions into SmolLM fall from \vf{0.99} to about \vf{0.44}, while directions into Qwen rise by about \vf{0.09}. % src: mixed-v8-s0b.json %% FIX: source; split stated
 \rd{The norm of the hub output carries part of the token identity, so normalization discards information the decoders need.}
 
-\placeholder{Table: free-run word-F1 and exact match for all nine directions on Corpus A and legal128w, from \texttt{results/v6\_3/hpc-final/} and \texttt{results/legal128w/v6\_3/report.md}.}
+%% FIX: placeholder replaced by the table; values from the two inversion.json files
+\begin{table}[H]
+\caption{Free-run word-F1 (exact match in parentheses) for all nine directions, \vf{5{,}000} validation prompts per corpus. Rows are source models, columns decoders. Result; \texttt{results/v6\_3/hpc-final/inversion.json}, \texttt{results/legal128w/v6\_3/inversion.json}.}
+\label{tab:hub:directions}
+\centering
+\begin{tabular}{llccc}
+\toprule
+Corpus & Source & Qwen decoder & OLMo decoder & SmolLM decoder \\
+\midrule
+Corpus A & Qwen & \vf{0.841} (\vf{0.355}) & \vf{0.969} (\vf{0.800}) & \vf{0.990} (\vf{0.917}) \\
+ & OLMo & \vf{0.881} (\vf{0.454}) & \vf{0.969} (\vf{0.804}) & \vf{0.987} (\vf{0.898}) \\
+ & SmolLM & \vf{0.874} (\vf{0.417}) & \vf{0.966} (\vf{0.784}) & \vf{0.993} (\vf{0.942}) \\
+\midrule
+legal128w & Qwen & \vf{0.961} (\vf{0.477}) & \vf{0.955} (\vf{0.426}) & \vf{0.986} (\vf{0.701}) \\
+ & OLMo & \vf{0.984} (\vf{0.703}) & \vf{0.982} (\vf{0.656}) & \vf{0.984} (\vf{0.645}) \\
+ & SmolLM & \vf{0.978} (\vf{0.566}) & \vf{0.973} (\vf{0.449}) & \vf{0.994} (\vf{0.757}) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{The ceiling holds on legal text, with one hub per length}\label{sec:hub:legal}
 
@@ -105,8 +123,8 @@ Random noise is not the error a fitted map makes. Maps fitted from an unseen mod
 
 \begin{figure}[ht]
 \centering
-\placeholder{Figure: word-F1 against relative hub error $r$, isotropic and covariance-shaped, legal128w and Corpus A; from \texttt{oct\_w5c-noise.json} on each corpus.}
-\caption{The decoders tolerate random hub error of relative size 0.4 at a cost of about 0.06; by 0.6, legal text degrades faster than question text.} %% FIX
+\includegraphics[width=\textwidth]{ch3/noise_tolerance} %% FIX: figure added; figures/scripts/make_figures.py, both oct_w5c-noise.json
+\caption{The decoders tolerate random hub error of relative size 0.4 at a cost of about 0.06; by 0.6, legal text degrades faster than question text. Macro word-F1 over three decoders, \vf{500} development prompts per corpus, one noise seed; the dotted line marks $r = 0.4$.} %% FIX
 \label{fig:hub:noise}
 \end{figure}
 
@@ -123,7 +141,9 @@ Second, the ceiling is known for each corpus. Every unseen-model result is read 
 
 The design trades breadth for a clean target. The per-token hub gives up the teacher-forced accuracy of a hub with attention, and in exchange every hub output depends on one hidden state, which an affine map can approach. One hub per corpus gives up a single universal space, and in exchange each ceiling is measured on the text it bounds. Both trades favor the attack of the next chapter over the generality of the hub.
 
-The results leave three questions open, each with a reason. \rd{Three models may not span the representations of every unseen model: the hub learned only the directions its three models share, and a model trained on different data may hold identity in directions the hub never saw.} The cost advantage of one hub over pairwise translators is argued, not yet measured at this scale. \todo{V1/V2 parity numbers.} The ceilings come from validation and development prompts; the test split stays sealed until the final evaluation, so the ceiling on unseen prompts is a prediction. \todo{State when the test split is read.}
+The results leave three questions open, each with a reason. \rd{Three models may not span the representations of every unseen model: the hub learned only the directions its three models share, and a model trained on different data may hold identity in directions the hub never saw.} The cost advantage of one hub over pairwise translators is argued, not yet measured at this scale. \todo{V1/V2 parity numbers.}
+% records (retrieval and parameter counts, not inversion): V1 hub 13,587,456 against pairwise 46,080,000 parameters (results/v1_final_result.md); V2 hub 64.8 percent fewer parameters than pairwise (documents/v2-closeout-2026-08-04.md); V3 free-run exact match, hub 0.419 against direct maps 0.274 (results/v3/final/results-summary.md). No hub-against-pairwise inversion score exists at V6.3 scale.
+ The ceilings come from validation and development prompts; the test split stays sealed until the final evaluation, so the ceiling on unseen prompts is a prediction. \todo{State when the test split is read.}
 
 %% ------------------------------------------------------------------
 \section{Methods}\label{sec:hub:methods}

@@ -13,14 +13,15 @@ The budget so far counted whole paired prompts. A realistic leak is smaller and 
 \caption{Leak shape on legal128w at about 90 rows. Macro word-F1, seed 1. Result; confirmation prompts where marked, else development. \texttt{oct\_w5-report.md}, \texttt{mixed-oct\_w5b-L.json}, \texttt{mixed-oct\_w5-s1-L90-ext3.json}.}
 \label{tab:attack:shape}
 \centering
+\small %% FIX: the intervals widen the table
 \begin{tabular}{lcccc}
 \toprule
 Leak & Rows & Hybrid & Supervised & $E$ \\
 \midrule
 90 prompts $\times$ 1 row (confirmation, 4,500) & 90 & 0.326 & 0.106 & +0.220 [+0.217, +0.223] \\
-10 prompts $\times$ 9 rows (development) & 90 & 0.304 & 0.094 & +0.210 \\
-1 prompt, whole (development) & 78 & 0.161 & 0.087 & +0.074 \\
-864 prompts $\times$ 1 row (development) & 864 & 0.628 & \todo{} & \todo{} \\
+10 prompts $\times$ 9 rows (development) & 90 & 0.304 & 0.094 & +0.210 [+0.200, +0.220] \\
+1 prompt, whole (development) & 78 & 0.161 & 0.087 & +0.075 [+0.067, +0.082] \\ %% FIX: +0.075, mixed-oct_w5b-L.json
+864 prompts $\times$ 1 row (development) & 864 & 0.628 & 0.548 & +0.080 [+0.072, +0.088] \\ %% FIX: filled from mixed-oct_w5-s1-L864.json (development); confirmation, 4,500 prompts: 0.631, 0.546, +0.085 [+0.082, +0.087]
 \bottomrule
 \end{tabular}
 \end{table}
@@ -48,7 +49,7 @@ Leak & Rows & Hybrid & Supervised & $E$ \\
 Corpus & Unseen model & Hybrid & Supervised & $E$ \\
 \midrule
 Corpus A & Pythia-1B & 0.604 & 0.352 & +0.253 [+0.242, +0.263] \\
-Corpus A & Llama-3.2-1B & 0.632 & 0.370 & +0.26 \\
+Corpus A & Llama-3.2-1B & 0.632 & 0.370 & +0.263 [+0.251, +0.274] \\ %% FIX: interval from nqllama mixed-oct_w5b-s1-prefix.json (paired prompt bootstrap, 1,000 resamples)
 legal10s & Pythia-1B & 0.318 & 0.114 & +0.204 [+0.191, +0.216] \\
 legal128w & Pythia-1B & 0.178 & 0.049 & +0.129 [+0.121, +0.138] \\
 \bottomrule
@@ -60,7 +61,7 @@ legal128w & Pythia-1B & 0.178 & 0.049 & +0.129 [+0.121, +0.138] \\
 
 \paragraph{Result.} Three parts. (1) On the noise curves of Figure~\ref{fig:hub:noise}, the hybrid cell sits 0.04 to 0.07 below the covariance-shaped curve at its own group-level error (RMS 0.80 of $\rho_H$ on legal, 0.70 on A), and the supervised cell 0.18 to 0.19 below it, on both corpora; the decoders tolerate legal and question text alike up to $r = 0.4$. (2) Llama-3.2-3B, attached to the frozen legal128w hub by a projector-only fit (validation cross-entropy 7.66 $\to$ 0.045), passes its gate (G2 0.983, $-0.002$ against SmolLM) but decodes the hybrid memories at 0.214 against SmolLM's 0.487 ($-0.273$ [$-0.292$, $-0.255$]): a stronger language model does not recover the loss. (3) A stock Qwen3-8B rewrite of the three decodings (attacker rung B) lifts the random-90 hybrid from 0.340 to 0.505 (+0.165 [+0.155, +0.176]) and content recall from 0.21 to 0.38, with the wrong-memory control at +0.025: the three decodings hold more text than word-F1 credits.
 
-\paragraph{Reading.} H7 holds in its first part: the decoders are not the bottleneck below $r = 0.5$, and the map's error, not the read-out, sets the legal level. The map's error on legal text is structured: it lands far enough from the true hub output that the decoders miss the opening words, and a rewrite of the three decodings recovers a third of the gap.
+\paragraph{Reading.} H7 holds in its first part: the decoders are not the bottleneck up to $r = 0.4$, and the map's error, not the read-out, sets the legal level. The map's error on legal text is structured: it lands far enough from the true hub output that the decoders miss the opening words, and a rewrite of the three decodings recovers a third of the gap.
 
 \subsection{What the decoded text looks like}
 \placeholder{Three worked examples per corpus (low, medium, high word-F1), true text against the three decodings, from \texttt{results/legal128w/v7\_2/main/long-freerun/examples.md} and the Corpus A ledger; the long free-run read: recovered prompts emit end-of-sequence at the memory's row count with 8 percent unsupported words, failed prompts (lists, tables) loop to the cap; hallucination is fluent substitution of numbers, dates, and names.}
