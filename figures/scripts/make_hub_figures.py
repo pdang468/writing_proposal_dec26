@@ -2,7 +2,7 @@
 
     python figures/scripts/make_hub_figures.py /path/to/representation_alignment
 
-Writes figures/ch3/{hub_architecture,direction_recovery,hub_translation,hub_ceiling}.{pdf,png}.
+Writes figures/ch3/{hub_architecture,direction_recovery,direction_recovery_nq,hub_translation,hub_ceiling}.{pdf,png}.
 Sources: results/v6_3/hpc-final/inversion.json, results/legal128w/v6_3/inversion.json (5,000 validation
 prompts each); both oct_w5c-noise.json zero-noise rows (G2, 500 development prompts);
 results/legal256w/v7_2/main/v8_6-readiness.json;
@@ -85,10 +85,12 @@ def architecture():
     save(fig, "hub_architecture")
 
 
-def directions():
-    files = {"Corpus A": "results/v6_3/hpc-final/inversion.json", "legal128w": "results/legal128w/v6_3/inversion.json"}
+def directions(files=None, out="direction_recovery", figsize=(6.4, 2.75), control="shuffled"):
+    files = files or {"Corpus A": "results/v6_3/hpc-final/inversion.json",
+                      "legal128w": "results/legal128w/v6_3/inversion.json"}
     cmap = LinearSegmentedColormap.from_list("blue", RAMP)
-    fig, axes = plt.subplots(1, 2, figsize=(6.4, 2.75))
+    fig, axes = plt.subplots(1, len(files), figsize=figsize, squeeze=False)
+    axes = axes[0]
     for ax, (name, rel) in zip(axes, files.items()):
         d = load(rel)
         grid = [[d["directions"][f"{s}->{t}"]["hub"] for t, _ in MODELS] for s, _ in MODELS]
@@ -111,15 +113,16 @@ def directions():
         for s in ax.spines.values():
             s.set_visible(False)
         shuffled = d["cross_mean"]["shuffled"]["word_f1"]
-        ax.set_title(f"{name}: cross mean {d['cross_mean']['hub']['word_f1']:.3f}, shuffled {shuffled:.3f}",
+        ax.set_title(f"{name}: cross mean {d['cross_mean']['hub']['word_f1']:.3f}, {control} {shuffled:.3f}",
                      fontsize=8.5, color=INK, y=-0.14)
     axes[0].set_ylabel("source model")
-    fig.tight_layout(rect=(0, 0, 0.93, 1))
-    bar = fig.colorbar(image, cax=fig.add_axes([0.94, 0.2, 0.012, 0.55]))
+    right = 0.93 if len(files) > 1 else 0.86
+    fig.tight_layout(rect=(0, 0, right, 1))
+    bar = fig.colorbar(image, cax=fig.add_axes([right + 0.01, 0.2, 0.012 * 6.4 / figsize[0], 0.55]))
     bar.set_label("free-run word-F1", fontsize=8)
     bar.outline.set_visible(False)
     bar.ax.tick_params(length=0, labelsize=7.5)
-    save(fig, "direction_recovery")
+    save(fig, out)
 
 
 def bar_axes(figsize):
@@ -192,5 +195,8 @@ def ceiling():
 
 architecture()
 directions()
+# Corpus A alone, for the chapter while the legal results are held back (2026-11-09).
+directions({"Corpus A": "results/v6_3/hpc-final/inversion.json"}, "direction_recovery_nq", (3.9, 2.9),
+           control="mismatched prompt")  # the records' "shuffled" arm is another prompt's memory
 translation()
 ceiling()
