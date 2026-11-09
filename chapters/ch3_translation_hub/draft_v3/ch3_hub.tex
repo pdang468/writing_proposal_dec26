@@ -85,8 +85,8 @@ Teacher-forced Acc@1 selects the checkpoint. Under teacher forcing the decoder r
 The test split is never read during hub training.
 
 %% BIG CHANGE: the cost of the per-token design, moved here from Hub Design so that the score is defined before it is quoted
-\paragraph{Cost of the per-token design.} Mapping each token alone costs selection accuracy. A variant with a two-layer transformer inside each adapter, trained on the same prompts with the same objective, reached \vf{0.987} on the selection score against \vf{0.954} for the per-token hub. % src: results/v6_2/hpc-final/{a,b}/report.json cross_mean (variant B 0.9870, variant A 0.9536)
-The per-token hub is kept for the property Section~\ref{sec:hub:design} names, and the free-run results below are its results.
+% \paragraph{Cost of the per-token design.} Mapping each token alone costs selection accuracy. A variant with a two-layer transformer inside each adapter, trained on the same prompts with the same objective, reached \vf{0.987} on the selection score against \vf{0.954} for the per-token hub. % src: results/v6_2/hpc-final/{a,b}/report.json cross_mean (variant B 0.9870, variant A 0.9536)
+% The per-token hub is kept for the property Section~\ref{sec:hub:design} names, and the free-run results below are its results.
 
 %% ------------------------------------------------------------------
 \section{Evaluation}\label{sec:hub:eval}
@@ -102,11 +102,12 @@ Word-F1 ignores word order, so exact match is reported beside it.
 % src: src/v6_3/inversion.py (shuffled_indices: (i + 1) mod n); src/v8/projectors.py (wrong_partner: same rule)
 
 \paragraph{Prompt sets.} Corpus A holds Natural Questions query strings, \vf{nine} words long on average (\vf{6} to \vf{19} in the validation split), split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts; near-duplicate questions never cross a split, and the test split is sealed. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
-Two sets are read. The full validation split gives the per-direction scores; it also selected the checkpoint, through teacher-forced Acc@1, so its free-run scores are descriptive, not held out. The development prompts are a fixed subset of \vf{500} validation prompts; Chapter~\ref{ch:attack} takes its development reads on them, so the hub is read on them as well. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
+Two sets are read. The full validation split gives the per-direction scores; it also selected the checkpoint, through teacher-forced Acc@1.
+The development prompts are a fixed subset of \vf{500} validation prompts; Chapter~\ref{ch:attack} takes its development reads on them, so the hub is read on them as well. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
 
-\paragraph{Gates.} Two reads qualify a hub for the next chapter. Gate G1 is the translation score: free-run word-F1 averaged over the six cross directions on the validation split. Gate G2 is the true-hub reference: the word-F1 of one hub model's own hub outputs, those of OLMo, decoded by the three decoders on the development prompts and averaged. G2 is the score a map from an unseen model would obtain, under the same decoding settings, if it reproduced OLMo's hub outputs exactly; Chapter~\ref{ch:attack} reads its unseen-model results against it. %% BIG CHANGE: G2 described as a reference, not as a ceiling no map can exceed
+\paragraph{Gate.} One read qualifies a hub for the next chapter. Gate G1 is the translation score: free-run word-F1 averaged over the six cross directions on the validation split; a gate is a score that must clear a threshold before the hub is handed on. %% BIG CHANGE: G2 dropped from this chapter; Chapter 4 defines its own comparison point (the score of the fully supervised hub output through the three decoders) where it is needed
 
-\paragraph{Refutation criteria for H1.} H1 is refuted on a corpus if G1 falls below \vf{0.90}, or if the mismatched-prompt control on the same prompts reaches \vf{0.20}. On a legal corpus, H1 is also refuted if G2 falls below \vf{0.85}. The translation and control thresholds come from the readiness plan of the legal window hubs, and the G2 threshold from the later gate of the ten-word pieces; their application to Corpus A, whose hub came first, is retrospective. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); oct_w5b/plan.md (G2 at least 0.85); no threshold precedes the Corpus A run %% BIG CHANGE: provenance of the thresholds stated
+\paragraph{Refutation criteria for H1.} H1 is refuted on a corpus if G1 falls below \vf{0.90}, or if the mismatched-prompt control on the same prompts reaches \vf{0.20}. Both thresholds come from the readiness plan of the legal window hubs; their application to Corpus A, whose hub came first, is retrospective. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); no threshold precedes the Corpus A run %% BIG CHANGE: third criterion (0.85 on the supervised hub output, legal) moved out with G2 %% BIG CHANGE: provenance of the thresholds stated
 Each direction is reported alone as well, because a mean can hide one weak decoder.
 
 %% ------------------------------------------------------------------
@@ -137,7 +138,6 @@ Translation (G1) & \vf{5{,}000} validation & six cross & \vf{0.945} & \vf{0.120}
 Self & \vf{5{,}000} validation & three self & \vf{0.935} & \vf{0.120} \\ % src: v6_3 inversion.json, mean of the diagonal (0.8411, 0.9691, 0.9933; shuffled 0.1210, 0.1199, 0.1203)
 Translation & \vf{500} development & six cross & \vf{0.945} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference (cross_macro_mean 0.9447, wrong_macro_mean 0.1214)
 OLMo source & \vf{500} development & OLMo, three decoders & \vf{0.947} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference per_direction_mean olmo->{qwen,olmo,smollm}: hub 0.8827, 0.9716, 0.9865; wrong 0.1214, 0.1213, 0.1209
-Reference (G2) & \vf{500} development & OLMo, three decoders & \vf{0.946} & not measured \\ % src: oct_w5c-noise.json sets.iso-r0 (0.9459), the Chapter 4 pipeline
 \bottomrule
 \end{tabular}
 \end{table}
@@ -172,8 +172,8 @@ H1 therefore holds on the mean and not in every direction. The read-out does not
 \subsection{The development prompts repeat the validation scores}\label{sec:hub:dev}
 
 The development prompts reproduce the validation scores. On these \vf{500} prompts, the set that Chapter~\ref{ch:attack} reads during development, the cross mean is \vf{0.945} against \vf{0.121} for the mismatched-prompt control, and every direction lies within \vf{0.005} of its validation score (Table~\ref{tab:hub:reads}). % src: mixed-v8-s0b.json readout.reference per_direction_mean vs v6_3 inversion.json (largest difference 0.0045, smollm->qwen)
-The true-hub reference G2, OLMo's hub outputs through the three decoders, is \vf{0.946}: \vf{0.881} into Qwen, \vf{0.971} into OLMo, and \vf{0.986} into SmolLM. % src: results/v7_2/main/oct_w5c-noise.json sets.iso-r0 per_decoder
-The same OLMo row in the nine-direction read scores \vf{0.947}, against \vf{0.121} for the mismatched-prompt control. Recovery on these prompts therefore depends on the hub outputs of the right prompt, and \vf{0.946} is the reference against which Chapter~\ref{ch:attack} places a map from an unseen model.
+OLMo's own hub outputs, read through the three decoders, score \vf{0.947} against \vf{0.121} for the mismatched-prompt control: \vf{0.883} into Qwen, \vf{0.972} into OLMo, and \vf{0.987} into SmolLM. % src: mixed-v8-s0b.json readout.reference per_direction_mean olmo->{qwen,olmo,smollm}; the Chapter 4 pipeline reads the same row at 0.946 (oct_w5c-noise.json sets.iso-r0)
+Recovery on these prompts therefore depends on the hub outputs of the right prompt. %% BIG CHANGE: G2 name and the forward reference to Chapter 4 removed; the OLMo row stays as one row of the read
 
 \subsection{The decoders read the raw hub output}\label{sec:hub:projectors}
 
@@ -186,7 +186,7 @@ With retrained projectors, normalization thus raises recovery into Qwen and lowe
 %% BIG CHANGE: placeholder. The legal paragraphs, Table tab:hub:g2 and the two bar figures of draft v2 return here
 %% once every legal read follows the protocol of Table tab:hub:reads (same prompt sets, mismatched-prompt control on each read).
 
-One hub is trained per corpus, with the design and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training} unchanged. The legal corpora test H1 on text that is longer and rarer in vocabulary than questions, and they add the third refutation criterion: a true-hub reference G2 below \vf{0.85}.
+One hub is trained per corpus, with the design and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training} unchanged. The legal corpora test H1 on text that is longer and rarer in vocabulary than questions. %% BIG CHANGE: third criterion removed with G2
 
 \placeholder{Legal results. For each legal corpus (legal128w and the ten-word pieces): the corpus description; the rows of Table~\ref{tab:hub:reads}, each with its prompt set, the directions averaged, the decode margin, exact match, the hub seed, and the mismatched-prompt control on the same prompts; the nine-direction grid; decoded examples at a high, a middle, and a low score; and the verdict on H1. No legal result is claimed in this draft.}
 
@@ -199,9 +199,7 @@ One hub is trained per corpus, with the design and objective of Sections~\ref{se
 Corpus & Read & Prompts & Word-F1 & Control \\
 \midrule
 legal128w & Translation (G1) & & \todo{} & \todo{} \\
- & True-hub reference (G2) & & \todo{} & \todo{} \\
 Ten-word pieces & Translation (G1) & & \todo{} & \todo{} \\
- & True-hub reference (G2) & & \todo{} & \todo{} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -211,7 +209,7 @@ Ten-word pieces & Translation (G1) & & \todo{} & \todo{} \\
 
 H1 holds on question prompts, on the mean. Token identity survives the passage through a shared space of \vf{512} dimensions: frozen models that never trained on each other's states read a prompt back at \vf{0.945}, against \vf{0.120} from another prompt's hub outputs, while both cross directions into the Qwen decoder stay below \vf{0.90}.
 
-The hub gives Chapter~\ref{ch:attack} a fixed target, a measured reference, and a map that acts on single hidden states. First, the hub output is a fixed target, so attaching an unseen model becomes a regression into a \vf{512}-dimensional space. Second, the reference is known: an unseen-model result on Corpus A can be read against G2 at \vf{0.946} and against the mismatched-prompt control, not as a bare score. Third, the hub adds no context of its own; whatever a map from one block of an unseen model recovers, it recovers from that block's states, row by row.
+The hub gives Chapter~\ref{ch:attack} a fixed target, a measured score for the fully supervised hub output, and a map that acts on single hidden states. First, the hub output is a fixed target, so attaching an unseen model becomes a regression into a \vf{512}-dimensional space. Second, the score of that target is known: OLMo's own hub outputs read through the three decoders reach \vf{0.947} on the \vf{500} prompts, against \vf{0.121} for the mismatched-prompt control, so an unseen-model result on the same prompts is not a bare score. Third, the hub adds no context of its own; whatever a map from one block of an unseen model recovers, it recovers from that block's states, row by row.
 
 The design trades breadth for a simple target. The per-token hub gives up the selection accuracy of a hub with attention, and one hub per corpus gives up a single universal space; in exchange every hub output depends on one hidden state, and each reference is measured on the text to which it is applied.
 
@@ -220,7 +218,7 @@ Five limits bound the claim.
 \item \textbf{One hub seed.} Every score comes from one trained hub. How much the scores move between hub seeds is unmeasured, the lower recovery into Qwen included.
 \item \textbf{Selection and read-out share prompts.} The validation split selected the checkpoint and gives G1, and the development prompts are part of that split. Selection ran on teacher-forced accuracy, not on free-run scores, but no hub score is held out; the test split stays sealed until the final evaluation. \todo{State when the test split is read.}
 \item \textbf{One control.} The mismatched-prompt control shows that recovery depends on the right prompt's hub outputs. No control separates token identity from token order, and word-F1 does not read order; exact match, at \vf{0.71} on the cross mean, is the only score that reads order.
-\item \textbf{Decode margin.} The reads of this chapter cap generation at the memory's row count plus \vf{8} tokens, while the standard cell of Chapter~\ref{ch:attack} caps at plus \vf{32}. G2 on Corpus A at margin \vf{32} is not yet measured, so a gain in Chapter~\ref{ch:attack} is not yet stated as a fraction of the reference. \todo{Read G2 on Corpus A at margin 32 (w46 plan, step 4).} % src: w46/plan.md Setting item 6 and Steps row 4; configs/v7_cap32.yaml
+\item \textbf{Decode margin.} The reads of this chapter cap generation at the memory's row count plus \vf{8} tokens, while the standard cell of Chapter~\ref{ch:attack} caps at plus \vf{32}. The reads of this chapter at margin \vf{32} are not yet measured, so a Chapter~\ref{ch:attack} result is not yet placed against a hub score under its own settings. \todo{Read the OLMo row on Corpus A at margin 32 (w46 plan, step 4).} % src: w46/plan.md Setting item 6 and Steps row 4; configs/v7_cap32.yaml
 \item \textbf{Three models, no pairwise comparison.} Three hub models are a narrow sample of the models an attacker may meet, and Chapter~\ref{ch:attack} tests the hub against two unseen ones. The cost advantage of one hub over a translator per pair of models is argued, not measured, for inversion at this scale. \todo{V1/V2 parity numbers.} %% the existing records compare retrieval and parameter counts, not inversion
 % records (retrieval and parameter counts, not inversion): V1 hub 13,587,456 against pairwise 46,080,000 parameters (results/v1_final_result.md); V2 hub 64.8 percent fewer parameters than pairwise (documents/v2-closeout-2026-08-04.md). No hub-against-pairwise inversion score exists for this hub.
 \end{itemize}
