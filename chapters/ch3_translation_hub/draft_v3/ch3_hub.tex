@@ -188,7 +188,7 @@ With retrained projectors, normalization thus raises recovery into Qwen and lowe
 
 One hub is trained per corpus, with the design and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training} unchanged. The legal corpora test H1 on text that is longer and rarer in vocabulary than questions, and they add the third refutation criterion: a true-hub reference G2 below \vf{0.85}.
 
-\placeholder{Legal results. For each legal corpus (legal128w, legal256w, and the ten-word pieces): the corpus description; the rows of Table~\ref{tab:hub:reads}, each with its prompt set, the directions averaged, the decode margin, exact match, the hub seed, and the mismatched-prompt control on the same prompts; the nine-direction grid; decoded examples at a high, a middle, and a low score; and the verdict on H1. No legal result is claimed in this draft.}
+\placeholder{Legal results. For each legal corpus (legal128w and the ten-word pieces): the corpus description; the rows of Table~\ref{tab:hub:reads}, each with its prompt set, the directions averaged, the decode margin, exact match, the hub seed, and the mismatched-prompt control on the same prompts; the nine-direction grid; decoded examples at a high, a middle, and a low score; and the verdict on H1. No legal result is claimed in this draft.}
 
 \begin{table}[H]
 \caption{Reads of the legal hubs, in the layout of Table~\ref{tab:hub:reads}. \todo{Fill once each read and its control are run on the same prompts.}}
@@ -196,11 +196,9 @@ One hub is trained per corpus, with the design and objective of Sections~\ref{se
 \centering
 \begin{tabular}{lllcc}
 \toprule
-Corpus & Read & Prompts & Word-F1 & Wrong memory \\
+Corpus & Read & Prompts & Word-F1 & Control \\
 \midrule
 legal128w & Translation (G1) & & \todo{} & \todo{} \\
- & True-hub reference (G2) & & \todo{} & \todo{} \\
-legal256w & Translation (G1) & & \todo{} & \todo{} \\
  & True-hub reference (G2) & & \todo{} & \todo{} \\
 Ten-word pieces & Translation (G1) & & \todo{} & \todo{} \\
  & True-hub reference (G2) & & \todo{} & \todo{} \\

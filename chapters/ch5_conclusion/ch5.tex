@@ -1,13 +1,1 @@
 \chapter{Conclusion}\label{ch:conclusion}
-
-The proposal set out to invert the hidden states of a language model whose architecture, tokenizer, and vocabulary the attacker does not hold. Three findings answer the research questions of Chapter~\ref{ch:intro}.
-
-\paragraph{Q1.} One per-token hub trained on three white-box models lets each frozen decoder regenerate the prompt from any model's hub output at free-run word-F1 of 0.95 on question prompts and 0.98 on legal text, against mismatched-prompt controls of 0.12 to 0.19 (Chapter~\ref{ch:hub}).
-
-\paragraph{Q2.} An affine map attaches an unseen model to that hub. A ridge-regularized fit on paired prompts reaches word-F1 0.35, 0.54, 0.76, 0.85, and 0.88 at 10, 30, 100, 300, and 1,000 pairs over three seeds (Section~\ref{sec:attack:budget}). Pairs are necessary: no blind matching loss read the states (Section~\ref{sec:attack:blind}).
-
-\paragraph{Q3.} A matching term on unpaired batches, weighted lightly against the supervised residual, lifts the low-budget end to 0.66, 0.73, and 0.81 at 10, 30, and 100 pairs, and the gain vanishes by 300 (Section~\ref{sec:attack:hybrid}). At 90 leaked rows the same loss reaches 0.60 on question prompts (ten prompts, nine rows each) and 0.33 on legal text (ninety prompts, one row each) against 0.35 and 0.11 for the supervised fit; the shape of the leak matters more than its word content; the legal shortfall tracks the corpus and sits in the opening words; the decoders are not the bottleneck (Section~\ref{sec:attack:leak}).
-
-\paragraph{Significance.} For an honest-but-curious server in a split-inference system, the barrier of not knowing the client's model is low: tens of paired prompts, or about a hundred leaked token rows, attach the model to an existing hub well enough to read question prompts at 0.6 word-F1 and legal text at 0.3, and a rewrite step recovers more. The defense question therefore shifts from hiding the model's identity to limiting what the released states carry.
-
-\paragraph{Limits.} One seed on legal text; sealed test splits unread; two unseen models of about one billion parameters; in-domain calibration; tokenizer access for the calibration prompts; lexical overlap as the primary metric. Chapter~\ref{ch:future} addresses each.
