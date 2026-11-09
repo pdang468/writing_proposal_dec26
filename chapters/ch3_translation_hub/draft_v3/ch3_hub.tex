@@ -1,25 +1,3 @@
-%% Chapter 3, draft v3 (2026-11-09). Order: design, training, evaluation, results on Corpus A, legal placeholder,
-%% discussion. Plan agreed with a Codex planning round (~/codex-rounds/ch3/round1.md); reviewed in rounds 2 and 3.
-%% Every number is wrapped in \vf{} and carries a "% src:" comment; all were re-read from the result files on
-%% 2026-11-09 (paths relative to the research repo, representation_alignment).
-%%
-%% BIG CHANGES against draft v2 (each also marked "%% BIG CHANGE" in place):
-%%  1. Methods moved ahead of Results; the chapter now builds the hub before it reports a score.
-%%  2. Results cover Corpus A only. Legal numbers left the running text; Section "Legal corpora" is a placeholder.
-%%     Draft v2 keeps the legal paragraphs, tables and figures (draft_v2/ch3_hub_draft.tex).
-%%  3. ONE control, not two. The records' "shuffled" arm feeds prompt (i+1) mod N's memory
-%%     (src/v6_3/inversion.py, shuffled_indices); it never reorders rows inside a prompt. Draft v2 described it
-%%     as a row-order shuffle. The text calls both recorded controls the "mismatched-prompt control" (the records name them "shuffled" and "wrong memory") and drops the bag-of-tokens claim.
-%%  4. Blocks sit at three quarters of each model's depth (18/24, 12/16, 18/24; configs/v3.yaml), not "middle".
-%%  5. Token groups are built per model pair, not per triple (src/v6_2/data.py, _pair_groups).
-%%  6. InfoNCE equation corrected: masked negatives, mean within prompt then over prompts (src/v3/losses.py).
-%%  7. The Terms list is gone; each term is defined in apposition where the reader first needs it.
-%%  8. The nine-direction read on the 500 development prompts, with its mismatched-prompt control, is reported
-%%     (mixed-v8-s0b.json, readout.reference); draft v2 cited only its control.
-%%  9. The five orange \rd{} readings and the V3 continuation numbers are cut.
-%% 10. New displays: Figure direction_recovery_nq (Corpus A panel of the old two-panel figure), Table tab:hub:reads,
-%%     Table tab:hub:examples. Dropped from the chapter for now: hub_translation, hub_ceiling, the nine-direction table.
-
 \providecommand{\vf}[1]{\textcolor{blue}{#1}}
 
 \chapter{Translation Hub}\label{ch:hub}
