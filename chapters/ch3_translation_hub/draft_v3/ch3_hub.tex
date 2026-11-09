@@ -45,7 +45,7 @@ The hub is a shared vector space with one entrance and one exit per model (Figur
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch3/hub_architecture}
-\caption{The translation hub sends each model's hidden states into one shared space, and every frozen model reads them back out. Each source model has its own adapter; the trunk and the 512-dimensional hub output are shared; each decoder has its own projector. Shaded boxes train; dashed boxes are the frozen models.}
+\caption{The translation hub sends each model's hidden states into one shared space, and every frozen model reads them back out. Each source model has its own adapter; the trunk and the 512-dimensional hub output are shared; each decoder has its own projector. Shaded boxes are trained modules, dashed boxes the frozen models, and the bar of cells the hub output, a vector with no parameters of its own.}
 \label{fig:hub:arch}
 \end{figure}
 

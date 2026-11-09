@@ -72,12 +72,20 @@ def architecture():
         arrow(17, y, 21, y)
         arrow(34, y, 38, y)
     box(38, 19, 13, "shared\ntrunk\n1024 $\\to$ 512", dark, height=32.5)
-    box(55, 19, 9, "hub\noutput\n$m_t$, 512", SURFACE, height=14)
-    arrow(51, 19, 55, 19)
+    # The hub output is a vector, not a module: a narrow bar of cells, labelled outside.
+    bar_x, bar_w, cells, cell_h = 57.5, 2.2, 7, 2.0
+    for k in range(cells):
+        ax.add_patch(plt.Rectangle((bar_x, 19 - cells * cell_h / 2 + k * cell_h), bar_w, cell_h,
+                                   fc="#cde2fb", ec=INK2, lw=0.6))
+    ax.text(bar_x + bar_w / 2, 19 + cells * cell_h / 2 + 1.2, "hub output $m_t$", ha="center", va="bottom",
+            fontsize=7.5, color=INK)
+    ax.text(bar_x + bar_w / 2, 19 - cells * cell_h / 2 - 1.2, "512-d vector", ha="center", va="top",
+            fontsize=7, color=INK2)
+    arrow(51, 19, bar_x, 19)
     for y, (_, width), dec in zip(rows, sources, decoders):
         box(69, y, 13, f"projector\n{width}", light)
         box(86, y, 14, dec, SURFACE, dashed=True)
-        arrow(64, 19, 69, y)
+        arrow(bar_x + bar_w, 19, 69, y)
         arrow(82, y, 86, y)
     ax.text(8.5, 38, "hidden state $s_t$", ha="center", fontsize=7.5, color=INK2)
     ax.text(93, 38, "memory rows", ha="center", fontsize=7.5, color=INK2)
