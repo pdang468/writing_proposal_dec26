@@ -19,7 +19,7 @@ Hidden states from any of the three models are mapped into shared space and proj
 An unseen model, Pythia-1B, joins the hub through a lightweight affine map trained on leaked rows and unsupervised matching on unpaired hidden states.
 The leaked rows work as initial anchors, and matching extends the mapping.
 The fully supervised translation hub sets the ceiling for recovery: word-F1 of 0.95 on question prompts and 0.98 on legal text.
-With 90 leaked rows, nine from each of ten prompts, matching raises word-F1 from 0.37 to 0.77 on question prompts and from 0.09 to 0.30 on legal text.
+With 90 leaked rows, nine from each of ten prompts, matching raises word-F1 from 0.35 to 0.77 on question prompts and from 0.10 to 0.32 on legal text.
 With 864 rows, it raises word-F1 from 0.76 to 0.81 on question prompts and from 0.55 to 0.63 on legal text. The gain from matching shrinks as the leak grows.
 
 The remaining work asks how much matching contributes, and where that improvements ends.
