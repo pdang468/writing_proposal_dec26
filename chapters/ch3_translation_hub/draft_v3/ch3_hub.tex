@@ -7,10 +7,10 @@
 
 A language model's hidden states retain information about the input tokens. Inversion attacks recover that input: given the hidden states of a known model, a trained decoder reconstructs the prompt \todo{cite: vec2text, embedding and hidden-state inversion}. Each such inverter is bound to one model. It learns a single architecture, tokenizer, and vocabulary, so a new target model requires a new inverter trained on that model's states.
 
-The Platonic Representation Hypothesis suggests that the binding is not necessary \cite{huh2024platonic}. If models trained on similar data converge toward similar representations, then a learned transformation can align their hidden states in one shared space, and decoders trained on that space serve every model that maps into it. An unseen model would then need only a mapping into the space, not a decoder of its own.
+The Platonic Representation Hypothesis suggests that the binding is not necessary \cite{huh2024platonic}. If models trained on similar data converge toward similar representations, then a learned transformation can align their hidden states in one shared space, and decoders trained on that space serve every model that maps into it. A target model would then need only a mapping into the space, not a decoder of its own.
 
 This chapter builds that space, the translation hub, and measures how much input information it preserves. Model-specific adapters and a shared trunk map the hidden states of three public models into the hub; model-specific projectors condition each frozen model to reconstruct the source prompt. On Natural Questions queries, cross-model reconstruction reaches a mean word-F1 of \vf{0.945}, against \vf{0.120} when the decoder receives the hub representations of a different prompt. % src: results/v6_3/hpc-final/inversion.json
-The hub is therefore a fixed target, and Chapter~\ref{ch:attack} aligns an unseen model to it.
+The hub is therefore fixed, and Chapter~\ref{ch:attack} aligns a target model to it.
 
 \paragraph{Hypothesis H1: shared representations support cross-model inversion.} A token-wise hub trained on three open-weight models preserves enough input information for each frozen model to reconstruct the prompt from any other model's hub representations. Section~\ref{sec:hub:eval} gives the protocol and the two aggregate criteria; per-direction results report the variation that an aggregate can hide.
 
@@ -44,7 +44,7 @@ A direction pairs a source model with a decoder, e.g., Qwen $\to$ hub $\to$ OLMo
 
 Only the adapters, the trunk, and the projectors are trainable; the three language models remain frozen as both sources and decoders.
 
-The hub maps each token independently. Equation~\ref{eq:hub:map} has no positional input and no attention across tokens, so each hub vector depends on one source hidden state, although that state may already encode prompt context. The token-wise design is what Chapter~\ref{ch:attack} relies on: an unseen model can be aligned from paired hidden states one row at a time, and the alignment map adds no context of its own.
+The hub maps each token independently. Equation~\ref{eq:hub:map} has no positional input and no attention across tokens, so each hub vector depends on one source hidden state, although that state may already encode prompt context. The token-wise design is what Chapter~\ref{ch:attack} relies on: a target model can be aligned from paired hidden states one row at a time, and the alignment map adds no context of its own.
 
 %% ------------------------------------------------------------------
 \section{Training}\label{sec:hub:training}
@@ -101,7 +101,7 @@ Word-F1 ignores word order, so exact match is reported as the order-sensitive me
 % src: src/v6_3/inversion.py (shuffled_indices: (i + 1) mod n); src/v8/projectors.py (wrong_partner: same rule)
 
 \paragraph{Prompt sets.} Corpus A contains Natural Questions query strings, \vf{nine} words long on average (\vf{6} to \vf{19} in the validation split), split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts; near-duplicate questions never cross a split, and the test split remains held out. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
-Two overlapping sets are evaluated. The full validation split gives the per-direction scores and the selection scores. A fixed subset of \vf{500} validation prompts is the development set: Chapter~\ref{ch:attack} evaluates its unseen-model mappings on it, so the hub is evaluated on it as well. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
+Two overlapping sets are evaluated. The full validation split gives the per-direction scores and the selection scores. A fixed subset of \vf{500} validation prompts is the development set: Chapter~\ref{ch:attack} evaluates its target-model mappings on it, so the hub is evaluated on it as well. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
 
 \paragraph{Criteria for H1.} One aggregate score, G1, summarizes the hub: free-running word-F1 averaged over the six cross-model directions on the validation split. A corpus fails H1 if G1 falls below \vf{0.90} or if the mismatched-prompt control on the same prompts reaches \vf{0.20}. Both thresholds come from the evaluation plan of the legal-window hubs and were applied to Corpus A retrospectively; no threshold preceded its training run. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); no threshold precedes the Corpus A run
 Per-direction scores accompany every aggregate, because a mean can hide one weak decoder.
@@ -169,7 +169,7 @@ H1 therefore holds on the mean and not in every direction. The scores do not ide
 
 The \vf{500} development prompts give the same picture as the full split. Mean cross-model word-F1 is \vf{0.945} against \vf{0.121} under the control, and every direction lies within \vf{0.005} of its validation score (Table~\ref{tab:hub:reads}). % src: mixed-v8-s0b.json readout.reference per_direction_mean vs v6_3 inversion.json (largest difference 0.0045, smollm->qwen)
 OLMo's hub representations, decoded by all three decoders, score \vf{0.947} against \vf{0.121}: \vf{0.883} into Qwen, \vf{0.972} into OLMo, and \vf{0.987} into SmolLM. % src: mixed-v8-s0b.json readout.reference per_direction_mean olmo->{qwen,olmo,smollm}; the Chapter 4 pipeline reads the same row at 0.946 (oct_w5c-noise.json sets.iso-r0)
-Chapter~\ref{ch:attack} can therefore compare its unseen-model scores with the hub's on the same prompts.
+Chapter~\ref{ch:attack} can therefore compare its target-model scores with the hub's on the same prompts.
 
 \subsection{Unnormalized hub representations give the higher mean}\label{sec:hub:projectors}
 
@@ -205,9 +205,9 @@ Ten-word segments & Cross-model (G1) & & \todo{} & \todo{} \\
 
 Token identity survives the passage through a shared \vf{512}-dimensional space. Three frozen models that never trained on one another's states reconstruct a prompt at mean word-F1 \vf{0.945}, against \vf{0.120} from another prompt's representations, so H1 holds on question prompts under the aggregate criteria. The result is not uniform: both cross-model directions into Qwen stay below \vf{0.90}.
 
-The hub gives Chapter~\ref{ch:attack} a fixed target with a measured score. Aligning an unseen model becomes a regression onto \vf{512}-dimensional hub vectors while the hub and decoders stay frozen, and the score of a perfect alignment is known: OLMo's own hub representations, decoded by the three decoders, reach \vf{0.947} on the development set against \vf{0.121} under the control. An unseen-model result on the same prompts is therefore placed against that score rather than reported alone. The token-wise design adds a third property: each mapped vector carries only the information already in its source hidden state.
+The hub gives Chapter~\ref{ch:attack} a frozen space with a measured score. Aligning a target model becomes a regression onto \vf{512}-dimensional hub vectors while the hub and decoders stay frozen, and the score of a perfect alignment is known: OLMo's own hub representations, decoded by the three decoders, reach \vf{0.947} on the development set against \vf{0.121} under the control. An target-model result on the same prompts is therefore placed against that score rather than reported alone. The token-wise design adds a third property: each mapped vector carries only the information already in its source hidden state.
 
-The design trades generality for that simple target. One hidden state per hub vector permits direct regression from an unseen model but gives up the selection accuracy of a hub with attention; one hub per corpus measures each hub on the text it is applied to but does not establish a single space across domains.
+The design trades generality for that frozen space. One hidden state per hub vector permits direct regression from a target model but gives up the selection accuracy of a hub with attention; one hub per corpus measures each hub on the text it is applied to but does not establish a single space across domains.
 
 Five limitations bound the claim.
 \begin{itemize}
@@ -215,7 +215,7 @@ Five limitations bound the claim.
 \item \textbf{Selection and evaluation share prompts.} The validation split determined the checkpoint and gives G1, and the development set is a subset of it. Selection ran on teacher-forced accuracy rather than free-running reconstruction, but no reported score is held-out test performance; the test split is reserved for the final evaluation. \todo{State when the test split is read.}
 \item \textbf{One control.} The mismatched-prompt control shows dependence on prompt-specific representations. It does not separate token content from token order, and word-F1 ignores order; mean cross-model exact match of \vf{0.71} is the only order-sensitive score reported.
 \item \textbf{Decode margin.} Generation in this chapter is capped at the memory length plus \vf{8} tokens, whereas the standard configuration of Chapter~\ref{ch:attack} permits \vf{32}. No score of this chapter has been measured at margin \vf{32}, so a Chapter~\ref{ch:attack} result cannot yet be placed against a hub score under its own decoding settings. \todo{Evaluate the OLMo row on Corpus A at margin 32 (w46 plan, step 4).} % src: w46/plan.md Setting item 6 and Steps row 4; configs/v7_cap32.yaml
-\item \textbf{Three models, no pairwise baseline.} The hub contains three source models, and Chapter~\ref{ch:attack} evaluates two unseen models of about one billion parameters. No pairwise inversion baseline measures the hub's cost advantage at this scale. \todo{V1/V2 parity numbers.} %% the existing records compare retrieval and parameter counts, not inversion
+\item \textbf{Three models, no pairwise baseline.} The hub contains three source models, and Chapter~\ref{ch:attack} evaluates two target models of about one billion parameters. No pairwise inversion baseline measures the hub's cost advantage at this scale. \todo{V1/V2 parity numbers.} %% the existing records compare retrieval and parameter counts, not inversion
 % records (retrieval and parameter counts, not inversion): V1 hub 13,587,456 against pairwise 46,080,000 parameters (results/v1_final_result.md); V2 hub 64.8 percent fewer parameters than pairwise (documents/v2-closeout-2026-08-04.md). No hub-against-pairwise inversion score exists for this hub.
 \end{itemize}
 The legal-corpus experiments of Section~\ref{sec:hub:legal} will test whether these results extend beyond Natural Questions queries.
