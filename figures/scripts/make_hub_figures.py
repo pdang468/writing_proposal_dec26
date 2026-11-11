@@ -71,7 +71,7 @@ def architecture():
         box(21, y, 13, "adapter\n$\\to$ 1024", light)
         arrow(17, y, 21, y)
         arrow(34, y, 38, y)
-    box(38, 19, 13, "shared\ntrunk\n1024 $\\to$ 512", dark, height=32.5)
+    box(38, 19, 13, "shared\nbackbone\n1024 $\\to$ 512", dark, height=32.5)
     # The hub output is a vector, not a module: a narrow bar of cells, labelled outside.
     bar_x, bar_w, cells, cell_h = 57.5, 2.2, 7, 2.0
     for k in range(cells):
