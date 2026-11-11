@@ -137,7 +137,7 @@ Donors follow a fixed cyclic assignment: prompt $i$ receives the memory of promp
 \paragraph{Prompt sets.} Corpus A contains Natural Questions query strings, \vf{nine} words long on average (\vf{6} to \vf{19} in the validation split), split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts; near-duplicate questions never cross a split, and the test split remains held out. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
 Two overlapping sets are evaluated.
 The full validation split gives the per-direction scores and the selection scores.
-A fixed subset of \vf{500} validation prompts is the development set: Chapter~\ref{ch:attack} evaluates its target-model mappings on it, so the hub is evaluated on it as well. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
+A fixed subset of \vf{500} validation prompts, the validation subset, is the set on which Chapter~\ref{ch:attack} evaluates its target-model mappings, so the hub is evaluated on it as well. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
 
 \paragraph{Criteria for H1.} One aggregate score summarizes the hub: mean cross-model word-F1, the free-running word-F1 averaged over the six cross-model directions on the validation split.
 A corpus fails H1 if that mean falls below \vf{0.90} or if the mismatched-prompt control on the same prompts reaches \vf{0.20}.
@@ -153,6 +153,7 @@ Corpus A meets both criteria for H1.
 On its \vf{5{,}000} validation prompts, cross-model word-F1 averages \vf{0.945}, against \vf{0.120} under the mismatched-prompt control; exact match averages \vf{0.71} and is zero under the control. % src: results/v6_3/hpc-final/inversion.json cross_mean (hub 0.9445, exact 0.7116; shuffled 0.1203, exact 0.0)
 The word-F1 gap of \vf{0.82} between reconstruction and control shows that decoding depends on prompt-specific hub outputs.
 Figure~\ref{fig:hub:directions} reports all nine directions, and Table~\ref{tab:hub:reads} places each score beside its control.
+The \vf{500}-prompt validation subset reproduces the full-split scores: mean cross-model word-F1 is \vf{0.945} against \vf{0.121} under the control, and every direction lies within \vf{0.005} of its full-split score. % src: mixed-v8-s0b.json readout.reference per_direction_mean vs v6_3 inversion.json (largest difference 0.0045, smollm->qwen)
 
 \begin{figure}[ht]
 \centering
@@ -176,8 +177,8 @@ Evaluation & Prompts & Directions & Word-F1 & Control \\
 \midrule
 Cross-model & \vf{5{,}000} validation & six cross & \vf{0.945} & \vf{0.120} \\ % src: v6_3 inversion.json
 Self-reconstruction & \vf{5{,}000} validation & three self & \vf{0.935} & \vf{0.120} \\ % src: v6_3 inversion.json, mean of the diagonal (0.8411, 0.9691, 0.9933; shuffled 0.1210, 0.1199, 0.1203)
-Cross-model & \vf{500} development & six cross & \vf{0.945} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference (cross_macro_mean 0.9447, wrong_macro_mean 0.1214)
-OLMo source & \vf{500} development & OLMo, three decoders & \vf{0.947} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference per_direction_mean olmo->{qwen,olmo,smollm}: hub 0.8827, 0.9716, 0.9865; wrong 0.1214, 0.1213, 0.1209
+Cross-model & \vf{500} validation subset & six cross & \vf{0.945} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference (cross_macro_mean 0.9447, wrong_macro_mean 0.1214)
+OLMo source & \vf{500} validation subset & OLMo, three decoders & \vf{0.947} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference per_direction_mean olmo->{qwen,olmo,smollm}: hub 0.8827, 0.9716, 0.9865; wrong 0.1214, 0.1213, 0.1209
 \bottomrule
 \end{tabular}
 \end{table}
@@ -215,18 +216,11 @@ Exact match widens the gap: \vf{0.35} to \vf{0.45} into Qwen against \vf{0.78} t
 Corpus A therefore meets the aggregate criteria for H1, although two cross-model directions fall below the word-F1 threshold.
 The scores do not identify the cause; Section~\ref{sec:hub:projectors} shows that normalizing the projector input changes reconstruction scores.
 
-\subsection{The development set reproduces the validation scores}\label{sec:hub:dev}
-
-The \vf{500} development prompts give the same picture as the full split.
-Mean cross-model word-F1 is \vf{0.945} against \vf{0.121} under the control (Table~\ref{tab:hub:reads}), and every direction lies within \vf{0.005} of its validation score. % src: mixed-v8-s0b.json readout.reference per_direction_mean vs v6_3 inversion.json (largest difference 0.0045, smollm->qwen)
-OLMo's hub outputs, decoded by all three decoders, reach mean word-F1 of \vf{0.947} against \vf{0.121} under the mismatched-prompt control: \vf{0.883} into Qwen, \vf{0.972} into OLMo, and \vf{0.987} into SmolLM. % src: mixed-v8-s0b.json readout.reference per_direction_mean olmo->{qwen,olmo,smollm}; the Chapter 4 pipeline reads the same row at 0.946 (oct_w5c-noise.json sets.iso-r0)
-Chapter~\ref{ch:attack} can therefore compare its target-model scores with the hub's on the same prompts.
-
 \subsection{Unnormalized hub outputs give the higher mean}\label{sec:hub:projectors}
 
 Normalizing the projector input lowers mean cross-model word-F1 by \vf{0.152}.
 In a retraining experiment with the adapters and backbone frozen, new projectors were trained on the decoding loss alone, from identical initial weights and prompt schedules, once on unnormalized and once on unit-normalized hub outputs.
-On the development set the unnormalized input reaches mean cross-model word-F1 of \vf{0.949} and the normalized input \vf{0.797} (95\% interval of the difference \vf{0.146} to \vf{0.159} over prompts). % src: mixed-v8-s0b.json readout.{retrained_raw,normalized}.cross_macro_mean; comparison.normalized_minus_retrained_raw; src/v8/projectors.py (same initializer and schedule)
+On the validation subset the unnormalized input reaches mean cross-model word-F1 of \vf{0.949} and the normalized input \vf{0.797} (95\% interval of the difference \vf{0.146} to \vf{0.159} over prompts). % src: mixed-v8-s0b.json readout.{retrained_raw,normalized}.cross_macro_mean; comparison.normalized_minus_retrained_raw; src/v8/projectors.py (same initializer and schedule)
 The mean hides opposite effects: the three directions into SmolLM fall from between \vf{0.98} and \vf{0.99} to between \vf{0.43} and \vf{0.45}, while the two cross-model directions into Qwen rise from \vf{0.89} to between \vf{0.97} and \vf{0.98}. % src: same file, per_direction_mean (into SmolLM raw 0.984, 0.988, 0.991; normalized 0.429, 0.446, 0.441; into Qwen cross raw 0.894, 0.888; normalized 0.984, 0.969) and setting.loss (decoder term alone)
 The unnormalized input is kept because it wins on the mean.
 Decoder-specific normalization is untested, the opposite responses of Qwen and SmolLM are unexplained, and the interval reflects prompt resampling under one hub seed, not variation across hubs.
@@ -265,8 +259,8 @@ legal10w & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % src: results/legal10w/v6_3/i
 \end{table}
 
 The legal scores do not yet follow the protocol of Table~\ref{tab:hub:reads}.
-The decode margin is \vf{32}, not \vf{8}; no legal hub is evaluated on a development set; and, as on Corpus A, each validation split also selected its hub's checkpoint.
-\todo{Development-set evaluation with its control at one decode margin for every corpus; nine-direction grid; decoded examples at a high, an intermediate, and a low score.}
+The decode margin is \vf{32}, not \vf{8}; no legal hub is evaluated on a \vf{500}-prompt validation subset; and, as on Corpus A, each validation split also selected its hub's checkpoint.
+\todo{Validation-subset evaluation with its control at one decode margin for every corpus; nine-direction grid; decoded examples at a high, an intermediate, and a low score.}
 
 %% ------------------------------------------------------------------
 \section{Discussion}\label{sec:hub:discussion}
@@ -277,7 +271,7 @@ The three legal hubs meet the same criteria (Section~\ref{sec:hub:legal}).
 The result is not uniform: on Corpus A, both cross-model directions into Qwen stay below \vf{0.90}.
 
 The hub gives Chapter~\ref{ch:attack} a frozen space with a measured score.
-Aligning a target model becomes a regression onto \vf{512}-dimensional hub outputs while the hub and decoders stay frozen, and OLMo's own hub outputs provide a reconstruction reference: decoded by the three decoders, they reach \vf{0.947} on the development set against \vf{0.121} under the control.
+Aligning a target model becomes a regression onto \vf{512}-dimensional hub outputs while the hub and decoders stay frozen, and OLMo's own hub outputs provide a reconstruction reference: decoded by the three decoders, they reach \vf{0.947} on the validation subset against \vf{0.121} under the control.
 A target-model result on the same prompts is therefore placed against that score rather than reported alone.
 The token-wise design adds a third property: each mapped vector carries only the information already in its source hidden state.
 
@@ -288,7 +282,7 @@ Five limitations bound the claim.
 \begin{itemize}
 \item \textbf{One hub seed.} Each corpus's scores derive from one trained hub.
 Variation across hub seeds is unmeasured, including the stability of Qwen's lower scores.
-\item \textbf{Selection and evaluation share prompts.} The validation split determined the checkpoint and gives the mean cross-model word-F1, and the development set is a subset of it.
+\item \textbf{Selection and evaluation share prompts.} The validation split determined the checkpoint and gives the mean cross-model word-F1, and the validation subset is drawn from it.
 Selection ran on teacher-forced accuracy rather than free-running reconstruction, but no reported score is held-out test performance; the test split is reserved for the final evaluation.
 \todo{State when the test split is read.}
 \item \textbf{One control.} The mismatched-prompt control shows dependence on prompt-specific representations.
@@ -301,4 +295,4 @@ No pairwise inversion baseline measures the hub's cost advantage at this scale.
 \todo{V1/V2 parity numbers.} %% the existing records compare retrieval and parameter counts, not inversion
 % records (retrieval and parameter counts, not inversion): V1 hub 13,587,456 against pairwise 46,080,000 parameters (results/v1_final_result.md); V2 hub 64.8 percent fewer parameters than pairwise (documents/v2-closeout-2026-08-04.md). No hub-against-pairwise inversion score exists for this hub.
 \end{itemize}
-The legal results of Section~\ref{sec:hub:legal} extend the aggregate result beyond Natural Questions queries, at a larger decode margin and without a development-set evaluation.
+The legal results of Section~\ref{sec:hub:legal} extend the aggregate result beyond Natural Questions queries, at a larger decode margin and without a validation-subset evaluation.

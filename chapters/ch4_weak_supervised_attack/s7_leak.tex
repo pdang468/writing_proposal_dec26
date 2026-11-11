@@ -5,12 +5,12 @@ The budget so far counted whole paired prompts. A realistic leak is smaller and 
 \subsection{Shape: 90 rows over 90 prompts against one whole prompt}
 \paragraph{Question.} At a matched row count, does spreading the leak across prompts beat one whole prompt?
 
-\paragraph{Setting.} legal128w hub; Pythia block 12 $\to$ affine map $\to$ hub $\to$ frozen projectors $\to$ Qwen, OLMo, SmolLM, free-run over the 128-token prompt. Hybrid: $\alpha = 0.99$, $\tau = 1\,d_{\text{sq}} = 0.0649$, $B = 8192$, ridge $\lambda = 1$, 3,000 updates (the V8.7 selection on legal128w). Supervised: $\alpha = 1$. Leaks: 90 random rows, one per prompt; 78 rows from one whole prompt (budget 1); ten prompts with nine rows each. Seed 1; 500 development prompts for levels, 4,500 confirmation prompts for decisions.
+\paragraph{Setting.} legal128w hub; Pythia block 12 $\to$ affine map $\to$ hub $\to$ frozen projectors $\to$ Qwen, OLMo, SmolLM, free-run over the 128-token prompt. Hybrid: $\alpha = 0.99$, $\tau = 1\,d_{\text{sq}} = 0.0649$, $B = 8192$, ridge $\lambda = 1$, 3,000 updates (the V8.7 selection on legal128w). Supervised: $\alpha = 1$. Leaks: 90 random rows, one per prompt; 78 rows from one whole prompt (budget 1); ten prompts with nine rows each. Seed 1; 500 validation-subset prompts for levels, 4,500 confirmation prompts for decisions.
 
 \paragraph{Result.} Table~\ref{tab:attack:shape}. Ninety single rows over ninety prompts (hybrid 0.326 on confirmation) beat one whole prompt of 78 rows (0.161) by a factor of two; ten prompts with nine rows each sit between (0.304). The supervised fit shows the same order at a lower level (0.106, 0.087, 0.094). The hybrid's gain $E$ over the supervised fit is +0.220 [+0.217, +0.223] at 90 scattered rows.
 
 \begin{table}[H]
-\caption{Leak shape on legal128w at about 90 rows. Macro word-F1, seed 1. Result; confirmation prompts where marked, else development. \texttt{oct\_w5-report.md}, \texttt{mixed-oct\_w5b-L.json}, \texttt{mixed-oct\_w5-s1-L90-ext3.json}.}
+\caption{Leak shape on legal128w at about 90 rows. Macro word-F1, seed 1. Result; confirmation prompts where marked, else validation subset. \texttt{oct\_w5-report.md}, \texttt{mixed-oct\_w5b-L.json}, \texttt{mixed-oct\_w5-s1-L90-ext3.json}.}
 \label{tab:attack:shape}
 \centering
 \small %% FIX: the intervals widen the table
@@ -19,9 +19,9 @@ The budget so far counted whole paired prompts. A realistic leak is smaller and 
 Leak & Rows & Hybrid & Supervised & $E$ \\
 \midrule
 90 prompts $\times$ 1 row (confirmation, 4,500) & 90 & 0.326 & 0.106 & +0.220 [+0.217, +0.223] \\
-10 prompts $\times$ 9 rows (development) & 90 & 0.304 & 0.094 & +0.210 [+0.200, +0.220] \\
-1 prompt, whole (development) & 78 & 0.161 & 0.087 & +0.075 [+0.067, +0.082] \\ %% FIX: +0.075, mixed-oct_w5b-L.json
-864 prompts $\times$ 1 row (development) & 864 & 0.628 & 0.548 & +0.080 [+0.072, +0.088] \\ %% FIX: filled from mixed-oct_w5-s1-L864.json (development); confirmation, 4,500 prompts: 0.631, 0.546, +0.085 [+0.082, +0.087]
+10 prompts $\times$ 9 rows (validation subset) & 90 & 0.304 & 0.094 & +0.210 [+0.200, +0.220] \\
+1 prompt, whole (validation subset) & 78 & 0.161 & 0.087 & +0.075 [+0.067, +0.082] \\ %% FIX: +0.075, mixed-oct_w5b-L.json
+864 prompts $\times$ 1 row (validation subset) & 864 & 0.628 & 0.548 & +0.080 [+0.072, +0.088] \\ %% FIX: filled from mixed-oct_w5-s1-L864.json (validation subset); confirmation, 4,500 prompts: 0.631, 0.546, +0.085 [+0.082, +0.087]
 \bottomrule
 \end{tabular}
 \end{table}
@@ -31,7 +31,7 @@ Leak & Rows & Hybrid & Supervised & $E$ \\
 
 \paragraph{Setting.} Five leak rules differing only in the predicate on the drawn row's word: any word (random); stop word; mid-frequency (rank 101 to 1,000 in the legal128w training table); rare (rank above 1,000 or absent); one repeated word. Later extensions: balanced class shares; every form distinct; and, inside a fixed shape, each class reduced to its own rows (17 to 36 rows) against a count-matched random subset. Predictions written before the run: stop-word leaks lose at least 0.03 (P1); mid-frequency leaks gain at least 0.03 (P2); one repeated word loses against mid (P9).
 
-\paragraph{Result.} On confirmation, random 0.326, mid-frequency 0.252, stop words 0.056 (development: rare 0.226, one word 0.053). P1 and P9 hold; P2 is contradicted: mid-frequency leaks lower the hybrid by 0.074 and its gain by 0.062 [0.065, 0.059] against random. No rule beats random (balanced $-0.057$, distinct +0.009, span9 $-0.017$). Inside a fixed shape, every class cell sits within 0.03 of its row-count control, so the class effect at 90 $\times$ 1 is prompt coverage, not word content. Stop-word leaks give the hybrid no gain at 90 rows ($E$ +0.000) and a large one at 864 rows ($E$ +0.263).
+\paragraph{Result.} On confirmation, random 0.326, mid-frequency 0.252, stop words 0.056 (validation subset: rare 0.226, one word 0.053). P1 and P9 hold; P2 is contradicted: mid-frequency leaks lower the hybrid by 0.074 and its gain by 0.062 [0.065, 0.059] against random. No rule beats random (balanced $-0.057$, distinct +0.009, span9 $-0.017$). Inside a fixed shape, every class cell sits within 0.03 of its row-count control, so the class effect at 90 $\times$ 1 is prompt coverage, not word content. Stop-word leaks give the hybrid no gain at 90 rows ($E$ +0.000) and a large one at 864 rows ($E$ +0.263).
 
 \paragraph{Reading.} H6 holds: the shape of the leak, how many prompts it touches, matters more than which words leak. Content-rich words are not better anchors; a leak of stop words is useless until there are many of them.
 
@@ -41,7 +41,7 @@ Leak & Rows & Hybrid & Supervised & $E$ \\
 \paragraph{Result.} Table~\ref{tab:attack:corpus}. A second unseen model, Llama-3.2-1B layer 12 on Corpus A, reaches hybrid 0.632 against supervised 0.370 at exactly 90 rows, the same level and gain as Pythia (0.604, 0.352), so the shortfall tracks the corpus, not the model. On legal10s, the legal documents cut to Corpus A's length, the hybrid reaches 0.318 against 0.114 ($E$ +0.204 [+0.191, +0.216]); the gain lies between legal128w (+0.129 at the exact-90 shape) and Corpus A (+0.253), so length explains part of the difference and domain the rest. A prefix read of the first nine decoded words against the first nine true words gives 0.366 for the random-90 hybrid on legal128w against 0.735 for the budget-10 hybrid on Corpus A: the legal shortfall sits in the opening words, not in the 128-token length. \todo{legal10s is labeled "pilot, not comparable": the SmolLM G2 comparability bound missed the $-0.03$ margin by 0.002.}
 
 \begin{table}[H]
-\caption{Exact-90 leak across corpora and unseen models. Macro word-F1, seed 1, 500 development prompts; $E$ = hybrid minus supervised, paired document bootstrap. Result; \texttt{oct\_w5b-report.md}, \texttt{nqllama/.../mixed-oct\_w5b-s1-prefix.json}.}
+\caption{Exact-90 leak across corpora and unseen models. Macro word-F1, seed 1, 500 validation-subset prompts; $E$ = hybrid minus supervised, paired document bootstrap. Result; \texttt{oct\_w5b-report.md}, \texttt{nqllama/.../mixed-oct\_w5b-s1-prefix.json}.}
 \label{tab:attack:corpus}
 \centering
 \begin{tabular}{llccc}

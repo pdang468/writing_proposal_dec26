@@ -2,7 +2,7 @@
 
 \paragraph{Question.} How does free-run word-F1 of the unseen model grow with the number of paired sequences under the affine map and the supervised fit ($\alpha = 1$)?
 
-\paragraph{Setting.} Corpus A; budgets 10, 30, 100, 300, 1,000 paired prompts drawn at random; three seeds; macro word-F1 over 500 development prompts and three decoders. The first measurement (V6.4) fitted the map on the raw hub output with paired rows only; the benchmark of every later version (V7.8 onward) is the residual plus ridge fit of Section~\ref{sec:attack:method}.
+\paragraph{Setting.} Corpus A; budgets 10, 30, 100, 300, 1,000 paired prompts drawn at random; three seeds; macro word-F1 over 500 validation-subset prompts and three decoders. The first measurement (V6.4) fitted the map on the raw hub output with paired rows only; the benchmark of every later version (V7.8 onward) is the residual plus ridge fit of Section~\ref{sec:attack:method}.
 
 \paragraph{Result.} Table~\ref{tab:attack:budget} gives the curve. The ridge fit reaches 0.35 at 10 pairs and 0.88 at 1,000, against the ceiling G2 of 0.946. The \emph{knee}, the smallest budget whose gain above the floor reaches 95 percent of the gain at 1,000, is near 500 pairs; 300 pairs under the affine map match a 256-dimensional PCA restriction at 1,000.
 
@@ -25,7 +25,7 @@ Wrong-memory control & \multicolumn{5}{c}{0.10 to 0.15} \\ %% FIX: was 0.05 to 0
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.75\textwidth]{ch4/budget_curve} %% FIX: figure added; figures/scripts/make_figures.py, mixed-v7_9-s5.json
-\caption{Budget curve on Corpus A. Macro word-F1 over three decoders and 500 development prompts; lines are the three-seed mean, bands the range over seeds. The dotted line is the hub ceiling G2; the gray band is the mismatched-prompt control of the drawn cells.}
+\caption{Budget curve on Corpus A. Macro word-F1 over three decoders and 500 validation-subset prompts; lines are the three-seed mean, bands the range over seeds. The dotted line is the hub ceiling G2; the gray band is the mismatched-prompt control of the drawn cells.}
 \label{fig:attack:budget}
 \end{figure}
 
