@@ -326,11 +326,11 @@ One hidden state per hub output permits direct regression from a target model wi
 
 Four limitations bound the claim.
 \begin{itemize}
-\item \textbf{One hub seed.} Each corpus's scores derive from one trained hub.
-Variation across hub seeds is unmeasured, including the stability of Qwen's lower scores.
-\item \textbf{Selection and evaluation share prompts.} The validation split determined the checkpoint and gives the mean cross-model word-F1.
-Selection ran on teacher-forced accuracy rather than free-running reconstruction, but no reported score is held-out test performance; the test split is reserved for the final evaluation.
+\item \textbf{One hub seed.} 
+
+
 \todo{State when the test split is read.}
+
 \item \textbf{One control.} The mismatched-prompt control shows dependence on prompt-specific representations.
 It does not separate token content from token order, and word-F1 ignores order; on Corpus A, mean cross-model exact match of \vf{0.71} is the only order-sensitive score reported.
 \item \textbf{Three models, no pairwise baseline.} The hub contains three source models, and Chapter~\ref{ch:attack} evaluates two target models of about one billion parameters.
