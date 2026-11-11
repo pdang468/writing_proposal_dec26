@@ -206,5 +206,8 @@ directions()
 # Corpus A alone, for the chapter while the legal results are held back (2026-11-09).
 directions({"Corpus A": "results/v6_3/hpc-final/inversion.json"}, "direction_recovery_nq", (3.9, 2.9),
            control="mismatched prompt")  # the records' "shuffled" arm is another prompt's memory
+# The three legal hubs (2026-11-11).
+directions({c: f"results/{c}/v6_3/inversion.json" for c in ("legal128w", "legal10s", "legal10w")},
+           "direction_recovery_legal", (9.4, 2.9), control="control")
 translation()
 ceiling()
