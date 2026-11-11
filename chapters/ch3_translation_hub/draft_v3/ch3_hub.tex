@@ -153,9 +153,9 @@ Prompt $i$ receives the memory of prompt $i+1$, and the last prompt receives the
 \paragraph{Prompt sets.} Corpus A contains Natural Questions query strings, split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts.
 Near-duplicate questions never cross a split, and the test split has not been evaluated. % src: configs/v3.yaml (split_schema_version v2-stage2-textcluster-v1); src/v3/splits.py
 The validation prompts average \vf{nine} words and range from \vf{6} to \vf{19}. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
-Two overlapping sets are evaluated.
-The full validation split gives the per-direction scores and the selection scores.
-The hub is also evaluated on a fixed subset of \vf{500} validation prompts, the set on which Chapter~\ref{ch:attack} evaluates its target-model mappings. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
+% Two overlapping sets are evaluated.
+All scores in this chapter are computed on the validation split.
+% The hub is also evaluated on a fixed subset of \vf{500} validation prompts, the set on which Chapter~\ref{ch:attack} evaluates its target-model mappings. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
 
 The validation split also selects the checkpoint, so no score in this chapter is held out.
 
@@ -171,9 +171,9 @@ Per-direction scores show the variation that the mean hides.
 
 Corpus A meets both criteria for H1.
 On its \vf{5{,}000} validation prompts, cross-model word-F1 averages \vf{0.945}, against \vf{0.120} under the mismatched-prompt control; exact match averages \vf{0.71} and is zero under the control. % src: results/v6_3/hpc-final/inversion.json cross_mean (hub 0.9445, exact 0.7116; shuffled 0.1203, exact 0.0)
-Replacing a prompt's hub outputs with those of another prompt lowers mean cross-model word-F1 by \vf{0.82}, so reconstruction depends on the prompt's own hub outputs.
+The drop of \vf{0.82} under the control shows that reconstruction depends on the prompt's own hub outputs.
 Figure~\ref{fig:hub:directions} reports all nine directions, and Table~\ref{tab:hub:reads} places each score beside its control.
-The \vf{500}-prompt validation subset reproduces the full-split scores: mean cross-model word-F1 is \vf{0.945} against \vf{0.121} under the control, and every direction lies within \vf{0.005} of its full-split score. % src: mixed-v8-s0b.json readout.reference per_direction_mean vs v6_3 inversion.json (largest difference 0.0045, smollm->qwen)
+% The \vf{500}-prompt validation subset reproduces the full-split scores: mean cross-model word-F1 is \vf{0.945} against \vf{0.121} under the control, and every direction lies within \vf{0.005} of its full-split score. % src: mixed-v8-s0b.json readout.reference per_direction_mean vs v6_3 inversion.json (largest difference 0.0045, smollm->qwen)
 
 \begin{figure}[ht]
 \centering
@@ -197,8 +197,8 @@ Evaluation & Prompts & Directions & Word-F1 & Control \\
 \midrule
 Cross-model & \vf{5{,}000} validation & six cross & \vf{0.945} & \vf{0.120} \\ % src: v6_3 inversion.json
 Self-reconstruction & \vf{5{,}000} validation & three self & \vf{0.935} & \vf{0.120} \\ % src: v6_3 inversion.json, mean of the diagonal (0.8411, 0.9691, 0.9933; shuffled 0.1210, 0.1199, 0.1203)
-Cross-model & \vf{500} validation subset & six cross & \vf{0.945} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference (cross_macro_mean 0.9447, wrong_macro_mean 0.1214)
-OLMo source & \vf{500} validation subset & OLMo, three decoders & \vf{0.947} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference per_direction_mean olmo->{qwen,olmo,smollm}: hub 0.8827, 0.9716, 0.9865; wrong 0.1214, 0.1213, 0.1209
+% Cross-model & \vf{500} validation subset & six cross & \vf{0.945} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference (cross_macro_mean 0.9447, wrong_macro_mean 0.1214)
+% OLMo source & \vf{500} validation subset & OLMo, three decoders & \vf{0.947} & \vf{0.121} \\ % src: mixed-v8-s0b.json readout.reference per_direction_mean olmo->{qwen,olmo,smollm}: hub 0.8827, 0.9716, 0.9865; wrong 0.1214, 0.1213, 0.1209
 \bottomrule
 \end{tabular}
 \end{table}
@@ -254,7 +254,7 @@ Every cross-model direction exceeds \vf{0.90}; the lowest is Qwen $\to$ OLMo on 
 The weak Qwen decoder of Corpus A does not recur: the cross-model directions into Qwen score \vf{0.973} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9829, 0.9730; 0.9858, 0.9752)
 
 \begin{table}[H]
-\caption{Each legal hub exceeds a mean cross-model word-F1 of \vf{0.90} with a control below \vf{0.20}, on the validation split and on its \vf{500}-prompt subset.
+\caption{Each legal hub exceeds a mean cross-model word-F1 of \vf{0.90} with a control below \vf{0.20}.
 Free-running word-F1 and exact match averaged over the six cross-model directions, one hub seed per corpus; each control is evaluated on the same prompts and directions as its score.}
 \label{tab:hub:legal}
 \centering
@@ -263,18 +263,18 @@ Free-running word-F1 and exact match averaged over the six cross-model direction
 Corpus & Prompts & Word-F1 & Exact match & Control word-F1 \\
 \midrule
 legal128w & \vf{5{,}000} validation & \vf{0.977} & \vf{0.58} & \vf{0.152} \\ % src: results/legal128w/v6_3/inversion.json cross_mean (0.9769, 0.5814, 0.1519)
- & \vf{500} validation subset & \vf{0.975} & \vf{0.59} & \vf{0.148} \\ % src: results/legal128w/v7_2/main/hub-dev-eval-m32.json (0.9754, 0.5883, 0.1484)
+%  & \vf{500} validation subset & \vf{0.975} & \vf{0.59} & \vf{0.148} \\ % src: results/legal128w/v7_2/main/hub-dev-eval-m32.json (0.9754, 0.5883, 0.1484)
 legal10s & \vf{5{,}000} validation & \vf{0.970} & \vf{0.78} & \vf{0.044} \\ % src: results/legal10s/v6_3/inversion.json cross_mean (0.9705, 0.7835, 0.0441)
- & \vf{500} validation subset & \vf{0.970} & \vf{0.78} & \vf{0.038} \\ % src: results/legal10s/v7_2/main/hub-dev-eval-m32.json (0.9702, 0.7767, 0.0378)
+%  & \vf{500} validation subset & \vf{0.970} & \vf{0.78} & \vf{0.038} \\ % src: results/legal10s/v7_2/main/hub-dev-eval-m32.json (0.9702, 0.7767, 0.0378)
 legal10w & \vf{5{,}000} validation & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % src: results/legal10w/v6_3/inversion.json cross_mean (0.9767, 0.8291, 0.0706)
- & \vf{500} validation subset & \vf{0.977} & \vf{0.83} & \vf{0.070} \\ % src: results/legal10w/v7_2/main/hub-dev-eval-m32.json (0.9771, 0.8283, 0.0697)
+%  & \vf{500} validation subset & \vf{0.977} & \vf{0.83} & \vf{0.070} \\ % src: results/legal10w/v7_2/main/hub-dev-eval-m32.json (0.9771, 0.8283, 0.0697)
 \bottomrule
 \end{tabular}
 \end{table}
 
-On each legal corpus, mean cross-model word-F1 on the \vf{500}-prompt validation subset differs from its full-split value by less than \vf{0.002} (Table~\ref{tab:hub:legal}). % src: hub-dev-eval-m32.json vs inversion.json per corpus (differences 0.0015, 0.0003, 0.0004)
-On that subset, OLMo's own hub outputs, decoded by the three decoders, reach mean word-F1 of \vf{0.982} on legal128w, \vf{0.975} on legal10s, and \vf{0.982} on legal10w, against \vf{0.148}, \vf{0.038}, and \vf{0.069} under the control. % src: hub-dev-eval-m32.json olmo_source_mean per corpus (hub 0.9821, 0.9752, 0.9821; wrong 0.1484, 0.0378, 0.0694)
-These scores are the reconstruction references for Chapter~\ref{ch:attack} on the legal corpora.
+% On each legal corpus, mean cross-model word-F1 on the \vf{500}-prompt validation subset differs from its full-split value by less than \vf{0.002} (Table~\ref{tab:hub:legal}). % src: hub-dev-eval-m32.json vs inversion.json per corpus (differences 0.0015, 0.0003, 0.0004)
+% On that subset, OLMo's own hub outputs, decoded by the three decoders, reach mean word-F1 of \vf{0.982} on legal128w, \vf{0.975} on legal10s, and \vf{0.982} on legal10w, against \vf{0.148}, \vf{0.038}, and \vf{0.069} under the control. % src: hub-dev-eval-m32.json olmo_source_mean per corpus (hub 0.9821, 0.9752, 0.9821; wrong 0.1484, 0.0378, 0.0694)
+% These scores are the reconstruction references for Chapter~\ref{ch:attack} on the legal corpora.
 As on Corpus A, each validation split also selected its hub's checkpoint, so no legal score is held out.
 \begin{figure}[ht]
 \centering
@@ -318,8 +318,8 @@ The result is not uniform: on Corpus A, both cross-model directions into Qwen st
 
 The hub gives Chapter~\ref{ch:attack} a frozen space with a measured score.
 Aligning a target model becomes a regression onto \vf{512}-dimensional hub outputs while the hub and decoders stay frozen.
-OLMo's own hub outputs, decoded by the three decoders, reach mean word-F1 of \vf{0.947} on the validation subset against \vf{0.121} under the control. % src: mixed-v8-s0b.json readout.reference
-That score is the reference for target-model results on the same prompts.
+% OLMo's own hub outputs, decoded by the three decoders, reach mean word-F1 of \vf{0.947} on the validation subset against \vf{0.121} under the control. % src: mixed-v8-s0b.json readout.reference
+% That score is the reference for target-model results on the same prompts.
 The token-wise design adds a third property: each mapped vector carries only the information already in its source hidden state.
 
 One hidden state per hub output permits direct regression from a target model without adding attention across tokens; one hub per corpus measures each hub on the text it is applied to but does not establish a single space across domains.
@@ -328,7 +328,7 @@ Four limitations bound the claim.
 \begin{itemize}
 \item \textbf{One hub seed.} Each corpus's scores derive from one trained hub.
 Variation across hub seeds is unmeasured, including the stability of Qwen's lower scores.
-\item \textbf{Selection and evaluation share prompts.} The validation split determined the checkpoint and gives the mean cross-model word-F1, and the validation subset is drawn from it.
+\item \textbf{Selection and evaluation share prompts.} The validation split determined the checkpoint and gives the mean cross-model word-F1.
 Selection ran on teacher-forced accuracy rather than free-running reconstruction, but no reported score is held-out test performance; the test split is reserved for the final evaluation.
 \todo{State when the test split is read.}
 \item \textbf{One control.} The mismatched-prompt control shows dependence on prompt-specific representations.
