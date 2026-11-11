@@ -18,7 +18,7 @@ The chapter follows the order of construction: architecture (Section~\ref{sec:hu
 The hub is a shared vector space with one source adapter and one projector per model (Figure~\ref{fig:hub:arch}).
 The source models are Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B.
 Each contributes hidden states from the block at three quarters of its depth: block \vf{18} of \vf{24} in Qwen (width \vf{1024}), block \vf{12} of \vf{16} in OLMo (width \vf{2048}), and block \vf{18} of \vf{24} in SmolLM (width \vf{2048}). % src: configs/v6_3.yaml (d3_block, width); configs/v3.yaml (blocks, depth_fractions)
-\todo{One sentence on why this depth, with its source.}
+% \todo{One sentence on why this depth, with its source.}
 
 \begin{figure}[ht]
 \centering
@@ -61,10 +61,8 @@ Training combines prompt reconstruction with two alignment objectives.
 Each prompt passes through all three frozen source models, and every update includes all nine directions.
 The reconstruction loss preserves input information; the two auxiliary losses align the three models inside the hub.
 
-\paragraph{Token groups.} The three tokenizers segment a prompt differently, so token positions do not correspond across models.
-For each pair of models, tokens are therefore aligned by character span: two tokens from different models are linked when their spans share a non-whitespace character, and each connected component of linked tokens is a token group.
-Each token's weight is the number of non-whitespace group characters its span covers. % src: src/v3/alignment.py (connected components, a_weights, b_weights); src/v6_2/data.py (_pair_groups)
-For each model, the group representation is the weighted mean of the group's token vectors, normalized to unit length.
+\paragraph{Token groups.} The three tokenizers segment a prompt differently, so tokens are aligned across each pair of models by character span: tokens whose spans overlap form a token group. % src: src/v3/alignment.py (connected components, a_weights, b_weights); src/v6_2/data.py (_pair_groups)
+A group vector is the mean of the group's token vectors under one model, weighted by the characters each token covers and normalized to unit length.
 
 \paragraph{Objective.} The objective combines a decoding loss, a contrastive loss, and a geometry loss:
 \begin{equation}
@@ -76,10 +74,11 @@ For each model, the group representation is the weighted mean of the group's tok
 % src: src/v6_2/losses.py (weighted_direction_ce: (sum cross + 1/3 sum self)/7; h3_objective); configs/v6_3.yaml (loss)
 
 \paragraph{Decoding term.} $\mathcal{L}_{\text{dec}}$ trains the hub to preserve the information needed for reconstruction.
-For each direction, the decoder receives the projected hub outputs as a memory prefix, then its start token, then the ground-truth prompt tokens $x_1 \ldots x_T$ in its own vocabulary.
-Under teacher forcing it predicts $x_1$ after the start token, $x_{t+1}$ after $x_t$, and the end-of-sequence token after $x_T$.
-The memory prefix thus supplies prompt information before any ground-truth token, and the target reproduces the prompt rather than continuing it.
-The loss averages cross-entropy over the $T+1$ predictions and then over prompts; the prefix length follows the source tokenizer and may differ from $T$. % src: v6_3/plan.md section 4; src/v3/evaluate.py (teacher_forced_batch)
+For each direction, the decoder receives the memory prefix, then its start token, then the ground-truth prompt tokens $x_1 \ldots x_T$, where $T$ is the prompt length in the decoder's own tokens.
+Under teacher forcing it makes $T+1$ predictions: the $T$ prompt tokens and then the end-of-sequence token, so the decoder also learns where the prompt ends.
+The target is the prompt itself, not its continuation.
+The loss averages cross-entropy over the $T+1$ predictions and then over prompts. % src: v6_3/plan.md section 4; src/v3/evaluate.py (teacher_forced_batch)
+The memory prefix has one row per source token, so its length may differ from $T$.
 The bars in Equation~\ref{eq:hub:loss} average over the six cross-model and the three self-reconstruction directions.
 Each self direction carries one third of a cross direction's weight, so the objective weights cross-model reconstruction most.
 
