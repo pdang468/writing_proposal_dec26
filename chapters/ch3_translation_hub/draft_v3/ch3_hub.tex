@@ -135,7 +135,8 @@ The test split is excluded from training and from selection.
 \section{Evaluation}\label{sec:hub:eval}
 
 \paragraph{Autoregressive reconstruction.} The hub is evaluated under free-running decoding.
-Each decoder conditions on the projected hub outputs and on its own generated prefix; greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap, the memory length plus \vf{8} tokens. % src: configs/v6_3.yaml (cap_margin 8); src/v6_3/inversion.py (CAP_RULE, batched_greedy_decode)
+Each decoder conditions on the projected hub outputs and on its own generated prefix; greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap. % src: configs/v6_3.yaml (cap_margin 8); src/v6_3/inversion.py (CAP_RULE, batched_greedy_decode)
+The cap is the memory length plus \vf{8} tokens on Corpus A and plus \vf{32} tokens on the legal corpora; a larger cap does not change the Corpus A scores. % src: configs/v6_3_legal{128w,10s,10w}.yaml (cap_margin 32); results/v7_2/main/hub-dev-eval-m32.json vs mixed-v8-s0b.json readout.reference (500 prompts, largest per-direction difference 0.0004)
 Two metrics compare the reconstruction with the source prompt.
 Word-F1 is the harmonic mean of word precision and recall over word multisets, averaged over prompts; exact match is the fraction of reconstructions equal to their reference after Unicode and whitespace normalization. % src: src/v4/clues/production_decoder.py (word_f1); src/v6_3/inversion.py (exact_match); src/v3/evaluate.py (canonicalize_text: NFKC, collapsed whitespace)
 Word-F1 ignores word order, so exact match is reported as the order-sensitive metric.
@@ -186,7 +187,7 @@ One hub seed.}
 
 \begin{table}[H]
 \caption{Every mean reconstruction score in this table exceeds its control by at least \vf{0.81}.
-Free-running word-F1 with a generation cap of the memory length plus \vf{8} tokens, one hub seed; each control is evaluated on the same prompts and directions as its score.}
+Free-running word-F1, one hub seed; each control is evaluated on the same prompts and directions as its score.}
 \label{tab:hub:reads}
 \centering
 \small\setlength{\tabcolsep}{4pt}
@@ -245,9 +246,7 @@ A separate hub is trained per corpus with the architecture and objective of Sect
 \paragraph{Corpora.} Three legal corpora are evaluated.
 The window corpus legal128w cuts one contiguous window per legal document, with the start word drawn uniformly over the document; its validation prompts average \vf{61} words. % src: references in results/legal128w/v6_3/inversion-records.jsonl, first 5,000 records (mean 61.2, range 8 to 90)
 The two segment corpora cut the same source documents into ten-word segments: legal10s takes the first ten words of a sentence from the opening sentences of a document, and legal10w takes ten consecutive words from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
-Each corpus has \vf{40{,}000} training and \vf{5{,}000} validation prompts.
-The generation cap is the memory length plus \vf{32} tokens, against plus \vf{8} on Corpus A. % src: configs/v6_3_legal{128w,10s,10w}.yaml (n_train, n_validation, cap_margin)
-On the Corpus A validation subset, raising the cap from plus \vf{8} to plus \vf{32} tokens changes each direction's word-F1 by less than \vf{0.001}; mean cross-model word-F1 remains \vf{0.945} against \vf{0.121} under the control. % src: results/v7_2/main/hub-dev-eval-m32.json (cross 0.9446, control 0.1214) vs mixed-v8-s0b.json readout.reference (largest per-direction difference 0.0004)
+Each corpus has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10s,10w}.yaml (n_train, n_validation)
 
 \paragraph{Results.} All three legal hubs meet both criteria for H1 (Table~\ref{tab:hub:legal}).
 On the \vf{5{,}000} validation prompts of each corpus, mean cross-model word-F1 lies between \vf{0.970} and \vf{0.977}, against \vf{0.044} to \vf{0.152} under the mismatched-prompt control. % src: results/legal{128w,10s,10w}/v6_3/inversion.json cross_mean (hub 0.9769, 0.9705, 0.9767; shuffled 0.1519, 0.0441, 0.0706)
@@ -256,7 +255,7 @@ The weak Qwen decoder of Corpus A does not recur: the cross-model directions int
 
 \begin{table}[H]
 \caption{Each legal hub exceeds a mean cross-model word-F1 of \vf{0.90} with a control below \vf{0.20}, on the validation split and on its \vf{500}-prompt subset.
-Free-running word-F1 and exact match averaged over the six cross-model directions, generation cap of the memory length plus \vf{32} tokens, one hub seed per corpus; each control is evaluated on the same prompts and directions as its score.}
+Free-running word-F1 and exact match averaged over the six cross-model directions, one hub seed per corpus; each control is evaluated on the same prompts and directions as its score.}
 \label{tab:hub:legal}
 \centering
 \begin{tabular}{llccc}
