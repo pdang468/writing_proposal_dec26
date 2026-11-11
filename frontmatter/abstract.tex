@@ -1,16 +1,18 @@
 %% 350 words or less. Present tense, third person. No page number.
 
-% In split inference, the large language model (LLM) is partitioned into blocks, with the cloud running the middle layers.
+Split inference partitions a large language model (LLM) across client and cloud: the client runs the early and final layers, and the cloud runs the middle layers between them.
+This setting reduces total inference cost and supports input protection through fine-tuning under noise injection and codebook scrambling.
+Inversion attacks aim to recover input prompts reliably from the transmitted hidden states with as little information as possible.
 
-Split inference partitions a large language model (LLM) across client and cloud: the client runs the early and final layers, and the cloud runs the middle layers between them. One cloud deployment then serves many clients, which lowers the cost of inference, but every client sends the hidden states of its prompts to the cloud. Those hidden states need protection, because prior work recovers the prompt from them. Each such inverter is trained on the hidden states of one known model, so a target model whose weights the attacker does not hold is out of reach.
+One approach to prompt inversion draws on the Platonic Representation Hypothesis that different models learn similar representation structures \cite{huh2024platonic}, motivating alignment between a target model's representations and those of known models.
+This dissertation develops alignment-based inversion attacks that combine limited leaked information with unsupervised matching to improve prompt recovery.
 
-This dissertation reaches the target model through a shared space. Following Jha et al.~\todo{cite Jha et al.}, who show that hidden states of different models align in one space, a translation hub joins Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B: model-specific adapters and a shared trunk map each model's hidden states into the hub, and model-specific projectors condition each frozen model to reconstruct the prompt. Training the hub end to end on reconstruction raises cross-model recovery to the fully supervised level, word-F1 of 0.95 on question prompts and 0.98 on legal text, where any model's hidden states reconstruct the prompt through any other model's decoder.
-
-The hub then becomes the inversion target for a model the attacker does not hold. The attacker knows the target model's tokenizer and vocabulary, holds none of its weights, issues no queries, and receives a small leak: hidden-state rows at single token positions, each paired with the token that produced it. A lightweight affine map, trained on the leaked rows, carries the target model's hidden states into the hub, and the frozen decoders reconstruct the prompt.
-
-The leak is small, and matching makes it sufficient. The leaked rows anchor the map; unsupervised matching on unpaired hidden states extends it. With 90 leaked rows, nine from each of ten prompts, matching raises word-F1 on Pythia-1B from 0.35 to 0.77 on question prompts and from 0.10 to 0.32 on legal text. With 864 rows it raises word-F1 from 0.76 to 0.81 and from 0.55 to 0.63, so the gain from matching shrinks as the leak grows.
-
-The remaining work asks how much matching contributes and where its gain ends, under three tests: leak budget, corpus domain, and target model. The answers measure how little a split-inference system can leak before its hidden states reveal the prompt.
+The central component is a translation hub that maps multiple public LLMs' intermediate representations into a shared space and reconstructs the input texts through soft prompt injection into frozen decoders.
+A lightweight affine map aligns a target model's representations with the hub, anchored by a limited set of hidden states paired with their source tokens and refined through unsupervised matching on unpaired hidden states.
+Across the tested settings, reconstruction word-F1 increases with the leak budget, while the gain from unsupervised matching decreases.
+On Natural Questions, the fully supervised hub achieves word-F1 of 0.95; with 90 leaked tokens, unsupervised matching raises target-model word-F1 from 0.35 to 0.77.
+Future work will test whether information from model depth and token order within a sequence further improves matching.
+Taken together, these studies probe the limits of privacy in split inference given shared representations across language models and the structure of natural language.
 
 %%------------------- note
 % Hub - balancing of supervised - unsupervised; reconstruct
