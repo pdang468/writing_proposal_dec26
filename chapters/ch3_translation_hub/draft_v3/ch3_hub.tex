@@ -6,7 +6,7 @@
 
 This chapter builds the translation hub, a representation space shared by three public language models, and measures how much input information it preserves.
 Model-specific adapters and a shared backbone map the hidden states of these models into the hub; model-specific projectors condition each frozen model to reconstruct the source prompt.
-On Natural Questions queries, cross-model reconstruction reaches a mean word-F1 of \vf{0.945}, against \vf{0.120} when the decoder receives the hub outputs of a different prompt. % src: results/v6_3/hpc-final/inversion.json
+On Natural Questions validation prompts, mean cross-model word-F1 reaches \vf{0.945}, against \vf{0.120} when the decoder receives the hub outputs of a different prompt. % src: results/v6_3/hpc-final/inversion.json
 The trained hub is then frozen, and Chapter~\ref{ch:attack} aligns a target model to it.
 
 \paragraph{Hypothesis H1: shared representations support cross-model inversion.} A token-wise hub trained on three open-weight models preserves enough input information for each frozen model to reconstruct the prompt from any other model's hub outputs.
@@ -43,7 +43,9 @@ Here $W_a$ is the linear layer of model $a$'s adapter, $R_a$ its residual block,
 Each residual block $R$ applies layer normalization (LN) and a SiLU activation, widens to \vf{2048}, and returns to \vf{1024}. % src: src/v3/bridge.py (SourceAdapter, ResidualMLP); src/v6_2/bridge.py (H3BridgeBundle); configs/v6_3.yaml (architecture)
 
 A hub output leaves the hub through a model-specific affine projector, which maps $m_t$ to the decoder's input width.
-The projected vectors form a soft prompt, the memory prefix, with one row per source token, and the frozen language model generates the reconstructed prompt after its start token; in that role the model is called a decoder.
+The frozen language model that receives the projected vectors is called the decoder.
+The projected vectors form its memory prefix, a soft prompt with one row per source token.
+The decoder generates the reconstructed prompt after its start token.
 Projectors receive unnormalized hub outputs.
 
 A direction pairs a source model with a decoder, e.g., Qwen $\to$ hub $\to$ OLMo.
@@ -54,14 +56,14 @@ Only the adapters, the backbone, and the projectors are trainable; the three lan
 
 The hub maps each token independently.
 Equation~\ref{eq:hub:map} has no positional input and no attention across tokens, so each hub output depends on one source hidden state, although that state may already encode prompt context.
-The token-wise design is what Chapter~\ref{ch:attack} relies on: a target model can be aligned from paired hidden states one row at a time, and the alignment map adds no context of its own.
+The token-wise design is what Chapter~\ref{ch:attack} relies on: a target model can be aligned from paired hidden states one row at a time.
 
 %% ------------------------------------------------------------------
 \section{Training}\label{sec:hub:training}
 
 Training combines prompt reconstruction with two alignment objectives.
 Each prompt passes through all three frozen source models, and every update includes all nine directions.
-The reconstruction loss preserves input information; the two auxiliary losses align the three models inside the hub.
+The reconstruction loss trains the hub to preserve input information; the two auxiliary losses encourage the three models to align inside the hub.
 
 \paragraph{Token groups.} The two auxiliary losses compare models at corresponding positions of a prompt, but the three tokenizers segment a prompt differently.
 For each pair of models, tokens are therefore matched by character span: a token group is a maximal set of tokens from the two models that are linked by overlapping spans. % src: src/v3/alignment.py (connected components, a_weights, b_weights); src/v6_2/data.py (_pair_groups)
@@ -78,7 +80,7 @@ The averaged vectors are hub outputs in the contrastive loss, and hidden states 
 \paragraph{Decoding term.} $\mathcal{L}_{\text{dec}}$ trains the hub to preserve the information needed for reconstruction.
 For each direction, the decoder receives the memory prefix, then its start token, then the ground-truth prompt tokens $x_1 \ldots x_T$, where $T$ is the prompt length in the decoder's own tokens.
 The memory prefix has one row per source token, so its length may differ from $T$.
-Under teacher forcing the decoder makes $T+1$ predictions: the $T$ prompt tokens and then the end-of-sequence token, so the decoder also learns where the prompt ends.
+Under teacher forcing the decoder makes $T+1$ predictions: the $T$ prompt tokens and then the end-of-sequence token, which marks where the prompt ends.
 The target is the prompt itself, not its continuation.
 The loss of direction $d$, $\text{CE}_d$, averages cross-entropy over the $T+1$ predictions and then over prompts. % src: v6_3/plan.md section 4; src/v3/evaluate.py (teacher_forced_batch)
 The decoding loss is a weighted mean over the nine directions:
@@ -103,7 +105,7 @@ The negatives are the vectors $g^b_j$ of groups from other prompts in the batch:
 where $\mathcal{N}_i$ contains group $i$ and its negatives.
 The losses $\ell^{\,a\to b}_i$ and $\ell^{\,b\to a}_i$ are averaged within each prompt, then over prompts, then over the two orders and the three model pairs. % src: src/v3/losses.py (_symmetric_group_info_nce_encoded, _negative_mask_from_codes, _mean_within_query_codes, grouped_info_nce)
 
-\paragraph{Geometry term.} $\mathcal{L}_{\text{geom}}$ preserves the pairwise similarities among the token groups of a batch, both within one model and across two models.
+\paragraph{Geometry term.} $\mathcal{L}_{\text{geom}}$ penalizes changes in the pairwise similarities among the token groups of a batch, both within one model and across two models.
 For model $a$ of a pair, let the rows of $X_a$ be the group vectors computed from its hidden states and the rows of $Y_a$ the group vectors computed from its hub outputs.
 For a matrix $A$ of group vectors, the Gram matrix $\Gamma(A) = AA^{\top}$ holds the inner products between groups, and $d(A,B)$ is the mean squared difference between the off-diagonal entries of $\Gamma(A)$ and $\Gamma(B)$.
 The loss is
@@ -111,8 +113,8 @@ The loss is
 \mathcal{L}_{\text{geom}} = \tfrac{1}{2}\Big(\overline{d(X_a, Y_a)} + \overline{d(Y_a, Y_b)}\Big).
 \label{eq:hub:geom}
 \end{equation}
-The first term compares one model with itself: the similarities among its hub outputs must match those among its hidden states.
-The second term compares two different models: the similarities among the hub outputs of model $a$ must match those of model $b$ on the same groups.
+The first term compares one model with itself: it penalizes differences between the similarities among its hub outputs and those among its hidden states.
+The second term compares two different models: it penalizes differences between the similarities among the hub outputs of model $a$ and those of model $b$ on the same groups.
 The first term is averaged over the two models of each pair and the second over the three pairs.
 Both $X_a$ and $Y_a$ are computed from centered vectors: the model's mean hidden state, or its mean unnormalized hub output, is subtracted from each token vector before the group mean is taken.
 The two means are taken over all training rows and computed once, at initialization.
@@ -143,14 +145,18 @@ Free-running decoding removes that prefix, so the reconstruction must come from 
 Teacher-forced Acc@1 therefore selects the checkpoint and nothing more; free-running word-F1 evaluates H1.
 
 \paragraph{Control.} The mismatched-prompt control replaces the source memory with the hub outputs of another prompt and keeps the original reference.
-A decoder that ignores its memory, or that generates a typical question whatever the memory holds, scores the same under matched and mismatched memories.
+A decoder that ignores its memory would score about the same under matched and mismatched memories.
 Prompt $i$ receives the memory of prompt $i+1$, and the last prompt receives the memory of the first.
 % src: src/v6_3/inversion.py (shuffled_indices: (i + 1) mod n); src/v8/projectors.py (wrong_partner: same rule)
 
-\paragraph{Prompt sets.} Corpus A contains Natural Questions query strings, \vf{nine} words long on average (\vf{6} to \vf{19} in the validation split), split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts; near-duplicate questions never cross a split, and the test split remains held out. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
+\paragraph{Prompt sets.} Corpus A contains Natural Questions query strings, split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts.
+Near-duplicate questions never cross a split, and the test split has not been evaluated. % src: configs/v3.yaml (split_schema_version v2-stage2-textcluster-v1); src/v3/splits.py
+The validation prompts average \vf{nine} words and range from \vf{6} to \vf{19}. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
 Two overlapping sets are evaluated.
 The full validation split gives the per-direction scores and the selection scores.
-A fixed subset of \vf{500} validation prompts is the set on which Chapter~\ref{ch:attack} evaluates its target-model mappings, so the hub is evaluated on it as well. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
+The hub is also evaluated on a fixed subset of \vf{500} validation prompts, the set on which Chapter~\ref{ch:attack} evaluates its target-model mappings. % src: mixed-v8-s0b.json setting.readout.source (V7.2 development subset of the validation split)
+
+The validation split also selects the checkpoint, so no score in this chapter is held out.
 
 \paragraph{Criteria for H1.} One score summarizes the hub: mean cross-model word-F1, the free-running word-F1 averaged over the six cross-model directions on the validation split.
 A corpus fails H1 if that mean falls below \vf{0.90} or if the mismatched-prompt control on the same prompts reaches \vf{0.20}.
@@ -164,7 +170,7 @@ Per-direction scores show the variation that the mean hides.
 
 Corpus A meets both criteria for H1.
 On its \vf{5{,}000} validation prompts, cross-model word-F1 averages \vf{0.945}, against \vf{0.120} under the mismatched-prompt control; exact match averages \vf{0.71} and is zero under the control. % src: results/v6_3/hpc-final/inversion.json cross_mean (hub 0.9445, exact 0.7116; shuffled 0.1203, exact 0.0)
-The word-F1 gap of \vf{0.82} between reconstruction and control shows that decoding depends on prompt-specific hub outputs.
+Replacing a prompt's hub outputs with those of another prompt lowers mean cross-model word-F1 by \vf{0.82}, so reconstruction depends on the prompt's own hub outputs.
 Figure~\ref{fig:hub:directions} reports all nine directions, and Table~\ref{tab:hub:reads} places each score beside its control.
 The \vf{500}-prompt validation subset reproduces the full-split scores: mean cross-model word-F1 is \vf{0.945} against \vf{0.121} under the control, and every direction lies within \vf{0.005} of its full-split score. % src: mixed-v8-s0b.json readout.reference per_direction_mean vs v6_3 inversion.json (largest difference 0.0045, smollm->qwen)
 
@@ -220,15 +226,15 @@ who played uncle in only fools and horses & \hit{who} \miss{plays the girl jinx}
 \end{tabular}
 \end{table}
 
-\subsection{The Qwen decoder reconstructs least well}\label{sec:hub:qwen}
-
-The mean hides one weak decoder.
-Both cross-model directions into Qwen fall below the \vf{0.90} that H1 asks of the mean, OLMo $\to$ Qwen at \vf{0.881} and SmolLM $\to$ Qwen at \vf{0.874}, while the four cross-model directions into OLMo and SmolLM range from \vf{0.966} to \vf{0.990} (Figure~\ref{fig:hub:directions}). % src: results/v6_3/hpc-final/inversion.json directions
-The weakness follows the decoder, not the source.
-Qwen's own states yield word-F1 of \vf{0.841} through the Qwen decoder, below both cross-model directions into it, and reach \vf{0.969} and \vf{0.990} through the other two decoders. % src: same; qwen->qwen 0.8411, qwen->olmo 0.9689, qwen->smollm 0.9896
-Exact match widens the gap: \vf{0.35} to \vf{0.45} into Qwen against \vf{0.78} to \vf{0.94} into the other decoders. % src: same, exact_match
-Corpus A therefore meets the criteria for H1, although two cross-model directions fall below the word-F1 threshold.
-The scores do not identify the cause.
+% \subsection{The Qwen decoder reconstructs least well}\label{sec:hub:qwen}
+%
+% The mean hides one weak decoder.
+% Both cross-model directions into Qwen fall below the \vf{0.90} that H1 asks of the mean, OLMo $\to$ Qwen at \vf{0.881} and SmolLM $\to$ Qwen at \vf{0.874}, while the four cross-model directions into OLMo and SmolLM range from \vf{0.966} to \vf{0.990} (Figure~\ref{fig:hub:directions}). % src: results/v6_3/hpc-final/inversion.json directions
+% The weakness follows the decoder, not the source.
+% Qwen's own states yield word-F1 of \vf{0.841} through the Qwen decoder, below both cross-model directions into it, and reach \vf{0.969} and \vf{0.990} through the other two decoders. % src: same; qwen->qwen 0.8411, qwen->olmo 0.9689, qwen->smollm 0.9896
+% Exact match widens the gap: \vf{0.35} to \vf{0.45} into Qwen against \vf{0.78} to \vf{0.94} into the other decoders. % src: same, exact_match
+% Corpus A therefore meets the criteria for H1, although two cross-model directions fall below the word-F1 threshold.
+% The scores do not identify the cause.
 
 %% ------------------------------------------------------------------
 \section{Legal Corpora}\label{sec:hub:legal}
@@ -241,7 +247,7 @@ The window corpus legal128w cuts one contiguous window per legal document, with 
 The two segment corpora cut the same source documents into ten-word segments: legal10s takes the first ten words of a sentence from the opening sentences of a document, and legal10w takes ten consecutive words from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
 Each corpus has \vf{40{,}000} training and \vf{5{,}000} validation prompts.
 Generation is capped at the memory length plus \vf{32} tokens, against \vf{8} on Corpus A. % src: configs/v6_3_legal{128w,10s,10w}.yaml (n_train, n_validation, cap_margin)
-The margin does not change the Corpus A scores: re-evaluated at margin \vf{32} on the validation subset, mean cross-model word-F1 is \vf{0.945} against \vf{0.121} under the control, and every direction lies within \vf{0.001} of its margin-\vf{8} score. % src: results/v7_2/main/hub-dev-eval-m32.json (cross 0.9446, control 0.1214) vs mixed-v8-s0b.json readout.reference (largest per-direction difference 0.0004)
+On the Corpus A validation subset, raising the margin from \vf{8} to \vf{32} changes each direction's word-F1 by less than \vf{0.001}; mean cross-model word-F1 remains \vf{0.945} against \vf{0.121} under the control. % src: results/v7_2/main/hub-dev-eval-m32.json (cross 0.9446, control 0.1214) vs mixed-v8-s0b.json readout.reference (largest per-direction difference 0.0004)
 
 \paragraph{Results.} All three legal hubs meet both criteria for H1 (Table~\ref{tab:hub:legal}).
 On the \vf{5{,}000} validation prompts of each corpus, mean cross-model word-F1 lies between \vf{0.970} and \vf{0.977}, against \vf{0.044} to \vf{0.152} under the mismatched-prompt control. % src: results/legal{128w,10s,10w}/v6_3/inversion.json cross_mean (hub 0.9769, 0.9705, 0.9767; shuffled 0.1519, 0.0441, 0.0706)
@@ -267,7 +273,7 @@ legal10w & \vf{5{,}000} validation & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % sr
 \end{tabular}
 \end{table}
 
-The \vf{500}-prompt validation subset of each legal corpus reproduces the full-split scores within \vf{0.002} (Table~\ref{tab:hub:legal}). % src: hub-dev-eval-m32.json vs inversion.json per corpus (differences 0.0015, 0.0003, 0.0004)
+On each legal corpus, mean cross-model word-F1 on the \vf{500}-prompt validation subset differs from its full-split value by less than \vf{0.002} (Table~\ref{tab:hub:legal}). % src: hub-dev-eval-m32.json vs inversion.json per corpus (differences 0.0015, 0.0003, 0.0004)
 On that subset, OLMo's own hub outputs, decoded by the three decoders, reach mean word-F1 of \vf{0.982} on legal128w, \vf{0.975} on legal10s, and \vf{0.982} on legal10w, against \vf{0.148}, \vf{0.038}, and \vf{0.069} under the control. % src: hub-dev-eval-m32.json olmo_source_mean per corpus (hub 0.9821, 0.9752, 0.9821; wrong 0.1484, 0.0378, 0.0694)
 These scores are the reconstruction references for Chapter~\ref{ch:attack} on the legal corpora.
 As on Corpus A, each validation split also selected its hub's checkpoint, so no legal score is held out.
@@ -280,11 +286,12 @@ One hub seed per corpus.}
 \label{fig:hub:legal-directions}
 \end{figure}
 
-Figure~\ref{fig:hub:legal-directions} reports all nine directions of each legal hub, and Table~\ref{tab:hub:legal-examples} shows reconstructions from Qwen $\to$ OLMo on legal10w, where the median prompt is reconstructed exactly. % src: results/legal10w/v6_3/inversion-records.jsonl, qwen->olmo hub arm (median 1.0, mean 0.9701); prompt_index 1, 29, 55
-At \vf{0.90} the decoder replaces one word with a near synonym (``timely'' with ``promptly''); at \vf{0.60} it keeps the frame of an address and changes the name and the numbers.
+Figure~\ref{fig:hub:legal-directions} reports all nine directions of each legal hub.
+Table~\ref{tab:hub:legal-examples} shows selected reconstructions from Qwen $\to$ OLMo on legal10w, where median word-F1 is \vf{1.00}. % src: results/legal10w/v6_3/inversion-records.jsonl, qwen->olmo hub arm (median 1.0, mean 0.9701); prompt_index 1, 29, 55
+At \vf{0.90} the decoder replaces one word (``timely'' with ``promptly''); at \vf{0.60} it changes a company name, a street number, and a street name.
 
 \begin{table}[H]
-\caption{On legal text, errors at an intermediate and a low score fall on single words, names, and numbers.
+\caption{Selected legal10w reconstructions illustrate word, name, and number errors.
 Reconstructions from Qwen $\to$ OLMo on legal10w validation prompts, selected at high, intermediate, and low word-F1; the final row is generated under mismatched memory and scored against the original prompt.
 Decoded words that match the true prompt are green; the others are red and bold.}
 \label{tab:hub:legal-examples}
@@ -305,17 +312,17 @@ Certification in the form attached hereto as Exhibit C; and & \miss{leave} \hit{
 %% ------------------------------------------------------------------
 \section{Discussion}\label{sec:hub:discussion}
 
-The shared \vf{512}-dimensional space preserves the information needed to reconstruct the prompt.
-Across the six cross-model directions, the frozen decoders reconstruct Corpus A prompts at mean word-F1 \vf{0.945}, against \vf{0.120} from another prompt's hub outputs, so H1 holds on question prompts by the criteria of Section~\ref{sec:hub:eval}.
+Corpus A meets the criteria for H1: across the six cross-model directions, mean word-F1 is \vf{0.945}, against \vf{0.120} under the mismatched-prompt control.
+The result rests on one hub seed and on validation prompts that also selected the checkpoint.
 The three legal hubs meet the same criteria (Section~\ref{sec:hub:legal}).
 The result is not uniform: on Corpus A, both cross-model directions into Qwen stay below \vf{0.90}.
 
 The hub gives Chapter~\ref{ch:attack} a frozen space with a measured score.
-Aligning a target model becomes a regression onto \vf{512}-dimensional hub outputs while the hub and decoders stay frozen, and OLMo's own hub outputs provide a reconstruction reference: decoded by the three decoders, they reach \vf{0.947} on the validation subset against \vf{0.121} under the control.
-A target-model result on the same prompts is therefore placed against that score rather than reported alone.
+Aligning a target model becomes a regression onto \vf{512}-dimensional hub outputs while the hub and decoders stay frozen.
+OLMo's own hub outputs, decoded by the three decoders, reach mean word-F1 of \vf{0.947} on the validation subset against \vf{0.121} under the control. % src: mixed-v8-s0b.json readout.reference
+That score is the reference for target-model results on the same prompts.
 The token-wise design adds a third property: each mapped vector carries only the information already in its source hidden state.
 
-The design trades generality for that frozen space.
 One hidden state per hub output permits direct regression from a target model without adding attention across tokens; one hub per corpus measures each hub on the text it is applied to but does not establish a single space across domains.
 
 Four limitations bound the claim.
