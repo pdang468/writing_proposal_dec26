@@ -67,8 +67,10 @@ Each prompt passes through all three frozen source models, and every update incl
 The reconstruction loss trains the hub to preserve input information; the two auxiliary losses encourage the three models to align inside the hub.
 
 \paragraph{Token groups.} The two auxiliary losses compare models at corresponding positions of a prompt, but the three tokenizers segment a prompt differently.
-For each pair of models, tokens are therefore matched by character span: a token group is a maximal set of tokens from the two models that are linked by overlapping spans. % src: src/v3/alignment.py (connected components, a_weights, b_weights); src/v6_2/data.py (_pair_groups)
-A word that one tokenizer keeps whole and the other splits in two, for example, forms one group with one token under the first model and two under the second.
+%% BIG CHANGE: token group defined by shared token boundaries, with a two-group example
+For each pair of models, the tokens are therefore collected into token groups: a group ends only at a character position where both tokenizers end a token (whitespace is ignored). % src: src/v3/alignment.py (connected components, a_weights, b_weights); src/v6_2/data.py (_pair_groups)
+If one tokenizer splits \emph{unbelievable} into \emph{un \textbar{} believable} and the other into \emph{un \textbar{} believ \textbar{} able}, the word yields two groups: \emph{un}, with one token per model, and \emph{believable}, with one token under the first model and two under the second.
+The boundary after \emph{believ} belongs to one tokenizer only, so it does not divide the second group.
 Each model represents a group by one group vector: the mean of the vectors of its tokens in the group, weighted by the characters each token covers and normalized to unit length.
 The averaged vectors are hub outputs in the contrastive loss, and hidden states or hub outputs in the geometry loss.
 
