@@ -2,16 +2,18 @@
 
 Split inference partitions a large language model (LLM) across client and cloud: the client runs the early and final layers, and the cloud runs the middle layers between them.
 This setting reduces total inference cost and supports input protection through fine-tuning under noise injection and codebook scrambling.
+
 Inversion attacks aim to recover input prompts reliably from the transmitted hidden states with as little information as possible.
+At that limit, unsupervised inversion reads only the embeddings themselves; surprisingly, it recovers part of the text from sentence embeddings, a result attributed to the Platonic Representation Hypothesis that different models learn similar representation structures \cite{huh2024platonic}.
+Motivated by that embedding-only result, this dissertation develops alignment-based inversion attacks on the hidden states of an LLM, combining limited leaked information with unsupervised matching to improve prompt recovery.
 
-One approach to prompt inversion draws on the Platonic Representation Hypothesis that different models learn similar representation structures \cite{huh2024platonic}, motivating alignment between a target model's representations and those of known models.
-This dissertation develops alignment-based inversion attacks that combine limited leaked information with unsupervised matching to improve prompt recovery.
-
-The central component is a translation hub that maps multiple public LLMs' intermediate representations into a shared space and reconstructs the input texts through soft prompt injection into frozen decoders.
-A lightweight affine map aligns a target model's representations with the hub, anchored by a limited set of hidden states paired with their source tokens and refined through unsupervised matching on unpaired hidden states.
+The central component is a translation hub that maps the hidden states of multiple open-weight LLMs into a shared space and reconstructs the input texts through soft prompt injection into the same LLMs, run as decoders.
+A lightweight affine map aligns a target model's hidden states with the hub, anchored by a limited set of hidden states paired with their source tokens and refined through unsupervised matching on unpaired hidden states.
 Across the tested settings, reconstruction word-F1 increases with the leak budget, while the gain from unsupervised matching decreases.
-On Natural Questions, the fully supervised hub achieves word-F1 of 0.95; with 90 leaked tokens, unsupervised matching raises target-model word-F1 from 0.35 to 0.77.
-Future work will test whether information from model depth and token order within a sequence further improves matching.
+On Natural Questions, the hub trained with full supervision reconstructs the open-weight LLMs' prompts at word-F1 0.95, the reference for the attack.
+For a target model held out from hub training, 90 leaked tokens yield word-F1 0.35 on the same corpus, and unsupervised matching raises it to 0.77.
+
+Future work will test whether model depth and token order within a sequence give the attacker additional signal to exploit in a split inference setting.
 Taken together, these studies probe the limits of privacy in split inference given shared representations across language models and the structure of natural language.
 
 %%------------------- note
