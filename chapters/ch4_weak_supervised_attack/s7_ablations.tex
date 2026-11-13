@@ -1,0 +1,265 @@
+\section{Ablations and Additional Comparisons}\label{sec:attack:ablations}\label{sec:attack:negative}
+
+The comparisons of this section vary one aspect of the attack at a time: the size of the leak, the presence of the leak, the components of the loss, the composition of the leak, the target model, and a further training step.
+Each rests on the setting of its row in Table~\ref{tab:attack:settings} and, unless stated, on the \vf{500} selection prompts.
+
+\subsection{Size of the leak}\label{sec:attack:budget}
+
+Word-F1 of the reconstructions rises with the budget, and the gain of the matching term shrinks as the budget grows.
+On Corpus NQ the supervised fit scores \vf{0.348} at a budget of \vf{10} and \vf{0.876} at \vf{1{,}000}, against a hub reference of \vf{0.946} (Table~\ref{tab:attack:hybrid}, Figure~\ref{fig:attack:budget}). % src: results/v7_2/main/mixed-v7_9-s5.json seed_summary.budgets.*.macro_f1 (0.3482, 0.8759); factorial.json controls.true_olmo_code (0.9459)
+The hybrid fit exceeds it by \vf{0.309}, \vf{0.197}, and \vf{0.051} at budgets of \vf{10}, \vf{30}, and \vf{100}, and by \vf{0.010} and \vf{0.002} at \vf{300} and \vf{1{,}000}. % src: same file, seed_summary.budgets.*.cell_minus_benchmark
+The unpaired pools thus add most where the leak is smallest; at \vf{300} the gain is small but still positive, with an interval of \vf{0.007} to \vf{0.013}.
+The budgets stop at \vf{1{,}000} because no larger leak was run.
+
+\begin{table}[H]
+\caption{The matching term raises word-F1 by \vf{0.31} at \vf{10} paired sequences and by \vf{0.01} at \vf{300}.
+Word-F1 averaged over three decoders and three seeds, Pythia on Corpus NQ, \vf{500} selection prompts, which also selected the setting of the hybrid fit ($\alpha = 0.95$, $\tau = 2d$, $B = 2{,}048$).
+The difference is hybrid minus supervised, with a \vf{95} percent interval from a paired bootstrap over prompts.}
+\label{tab:attack:hybrid}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Budget (paired sequences) & Supervised fit & Hybrid fit & Difference \\
+\midrule
+10 & \vf{0.348} & \vf{0.657} & \vf{$+0.309$} [\vf{0.300}, \vf{0.318}] \\ % src: results/v7_2/main/mixed-v7_9-s5.json seed_summary.budgets.10 (0.3482, 0.6569, +0.3087 [0.3001, 0.3177])
+30 & \vf{0.536} & \vf{0.732} & \vf{$+0.197$} [\vf{0.189}, \vf{0.204}] \\ % src: same, budgets.30 (0.5355, 0.7325, +0.1969 [0.1893, 0.2041])
+100 & \vf{0.758} & \vf{0.809} & \vf{$+0.051$} [\vf{0.047}, \vf{0.055}] \\ % src: same, budgets.100 (0.7582, 0.8094, +0.0513 [0.0472, 0.0554])
+300 & \vf{0.845} & \vf{0.855} & \vf{$+0.010$} [\vf{0.007}, \vf{0.013}] \\ % src: same, budgets.300 (0.8452, 0.8551, +0.0099 [0.0069, 0.0128])
+1{,}000 & \vf{0.876} & \vf{0.878} & \vf{$+0.002$} [\vf{$-0.001$}, \vf{0.004}] \\ % src: same, budgets.1000 (0.8759, 0.8775, +0.0016 [-0.0008, 0.0038])
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.75\textwidth]{ch4/budget_curve}
+\caption{The hybrid fit exceeds the supervised fit by \vf{0.31} word-F1 at \vf{10} paired sequences and by \vf{0.01} at \vf{300}.
+Word-F1 averaged over three decoders on the \vf{500} selection prompts of Corpus NQ; lines are means over three seeds and bands the range over seeds.
+The dotted line is the hub reference, and the gray band is the mismatched-prompt control of the plotted fits.}
+\label{fig:attack:budget}
+\end{figure}
+
+Table~\ref{tab:attack:examples} shows single prompts at a budget of \vf{10}, through the SmolLM decoder.
+At a word-F1 of \vf{0.78}, the median of the hybrid fit through SmolLM, the reconstruction changes the question word and one verb form; at \vf{0.43} it keeps the question frame and replaces the names. % src: results/v7_2/main/mixed-v7_9/runs/b10-a0.95-sq-m0-t0.1152-r1-B2048-s1/endpoint/decoding.jsonl, SmolLM records (median 0.7778)
+The supervised fit on the same leak keeps function words and loses the content of all three prompts.
+Three selected prompts show the scale of word-F1, not the frequency of each error.
+
+\begin{table}[H]
+\caption{At a budget of \vf{10}, the hybrid fit reconstructs content words that the supervised fit loses.
+Reconstructions through the SmolLM decoder for three Corpus NQ selection prompts, chosen at high, intermediate, and low word-F1 of the hybrid fit (seed \vf{1}); the final row is generated under the mismatched-prompt control of the hybrid fit.
+Decoded words that match the true prompt are green; the others are red and bold.}
+\label{tab:attack:examples}
+\centering
+\small
+\begin{tabular}{p{0.30\textwidth}lp{0.36\textwidth}c}
+\toprule
+True prompt & Fit & Decoded & Word-F1 \\
+\midrule
+where does the menthol in cigarettes come from & Hybrid & \hit{where does the menthol in cigarettes come from} & \vf{1.00} \\ % src: results/v7_2/main/mixed-v7_9/runs/b10-a0.95-sq-m0-t0.1152-r1-B2048-s1/endpoint/decoding.jsonl, nq-00056151, smollm
+ & Supervised & \hit{where} \miss{did} \hit{the} \miss{minott yumtza} \hit{come from} & \vf{0.53} \\ % src: results/v7_2/main/mixed-v7_9/runs/b10-a1-r1-s1/endpoint/decoding.jsonl, nq-00056151, smollm
+\midrule
+does grace have a baby in will and grace & Hybrid & \miss{when} \hit{grace} \miss{has} \hit{a baby in will and grace} & \vf{0.78} \\ % src: same files, nq-00090413
+ & Supervised & \miss{who win has the fight} \hit{in} \miss{well of shame} & \vf{0.11} \\
+\midrule
+who sang hello john gotta new motor & Hybrid & \hit{who sang} \miss{goodbye jimmy don't} \hit{new} \miss{gun} & \vf{0.43} \\ % src: same files, nq-00063609
+ & Supervised & \hit{who} \miss{sings come xan xan} \hit{new} \miss{clean} & \vf{0.29} \\
+\midrule
+where does the menthol in cigarettes come from & Hybrid & \miss{who played skeletarde's daughter} \hit{in the} \miss{quest end} \emph{(mismatched prompt)} & \vf{0.25} \\ % src: .../b10-a0.95-sq-m0-t0.1152-r1-B2048-s1/wrong_memory/decoding.jsonl, nq-00056151, smollm
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Matching without a leak}\label{sec:attack:blind}
+
+Without any row, the tested blind maps stay close to their mismatched-prompt controls.
+Table~\ref{tab:attack:blind} lists four groups of blind maps, trained on the unpaired pools of Corpus NQ with Pythia as the target model.
+The groups vary the score of the matching term, select the best of twelve further runs, replace the matching term by a Gromov-Wasserstein coupling that pairs the two pools by their internal distances, or set $\alpha = 0$ in Equation~\ref{eq:attack:loss}.
+The largest gain of a blind map over its mismatched-prompt control is \vf{0.025} word-F1 (interval \vf{0.019} to \vf{0.030}), at a word-F1 of \vf{0.080} against a hub reference of \vf{0.946}. % src: results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304])
+That map is the best of twelve runs, so its gain is biased upward.
+The tested blind maps thus gain at most \vf{0.025} word-F1 over their controls, whereas the hybrid fit improves on the supervised fit.
+The result covers two objectives, one target model, and one corpus, and does not show that no unpaired method can connect a target model.
+
+\begin{table}[H]
+\caption{No blind map gains more than \vf{0.025} word-F1 over its mismatched-prompt control.
+Word-F1 averaged over three decoders, Pythia on Corpus NQ; word-F1 and control are means over the maps of a row, and the last column is the largest gain of one map over its own control.
+The first row reads \vf{5{,}000} validation prompts and the others \vf{500} selection prompts.}
+\label{tab:attack:blind}
+\centering
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{0.33\textwidth}cccc}
+\toprule
+Blind map & Maps & Mean word-F1 & Mean control & Largest gain \\
+\midrule
+Matching term, three scores, three seeds & \vf{9} & \vf{0.074} & \vf{0.080} & \vf{$+0.015$} \\ % src: results/v7/main-different_text-pythia/results.json macro_word_f1 (*:s{1,2,3}:full:final; means 0.0743, 0.0797; differences -0.0189 to +0.0151, no interval stored)
+Matching term, best of twelve & \vf{1} & \vf{0.080} & \vf{0.056} & \vf{$+0.025$} \\ % src: results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304])
+Gromov-Wasserstein coupling & \vf{6} & \vf{0.101} & \vf{0.097} & \vf{$+0.021$} \\ % src: results/v7_2/main/gw.json representations.*.seeds.1.epsilons.*.decoding (means 0.1013, 0.0966; largest +0.0213 [0.0164, 0.0261])
+Equation~\ref{eq:attack:loss} at $\alpha = 0$, three seeds & \vf{6} & \vf{0.056} & \vf{0.059} & \vf{$+0.009$} \\ % src: results/v7_2/main/mixed-v7_9-s1.json seeds.*.cells.b10/a0/{sq,cos}/* (means 0.0557, 0.0594; largest +0.0089 [0.0045, 0.0136])
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Components of the loss}\label{sec:attack:components}
+
+The setting of the Corpus NQ budget curve was selected in five steps on the selection prompts with seed \vf{1}; seeds \vf{2} and \vf{3} then repeated every fit. % src: results/v7_2/main/mixed-v7_9-s{1..5}.json selection (selection_seed 1), setting.seeds
+Each step changes one component, keeps the value with the highest mean word-F1 over budgets \vf{10}, \vf{30}, and \vf{100}, and passes it to the next step (Table~\ref{tab:attack:steps}).
+Step \vf{5} tests a moment penalty, which penalizes the distance of the mean and the radius of the mapped states from those of the hub outputs.
+
+\begin{table}[H]
+\caption{Each of the first four steps raises word-F1 at budgets of \vf{10} to \vf{100}, and no step changes it by more than \vf{0.02} at \vf{300} or \vf{1{,}000}.
+Difference in word-F1, selected value minus the value before the step, mean over three seeds, Pythia on Corpus NQ, \vf{500} selection prompts.
+At a budget of \vf{10}, the interval of every difference in steps \vf{1} to \vf{4} excludes zero.
+The steps follow one order; another order was not run.}
+\label{tab:attack:steps}
+\centering
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{clccccc}
+\toprule
+Step & Comparison & 10 & 30 & 100 & 300 & 1{,}000 \\
+\midrule
+1 & squared-distance score minus cosine score ($\alpha = 0.95$) & \vf{$+0.043$} & \vf{$+0.049$} & \vf{$+0.033$} & \vf{$+0.007$} & \vf{$-0.001$} \\ % src: results/v7_2/main/mixed-v7_9-s1.json seed_summary.budgets.*.score_effect (+0.0425, +0.0493, +0.0330, +0.0073, -0.0006)
+1 & $\alpha = 0.95$ minus $\alpha = 1$ & \vf{$+0.096$} & \vf{$+0.104$} & \vf{$+0.051$} & \vf{$+0.007$} & \vf{$-0.005$} \\ % src: same file, cell_minus_benchmark (+0.0962, +0.1037, +0.0510, +0.0073, -0.0046)
+2 & $\tau = 2d$ minus $\tau = d$ & \vf{$+0.110$} & \vf{$+0.083$} & \vf{$+0.025$} & \vf{$+0.004$} & \vf{$+0.002$} \\ % src: mixed-v7_9-s2.json axis_effect (+0.1098, +0.0831, +0.0250, +0.0039, +0.0023)
+3 & $B = 2{,}048$ minus $B = 512$ & \vf{$+0.092$} & \vf{$+0.094$} & \vf{$+0.043$} & \vf{$+0.009$} & \vf{$+0.002$} \\ % src: mixed-v7_9-s3.json axis_effect (+0.0922, +0.0943, +0.0429, +0.0085, +0.0016)
+4 & ridge penalty on minus off & \vf{$+0.056$} & \vf{$+0.010$} & \vf{$+0.035$} & \vf{$+0.018$} & \vf{$-0.006$} \\ % src: mixed-v7_9-s4.json axis_effect (+0.0558, +0.0102, +0.0347, +0.0180, -0.0055)
+5 & moment penalty on minus off & \vf{$+0.002$} & \vf{$+0.001$} & \vf{$-0.001$} & \vf{$+0.000$} & \vf{$+0.000$} \\ % src: mixed-v7_9-s5.json axis_effect (+0.0016, +0.0005, -0.0005, +0.0003, +0.0001)
+\bottomrule
+\end{tabular}
+\end{table}
+
+Four components each raise word-F1 at small budgets: the squared-distance score, a supervision fraction below one, a higher temperature, and a larger batch for the matching term.
+All four differences fall below \vf{0.01} at a budget of \vf{300}, and the moment penalty changes word-F1 by at most \vf{0.002}. % src: Table rows; mixed-v7_9-s5.json selection.on_minus_off (+0.0005 [-0.0006, 0.0016])
+A larger batch raises word-F1 further at a budget of \vf{10}: by \vf{0.040} from $B = 2{,}048$ to \vf{4{,}096}, and by \vf{0.030} from \vf{4{,}096} to \vf{8{,}192} (three seeds, intervals \vf{0.037} to \vf{0.043} and \vf{0.027} to \vf{0.032}). % src: results/v7_2/main/mixed-v8-s1.json and mixed-v8-s1b.json seed_summary.budgets.10.axis_effect
+Each row credits a component only with its difference along that order of steps; another order was not run.
+
+\subsection{Composition of the leak}\label{sec:attack:leak}
+
+At a fixed number of rows, a leak spread over many prompts decodes better than a leak taken from one or two prompts.
+On legal128w, one row from each of \vf{90} prompts yields a word-F1 of \vf{0.321} under the hybrid fit, against \vf{0.178} for \vf{90} rows from two prompts (Table~\ref{tab:attack:shape}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json (L90-random 0.3207); mixed-oct_w5b-L-prefix.json (L90-prefix 0.1782)
+Most of the difference lies between two prompts and ten: nine consecutive rows from each of ten prompts score \vf{0.304}, only \vf{0.017} below the leak over \vf{90} prompts (interval \vf{0.008} to \vf{0.025}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90-ext2.json seeds.1.budgets.90.axis_effect delta_h:...L90-span9 (-0.0168 [-0.0254, -0.0084])
+On the \vf{4{,}500} held-out prompts the leak over \vf{90} prompts scores \vf{0.326} under the hybrid fit and \vf{0.106} under the supervised fit. % src: results/legal128w/v7_2/main/oct_w5-summary-confirmation-A.json levels H/random/L90/all, S/random/L90
+The comparison rests on one seed and does not separate the number of prompts from the content of the particular prompts drawn.
+
+\begin{table}[H]
+\caption{At about \vf{90} rows, a leak spread over \vf{10} or \vf{90} prompts decodes at \vf{0.30} to \vf{0.32} under the hybrid fit; a leak from one or two prompts decodes at \vf{0.16} to \vf{0.18}.
+Word-F1 averaged over three decoders, Pythia on legal128w, seed \vf{1}, \vf{500} selection prompts; the hub reference is \vf{0.982}.
+The difference is hybrid minus supervised with a \vf{95} percent interval; the mismatched-prompt control of the hybrid fits lies between \vf{0.06} and \vf{0.13}.
+The last row holds \vf{864} rows and is not matched in size to the others.}
+\label{tab:attack:shape}
+\centering
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
+\toprule
+Leak & Prompts & Rows & Hybrid fit & Supervised fit & Difference \\
+\midrule
+One row per prompt & \vf{90} & \vf{90} & \vf{0.321} & \vf{0.108} & \vf{$+0.212$} [\vf{0.202}, \vf{0.222}] \\ % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json cells *L90-random (0.3207, 0.1084, +0.2123 [0.2022, 0.2218]; control 0.1006)
+Nine consecutive rows per prompt & \vf{10} & \vf{90} & \vf{0.304} & \vf{0.094} & \vf{$+0.210$} [\vf{0.200}, \vf{0.220}] \\ % src: mixed-oct_w5-s1-L90-ext2.json cells *L90-span9 (0.3039, 0.0938, +0.2101 [0.1999, 0.2197]; control 0.1043)
+One prompt and part of a second & \vf{2} & \vf{90} & \vf{0.178} & \vf{0.049} & \vf{$+0.130$} [\vf{0.121}, \vf{0.138}] \\ % src: mixed-oct_w5b-L-prefix.json cells *L90-prefix (0.1782, 0.0487, +0.1295 [0.1213, 0.1378]; control 0.0605)
+One whole prompt & \vf{1} & \vf{78} & \vf{0.162} & \vf{0.087} & \vf{$+0.075$} [\vf{0.067}, \vf{0.082}] \\ % src: mixed-oct_w5b-L.json cells b1/* (0.1615, 0.0867, +0.0748 [0.0669, 0.0822]; control 0.0738)
+\midrule
+One row per prompt & \vf{864} & \vf{864} & \vf{0.628} & \vf{0.548} & \vf{$+0.080$} [\vf{0.072}, \vf{0.088}] \\ % src: mixed-oct_w5-s1-L864.json cells *L864-random (0.6281, 0.5480, +0.0801 [0.0724, 0.0876]; control 0.1266)
+\bottomrule
+\end{tabular}
+\end{table}
+
+The tested word-class rules score below a random draw of rows, and the distinct-word rule scores \vf{0.009} above it (Table~\ref{tab:attack:words}).
+Stop words are the words of a fixed stop list; mid-frequency words have rank \vf{101} to \vf{1{,}000} in the word counts of the legal128w training prompts, and rare words a rank above \vf{1{,}000}. % src: oct_w5/plan.md section 3; src/v7_2/anchors_linear.py (rank bands)
+The one-word rule leaks the same mid-frequency word in all \vf{90} prompts, and the distinct rule draws rows at random but leaks no word twice.
+Each rule skips a prompt without an eligible row, so the rules also differ in the prompts they draw, and the comparison does not isolate word class. % src: src/v7_2/anchors_linear.py
+A leak of stop words, or of one repeated word, leaves the hybrid fit at the level of the supervised fit.
+
+\begin{table}[H]
+\caption{No word class improves on a random draw of rows; stop-word rows and one repeated word give the hybrid fit no gain.
+Word-F1 averaged over three decoders, Pythia on legal128w, seed \vf{1}, \vf{500} selection prompts, \vf{90} rows from \vf{90} prompts.
+The last column is the hybrid fit under the rule minus the hybrid fit under the random draw, with a \vf{95} percent interval.}
+\label{tab:attack:words}
+\centering
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Leaked rows & Hybrid fit & Supervised fit & Hybrid fit minus random draw \\
+\midrule
+Random draw & \vf{0.321} & \vf{0.108} & \\ % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json cells *L90-random (0.3207, 0.1084)
+Distinct words & \vf{0.329} & \vf{0.109} & \vf{$+0.009$} [\vf{0.001}, \vf{0.017}] \\ % src: mixed-oct_w5-s1-L90-ext.json cells *L90-distinct (0.3295, 0.1087); axis_effect delta_h (+0.0088 [0.0007, 0.0166])
+Mid-frequency words & \vf{0.242} & \vf{0.094} & \vf{$-0.078$} [\vf{$-0.087$}, \vf{$-0.069$}] \\ % src: mixed-oct_w5-s1-L90.json cells *L90-mid (0.2423, 0.0938); delta_h (-0.0784 [-0.0871, -0.0692])
+Rare words & \vf{0.226} & \vf{0.072} & \vf{$-0.095$} [\vf{$-0.104$}, \vf{$-0.086$}] \\ % src: same file, *L90-rare (0.2255, 0.0717); delta_h (-0.0952 [-0.1041, -0.0860])
+Stop words & \vf{0.058} & \vf{0.056} & \vf{$-0.263$} [\vf{$-0.273$}, \vf{$-0.252$}] \\ % src: same file, *L90-stop (0.0582, 0.0555); delta_h (-0.2625 [-0.2725, -0.2516])
+One repeated word & \vf{0.054} & \vf{0.057} & \vf{$-0.267$} [\vf{$-0.278$}, \vf{$-0.256$}] \\ % src: same file, *L90-one_word (0.0535, 0.0568); delta_h (-0.2672 [-0.2781, -0.2563])
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:attack:legal-examples} shows three legal128w reconstructions under the leak of one row from each of \vf{90} prompts, through the SmolLM decoder, whose median prompt scores \vf{0.55}. % src: results/legal128w/v7_2/main/mixed-v7_9/runs/b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random-s1/endpoint/decoding.jsonl, SmolLM records (median 0.5502)
+The errors are fluent substitutions: ``registrant'' becomes ``insurer'', and dates, exhibit numbers, section numbers, and a company name are replaced by others of the same kind.
+The reconstruction itself does not mark which words match the source and which are substitutions.
+
+\begin{table}[H]
+\caption{The three selected legal reconstructions keep parts of the passage and substitute names and numbers.
+Reconstructions through the SmolLM decoder for three legal128w selection prompts, chosen at high, intermediate, and low word-F1 (seed \vf{1}, one row from each of \vf{90} prompts).
+Decoded words that match the true prompt are green; the others are red and bold.}
+\label{tab:attack:legal-examples}
+\centering
+\footnotesize
+\begin{tabular}{p{0.42\textwidth}p{0.42\textwidth}c}
+\toprule
+True prompt & Decoded & Word-F1 \\
+\midrule
+disclosure controls and procedures, as of the end of the period covered by this report based on such evaluation; and (d) Disclosed in this report any change in the registrant's internal control over financial reporting that occurred during the registrant's most recent fiscal quarter (the registrant's fourth fiscal quarter in the case of an annual report) that has materially affected, or is reasonably likely to materially affect, the registrant's internal control over financial reporting; and & \miss{responsibility} \hit{controls and procedures, as of the end of the period covered by this report based on such evaluation; and} \miss{(i) Considered} \hit{in this report any change in the} \miss{insurer's} \hit{internal control over financial reporting that occurred during the} \miss{insurer's} \hit{most recent fiscal} \miss{year} \hit{(the} \miss{insurer's first} \hit{fiscal} \miss{year} \hit{in the case of} \miss{a} \hit{annual report) that has materially affected, or is reasonably likely to materially affect, the} \miss{insurer's} \hit{internal control over financial} \miss{reporting} & \vf{0.83} \\ % src: decoding.jsonl above, law-edgar-00014181, smollm (0.8322); truth results/legal128w/v7_2/main/position/dev-truth.json
+\midrule
+operations for the year's endedDecember31, 2010 and 2009are filed as Exhibit 99.2 herewith. (d)Exhibits ExhibitNo. Description Stock Purchase Agreement, dated as of December23, 2010.,.(1) Audited financial statements as of and for the years ended December 31, 2010 and 2009 for CMAC, Inc. & \miss{references} \hit{for the} \miss{year} \hit{of} \miss{finished} \hit{December 2009 and} \miss{2000 are} \hit{filed as} \miss{Examination 61.2 hereafter. (A) Ex. No.} \hit{Description Stock Purchase Agreement, dated as of} \miss{June 07,2009, (B) Unaudited} \hit{financial statements as} \miss{of} \hit{and for the} \miss{months} \hit{ended} \miss{December 2009} \hit{and} \miss{2000} \hit{for} \miss{Kelebank, LLC.} & \vf{0.55} \\ % src: same file, law-edgar-00009775 (0.5455)
+\midrule
+Lender Credit Decision 58 Section 10.8 Expenses; Indemnities 58 Section 10.9 Resignation of Administrative Agent 59 Section 10.10 Release of Collateral or Guarantors 60 ARTICLE 11 MISCELLANEOUS 60 Section 11.1 Amendments, Waivers, Etc 60 Section 11.2 Assignments and Participations; & \hit{Lender} \miss{Creditability 31} \hit{Section} \miss{2.2 Exclusions; Unearned Benefits 26} \hit{Section} \miss{2.2} \hit{Resignation of Administrative} \miss{Officer9} \hit{Section} \miss{2.9} \hit{Release of Collateral and} \miss{Guarantors9} \hit{Section} \miss{2.9 Refusals, Exceptions9} \hit{Section} \miss{2.9} \hit{Amendments,} \miss{Revocations, Exceptions9 Section 2.9} \hit{Assignments} \miss{and Subscriptions;} & \vf{0.40} \\ % src: same file, law-edgar-00007393 (0.4000)
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{A second target model}\label{sec:attack:llama}
+
+The gain of the matching term does not depend on Pythia in the one comparison available.
+Llama-3.2-1B, observed at block \vf{12} (width \vf{2048}), replaces Pythia on Corpus NQ with a leak of \vf{90} rows from ten prompts. % src: configs/v7.yaml (unknowns.llama: d3_block 12, width 2048)
+Llama reaches a word-F1 of \vf{0.632} under the hybrid fit and \vf{0.370} under the supervised fit, against \vf{0.604} and \vf{0.352} for Pythia (Table~\ref{tab:attack:llama}). % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json; results/v7_2/main/mixed-oct_w5b-A-prefix.json
+The comparison covers one seed, one block of each model, and two models of about one billion parameters.
+
+\begin{table}[H]
+\caption{A second target model reproduces the gain of the matching term on Corpus NQ.
+Word-F1 averaged over three decoders, seed \vf{1}, \vf{500} selection prompts, a leak of \vf{90} rows from ten prompts (whole prompts, the last one in part), hybrid fit with $\alpha = 0.99$, $\tau = d$, $B = 8{,}192$.
+The difference is hybrid minus supervised with a \vf{95} percent interval; the mismatched-prompt controls lie between \vf{0.11} and \vf{0.17}.}
+\label{tab:attack:llama}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Target model & Hybrid fit & Supervised fit & Difference \\
+\midrule
+Pythia-1B & \vf{0.604} & \vf{0.352} & \vf{$+0.253$} [\vf{0.243}, \vf{0.264}] \\ % src: results/v7_2/main/mixed-oct_w5b-A-prefix.json cells *L90-prefix (0.6042, 0.3516, +0.2526 [0.2426, 0.2640]; controls 0.1063, 0.1433)
+Llama-3.2-1B & \vf{0.632} & \vf{0.370} & \vf{$+0.263$} [\vf{0.251}, \vf{0.274}] \\ % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json cells *L90-prefix (0.6324, 0.3696, +0.2628 [0.2514, 0.2742]; controls 0.1544, 0.1680)
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Training the map through the decoder}\label{sec:attack:decoderkl}
+
+A further training step lowers the teacher-forced scores and raises word-F1 by a small amount.
+The step starts from a hybrid fit on legal128w and trains the map through the frozen SmolLM decoder, on the prompts of the leak, with one of two losses. % src: oct_w4/plan.md; results/legal128w/v7_2/main/oct_w4-summary.json
+The cross-entropy loss is the decoder's cross-entropy on the true next word.
+The KL loss is the KL divergence between the decoder's next-token distributions under the hub outputs of OLMo and under the mapped states.
+The selection prompts chose the KL loss at every budget. % src: oct_w4-summary.json budgets.*.selected (kl/beta0)
+On the \vf{4{,}500} held-out prompts, the KL loss lowers the cross-entropy of SmolLM by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at budgets of \vf{10}, \vf{30}, and \vf{100}, and raises its word-F1 by \vf{0.009}, \vf{0.011}, and \vf{0.023} (Table~\ref{tab:attack:decoderkl}). % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce; confirmation.f1_gain_vs_start.kl/beta0.f1
+The cross-entropy loss raises the cross-entropy on the selection prompts at budgets of \vf{10} and \vf{30}, by \vf{0.17} and \vf{0.16} nats. % src: oct_w4-summary.json budgets.{10,30}.development.gain_vs_start.ce/beta0.ce (-0.1720, -0.1562)
+The KL loss thus lowers cross-entropy on the held-out prompts, while word-F1 rises by \vf{0.023} at most; the cross-entropy loss was read on the selection prompts only.
+The comparison covers one decoder, one seed, and one corpus.
+
+\begin{table}[H]
+\caption{Training the map through the decoder with the KL loss lowers cross-entropy and KL divergence by \vf{0.15} to \vf{0.26} nats and raises word-F1 by \vf{0.01} to \vf{0.02}.
+SmolLM decoder, legal128w, seed \vf{1}, \vf{4{,}500} held-out prompts; cross-entropy and KL divergence in nats per content word under teacher forcing; each gain carries a \vf{95} percent interval from a paired bootstrap over prompts.}
+\label{tab:attack:decoderkl}
+\centering
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Budget & Cross-entropy, before to after & KL divergence, before to after & Gain in word-F1 \\
+\midrule
+10 & \vf{1.48} to \vf{1.29} & \vf{1.45} to \vf{1.25} & \vf{$+0.009$} [\vf{0.006}, \vf{0.012}] \\ % src: results/legal128w/v7_2/main/oct_w4-summary.json budgets.10.confirmation.table.{start,kl/beta0} (1.4842, 1.2896; 1.4464, 1.2503); f1_gain_vs_start (+0.0092 [0.0062, 0.0123])
+30 & \vf{1.02} to \vf{0.87} & \vf{1.00} to \vf{0.84} & \vf{$+0.011$} [\vf{0.009}, \vf{0.013}] \\ % src: same, budgets.30 (1.0236, 0.8709; 0.9966, 0.8432; +0.0111 [0.0090, 0.0134])
+100 & \vf{0.77} to \vf{0.51} & \vf{0.75} to \vf{0.50} & \vf{$+0.023$} [\vf{0.021}, \vf{0.025}] \\ % src: same, budgets.100 (0.7703, 0.5131; 0.7520, 0.4962; +0.0233 [0.0212, 0.0254])
+\bottomrule
+\end{tabular}
+\end{table}

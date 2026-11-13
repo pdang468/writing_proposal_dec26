@@ -1,7 +1,9 @@
-\section{Method and Evaluation}\label{sec:attack:method}
+\section{Mapping into the Hub and Rewriting Reconstructions}\label{sec:attack:method}
 
-The attack trains one affine map; two later comparisons train a two-layer map (Section~\ref{sec:attack:negative}) and a projector for a further decoder (Section~\ref{sec:attack:leak}).
-The map sends each hidden state of the target model into the hub; the frozen projector of a decoder maps the result into that decoder's input space, and the frozen decoder reconstructs the prompt: Pythia block \vf{12} $\to$ affine map $\to$ hub $\to$ projector $\to$ decoder.
+The attack has two rounds.
+In the first round, a trained affine map sends each hidden state of the target model into the hub, and the frozen projectors and decoders reconstruct the prompt: Pythia block \vf{12} $\to$ affine map $\to$ hub $\to$ projector $\to$ decoder.
+In the second round, a language model rewrites the three decoders' reconstructions into one text.
+Only the affine map is trained.
 
 \paragraph{Map.} The map sends a hidden state $s$ of the target model to a point $\hat m$ of the hub:
 \begin{equation}
@@ -9,7 +11,6 @@ The map sends each hidden state of the target model into the hub; the frozen pro
 \label{eq:attack:map}
 \end{equation}
 where $\mu$ is the mean hidden state of the unpaired pool, $W$ is a matrix from \vf{2048} to \vf{512} dimensions, and $b$ is a bias. % src: src/v7/adapter.py; src/v7_2/preprocess.py (centering on pool U); configs/v7.yaml (width 2048, hub_dim 512)
-Only $W$ and $b$ are trained.
 The map acts on one hidden state at a time, as the hub does (Section~\ref{sec:hub:design}).
 
 \paragraph{Loss.} The loss combines a supervised term on the rows of the leak with a matching term on the unpaired pools:
@@ -23,10 +24,10 @@ At $0 < \alpha < 1$ the loss reads the leak and the unpaired pools, and the resu
 At $\alpha = 0$ the loss reads no row, and the result is called a blind map.
 
 \paragraph{Supervised term.} $\mathcal{L}_{\text{sup}}$ is the mean squared distance between the map's output and the hub output of the same row, divided by $\rho_H^2$.
-Rows are sampled by prompt first and then within the prompt, so each prompt of the leak has equal weight whatever its number of rows. % src: src/v7_2/mixed.py (SEED_RULE: prompt uniform, then row uniform)
 The constant $\rho_H$ is the root-mean-square distance of the pooled hub outputs from their mean, so the term does not depend on the scale of the hub. % src: src/v7_2/context.py (rho_H); src/v7/loss.py
 The ridge penalty $\mathcal{R}$ is the squared Frobenius norm of $W$ divided by $\rho_H^2$, with $\lambda = 1$. % src: configs/v7_9_s4.yaml (mixed.ridge_lambdas); src/v7_2/mixed.py
-Unless a table states otherwise, the supervised fit includes the ridge penalty.
+Rows follow the token groups of Section~\ref{sec:hub:training}, because the two models split a text into different tokens.
+Each side of a row averages its model's vectors over one token group, weighted by character coverage and without the normalization to unit length of Chapter~\ref{ch:hub}. % src: src/v6_4/pairs.py
 
 \paragraph{Matching term.} $\mathcal{L}_{\text{match}}$ reads a batch of $B$ mapped hidden states $\hat m_1 \ldots \hat m_B$ from the unpaired pool of the target model and a batch of $B$ hub outputs $h_1 \ldots h_B$ from the unpaired pool of the hub.
 No row of the first batch is matched to a row of the second.
@@ -46,47 +47,17 @@ The loss then asks that the average $\bar h_i$ identify the mapped state it came
 $\mathcal{L}_{\text{match}}$ averages $\ell_i$ over the batch and adds the same loss with the two batches exchanged, each with weight one half. % src: src/v7_2/abc_sqdist.py (abc_sqdist_loss)
 The matching term is low when mapped states and hub outputs are close to one another in a consistent way; it reads no text and no row.
 
-\paragraph{Temperature.} The scale of the temperature $\tau$ comes from the hub alone, and its multiplier is selected by word-F1 (Section~\ref{sec:attack:hybrid}).
-Let $d$ be the median gap between the highest and the second-highest score of a hub output against the other hub outputs of its batch, over \vf{100} batches of \vf{512} hub outputs. % src: src/v7_2/gap.py; results/*/v7_2/main/mixed-v7_9-s0.json gap
-The gap is \vf{0.0576} on Corpus A and \vf{0.0648} on legal128w, and $\tau$ is a multiple of $d$. % src: results/v7_2/main/mixed-v7_9-s0.json gap.sqdist.median (0.05761); results/legal128w/v7_2/main/mixed-v7_9-s0.json (0.06485)
+\paragraph{Temperature.} The temperature $\tau$ is a multiple of a scale $d$ that comes from the hub alone.
+The scale $d$ is the median gap between the highest and the second-highest score of a hub output against the other hub outputs of its batch, over \vf{100} batches of \vf{512} hub outputs. % src: src/v7_2/gap.py; results/*/v7_2/main/mixed-v7_9-s0.json gap
+It is \vf{0.0576} on Corpus NQ and \vf{0.0648} on legal128w. % src: results/v7_2/main/mixed-v7_9-s0.json gap.sqdist.median (0.05761); results/legal128w/v7_2/main/mixed-v7_9-s0.json (0.06485)
 
 \paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates with a learning rate that rises to $3\times10^{-4}$ over \vf{300} warmup updates and follows a cosine decay to zero, no weight decay, and gradients clipped at norm \vf{1.0}. % src: configs/v7_9_s4.yaml (training); src/v7/training.py (lr_multiplier)
-Each update samples \vf{512} rows of the leak, with replacement, and, for the matching term, $B$ rows from each unpaired pool. % src: results/v7_2/main/mixed-v7_9-s5.json setting (paired_batch_rows 512)
+Each update samples \vf{512} rows of the leak, with replacement, and $B$ rows from each unpaired pool. % src: results/v7_2/main/mixed-v7_9-s5.json setting (paired_batch_rows 512)
 The map after the last update is evaluated; no checkpoint is selected.
 A seed fixes the initial map, the draw of the leak, and the order of the batches.
 
-\paragraph{Settings.} Two settings of the hybrid fit appear in the chapter.
-On Corpus A, Sections~\ref{sec:attack:budget} to~\ref{sec:attack:hybrid} report $\alpha = 0.95$, $\tau = 2d$, and $B = 2{,}048$, selected step by step in Section~\ref{sec:attack:hybrid}. % src: results/v7_2/main/mixed-v7_9-s5.json setting, selection
-Section~\ref{sec:attack:leak} reports $\alpha = 0.99$, $\tau = d$, and $B = 8{,}192$ on both corpora. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json setting; results/v7_2/main/mixed-oct_w5b-A-prefix.json setting
-The result files do not record how the second setting was chosen. \todo{Author: state the selection of the second setting, or keep the sentence.}
-
-\paragraph{Data.} The corpora are Corpus A and legal128w of Chapter~\ref{ch:hub}, each with its own frozen hub.
-All training data come from the \vf{40{,}000} training prompts of a corpus. % src: results/v7_2/main/manifest.json (training_pools); results/v7_2/main/anchors-linear.json (pool_size 40000)
-The training prompts are divided once, at random, into two halves of \vf{20{,}000}: one half supplies the unpaired pool of the target model, as hidden states, and the other half supplies the unpaired pool of the hub, as hub outputs of OLMo.
-A leak draws its paired sequences at random from all \vf{40{,}000} training prompts, and the leaks of one seed are nested: a larger budget contains the smaller ones. % src: src/v7_2/anchors_linear.py (nested permutation); mixed-v7_9-s5.json anchor_counts (prompts_in_U)
-On Corpus A, ten paired sequences hold \vf{92} rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (seed 1)
-
-\paragraph{Decoding and score.} Evaluation follows Section~\ref{sec:hub:eval}: each of the three decoders generates greedily from the projected output of the map, without the ground-truth prefix, up to the memory length plus \vf{8} tokens on Corpus A and plus \vf{32} tokens on legal128w. % src: configs/v7.yaml (cap_margin 8); configs/v7_legal128w.yaml (cap_margin 32)
-The score is word-F1, the word overlap between the reconstruction and the true prompt defined in Section~\ref{sec:hub:eval}, averaged over prompts and over the three decoders. % src: src/v7_2/f1.py; src/v7_2/factorial.py
-In this chapter, word-F1 without a decoder's name denotes that three-decoder mean.
-
-\paragraph{Control.} The mismatched-prompt control gives each decoder the mapped states of another prompt and scores the output against the original prompt.
-The other prompt is the evaluation prompt whose number of rows is nearest; Chapter~\ref{ch:hub} takes the next prompt in order instead. % src: src/v6_4/controls.py (length_matched: nearest length, lower index); mixed-*.json cells.*.wrong_memory.rule
-A map whose word-F1 equals its control gains nothing, in mean word-F1, from the prompt's own mapped states.
-
-\paragraph{Hub reference.} The hub reference is the word-F1 that the three decoders reach from the hub outputs of OLMo for the evaluation prompts.
-It measures the frozen hub without any map and averages the three directions from OLMo, including OLMo to itself, where Chapter~\ref{ch:hub} averages the six cross-model directions.
-It is a reference, not an upper bound: the target model and OLMo tokenize a prompt differently, so even a map that fitted every row exactly would give the decoders a different sequence.
-The hub reference is \vf{0.946} on Corpus A and \vf{0.982} on legal128w. % src: results/v7_2/main/factorial.json controls.true_olmo_code.macro_f1 (0.9459); results/legal128w/v7_2/main/mixed-v7_9-s0.json setting.corpus.g2.macro_f1 (0.9824)
-
-\paragraph{Prompt sets.} Two disjoint sets of validation prompts are read, and neither overlaps the training prompts.
-The selection prompts are \vf{500} prompts drawn at random from the \vf{5{,}000} validation prompts of a corpus. % src: v7_run.py (subset_seed 20260903, dev_prompts 500); configs/v7.yaml; configs/v7_legal128w.yaml
-They selected the settings of Section~\ref{sec:attack:hybrid}, and they also report every score in this chapter unless the text names the held-out prompts.
-The held-out prompts are the other \vf{4{,}500} validation prompts. % src: src/v7_2/context.py; results/legal128w/v7_2/main/eval/confirmation/prompt_ids.json
-They selected no setting of the attack, although all \vf{5{,}000} validation prompts selected the hub checkpoint in Chapter~\ref{ch:hub}; they report the legal128w leaks of Section~\ref{sec:attack:leak} for which the text gives a held-out score.
-A score on the selection prompts is therefore not held out from selection.
-The test split of each corpus has not been read.
-
-\paragraph{Intervals and seeds.} A difference between two fits is reported with a \vf{95} percent percentile interval from a paired bootstrap over prompts, with \vf{1{,}000} resamples on the selection prompts and \vf{2{,}000} on the held-out prompts. % src: mixed-*.json bootstrap (1000); results/legal128w/v7_2/main/oct_w5-summary-confirmation-A.json bootstrap (2000)
-The intervals describe variation over prompts, not over seeds.
-Sections~\ref{sec:attack:budget} and~\ref{sec:attack:hybrid} report three seeds; Section~\ref{sec:attack:leak} reports one seed, and each table states its seeds.
+\paragraph{Second round.} Each of the three decoders reconstructs the prompt from the mapped states, as in Section~\ref{sec:hub:eval}.
+A language model, Claude Haiku~\vf{5.5}, then receives the three reconstructions, with the SmolLM reconstruction first, and returns one text. % src: results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json (model claude-haiku-5-5, system_B); attacker_run.py (LEVEL2_ORDER)
+Its instruction reads: ``You get three noisy copies of the same question. Copy 1 is the most reliable; start from it and apply majority rules where the copies disagree. Fix spelling, broken words and repeats. Reply with the text only, inside \texttt{<text></text>}.''
+On legal128w the instruction says ``SEC filing excerpt'' in place of ``question''.
+The language model sees no hidden state and no part of the true prompt; the kind of text is the only outside information it receives.

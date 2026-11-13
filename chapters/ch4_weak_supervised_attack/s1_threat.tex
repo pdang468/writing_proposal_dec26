@@ -14,19 +14,8 @@ No prompt of the second pool is matched to a prompt of the first.
 \item \textbf{A leak.} A small set of hidden states of the target model whose text the attacker knows.
 \end{itemize}
 
-\paragraph{Paired sequences, rows, and budget.} A paired sequence is one prompt for which the attacker holds both the text and the target model's hidden states.
-The attacker runs OLMo on the same text and maps OLMo's hidden states into the hub, which gives the hub outputs for that prompt. % src: src/v6_4/pairs.py (build_pairs)
-The two models split the text into different tokens, so their vectors are matched by token group, the unit defined in Section~\ref{sec:hub:training}.
-% Each token group gives one row: the target model's hidden states averaged over the group, paired with the hub outputs averaged over the same group.
-% The averages weight each token by the characters it covers and are not normalized to unit length, unlike the group vectors of Chapter~\ref{ch:hub}.
-The leak is the set of all rows the attacker holds.
-The budget is the number of paired sequences in the leak.
-Section~\ref{sec:attack:leak} counts rows instead, because a leak there may contain only part of a prompt.
-A paired sequence is a supplied anchor: a correspondence, given to the attacker, between the target model's hidden states and the hub outputs for one text.
-The main fits read supplied anchors only, and Section~\ref{sec:attack:negative} reports one test of anchors inferred without a leak.
-
-% \paragraph{What a leak requires.} Aligning a paired sequence requires the character span of each token of the target model, and so its tokenizer, for the leaked prompts only.
-% No tokenizer access is assumed for the prompts under attack.
-% A row supplies the correspondence for one span of text, although its hidden state may also encode the rest of the prompt.
-
-% \paragraph{Second target model.} Llama-3.2-1B replaces Pythia in one comparison on Corpus A (Section~\ref{sec:attack:leak}); the attacker observes its block \vf{12} (width \vf{2048}). % src: configs/v7.yaml (unknowns.llama: d3_block 12, width 2048)
+\paragraph{Leak, rows, and budget.} The leak consists of paired sequences: prompts for which the attacker holds both the text and the target model's hidden states.
+For each paired sequence, the attacker runs OLMo on the text and obtains the hub outputs of that prompt. % src: src/v6_4/pairs.py (build_pairs)
+A row pairs a hidden state of the target model with the hub output for the same piece of text.
+The map of this chapter is fitted on rows.
+The size of a leak is counted in rows, or in whole paired sequences, called the budget; each table states which.

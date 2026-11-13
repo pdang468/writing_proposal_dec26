@@ -1,27 +1,15 @@
-\section{Hypotheses and Criteria}\label{sec:attack:hypotheses}
+\section{Main Hypotheses}\label{sec:attack:hypotheses}
 
-Chapter~\ref{ch:hub} tested H1; this chapter tests six further hypotheses, each with a numerical criterion.
-The criteria of H2 to H6 refer to word-F1 averaged over the three hub decoders; H7 compares one further decoder with the best hub decoder.
-An interval is a \vf{95} percent bootstrap interval over prompts, and Section~\ref{sec:attack:method} defines the fits, the control, and the hub reference that the criteria name.
-Only the criterion of H7 was written before its run. % src: oct_w5/decoder-plan.md (prediction P4)
-The criteria of H2 to H6 were fixed after the runs, with the margins of the evaluation plans (\vf{0.02}, \vf{0.03}, \vf{0.05}); they are reported as retrospective criteria. % src: v7_9/plan.md (differences: 0.02); oct_w5/plan.md section 6 (margin 0.03); no plan states H2, H3, H5, or H6 as written here
-\todo{Author: confirm the criteria of H2 to H6, which no plan states in this form.}
+Chapter~\ref{ch:hub} tested H1.
+This chapter tests two further hypotheses; the remaining comparisons form the ablation study of Section~\ref{sec:attack:ablations} and carry no hypothesis number.
+Both hypotheses refer to word-F1, the word overlap between a reconstruction and the true prompt, and an interval is a \vf{95} percent bootstrap interval over prompts.
 
-\paragraph{Hypothesis H2: an affine map connects the target model.} One affine map sends the target model's hidden states into the hub and is fitted on paired sequences alone.
-The map yields reconstructions whose word-F1 rises with the budget.
-Criterion: at \vf{1{,}000} paired sequences, word-F1 is at least half of the hub reference, the score the decoders reach from the hub's own outputs.
+\paragraph{Hypothesis H2: matching improves reconstruction from a small leak.} The supervised fit trains the map on the rows of the leak alone.
+The hybrid fit adds a matching term that reads the two unpaired pools and no text (Section~\ref{sec:attack:method}).
+With a leak of \vf{90} rows, word-F1 is higher under the hybrid fit than under the supervised fit.
+Criterion, written before the run: on Corpus NQ and on legal128w, the gain in word-F1 is at least \vf{0.10}, with the lower bound of its interval above \vf{0.05}. % src: w46/plan.md (prediction P1)
 
-\paragraph{Hypothesis H3: matching without a leak yields no readable map.} Trained on the two unpaired pools alone, with no row, a map stays near the mismatched-prompt control.
-Criterion: no tested map exceeds its control by \vf{0.05} word-F1 with the lower bound of the interval above zero.
-
-\paragraph{Hypothesis H4: the matching term helps when the leak is small.} Added to the supervised fit, a matching term on the unpaired pools raises word-F1 at budgets of \vf{10}, \vf{30}, and \vf{100} paired sequences.
-Criterion: at each of the three budgets the gain is at least \vf{0.03} with the lower bound above zero.
-
-\paragraph{Hypothesis H5: the gain shrinks as the leak grows.} Criterion: at \vf{300} and at \vf{1{,}000} paired sequences the gain lies within $\pm$\vf{0.02}.
-
-\paragraph{Hypothesis H6: a leak spread over many prompts decodes better, and no word class improves on a random draw.} At a fixed number of rows, a leak decodes better when it takes one row from each of many prompts than when it takes its rows from one or two prompts.
-Word-F1 does not rise above that of a random draw of rows when the leaked words are restricted to one class.
-Criterion: at \vf{90} rows, the leak spread over \vf{90} prompts exceeds the leak from two prompts by at least \vf{0.03}, and no word-class rule exceeds the random draw by \vf{0.03}.
-
-\paragraph{Hypothesis H7: a larger decoder raises word-F1 on the same mapped states.} H7 is the prediction of the evaluation plan.
-Criterion, written before the run: the larger decoder exceeds the best hub decoder in word-F1, with the lower bound of the difference above \vf{0.03}; an upper bound below \vf{0.02} contradicts H7.
+\paragraph{Hypothesis H3: a second-round language model improves the reconstruction further.} A language model receives the three decoders' reconstructions of a prompt and rewrites them into one text.
+Word-F1 is higher after the rewriting than before.
+Criterion, fixed after the runs: in each tested condition the paired gain in word-F1 is positive, with the lower bound of its interval above zero.
+A second condition is stated but not tested here: the gain should be larger for the reconstructions of the prompt itself than for those of a mismatched prompt (Section~\ref{sec:attack:rewriting}).
