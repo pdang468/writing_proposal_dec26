@@ -1,15 +1,18 @@
-\section{Main Hypotheses}\label{sec:attack:hypotheses}
+\section{Main Hypothesis}\label{sec:attack:hypotheses}
 
 Chapter~\ref{ch:hub} tested H1.
-This chapter tests two further hypotheses; the remaining comparisons form the ablation study of Section~\ref{sec:attack:ablations} and carry no hypothesis number.
-Both hypotheses refer to word-F1, the word overlap between a reconstruction and the true prompt, and an interval is a \vf{95} percent bootstrap interval over prompts.
+This chapter tests one further hypothesis, H2.
+The second-round rewriting is reported as an exploratory result without a hypothesis number, and the remaining comparisons form the ablation study of Section~\ref{sec:attack:ablations}.
 
 \paragraph{Hypothesis H2: matching improves reconstruction from a small leak.} The supervised fit trains the map on the rows of the leak alone.
 The hybrid fit adds a matching term that reads the two unpaired pools and no text (Section~\ref{sec:attack:method}).
 With a leak of \vf{90} rows, word-F1 is higher under the hybrid fit than under the supervised fit.
-Criterion, written before the run: on Corpus A and on legal128w, the gain in word-F1 is at least \vf{0.10}, with the lower bound of its interval above \vf{0.05}. % src: w46/plan.md (prediction P1)
+Criterion, written before the run: on Corpus A and on legal128w, the gain in word-F1 is at least \vf{0.10}, with the lower bound of its \vf{95} percent interval above \vf{0.05}. % src: w46/plan.md (prediction P1)
 
-\paragraph{Hypothesis H3: a second-round language model improves the reconstruction further.} A language model receives the three decoders' reconstructions of a prompt and rewrites them into one text.
-Word-F1 is higher after the rewriting than before.
-Criterion, fixed after the runs: in each tested condition the paired gain in word-F1 is positive, with the lower bound of its interval above zero.
-A second condition is stated but not tested here: the gain should be larger for the reconstructions of the prompt itself than for those of a mismatched prompt (Section~\ref{sec:attack:rewriting}).
+\paragraph{What H2 claims.} H2 is a claim about word-F1, the word overlap between a reconstruction and the true prompt, under the resources of Section~\ref{sec:attack:threat}.
+It does not claim that prompts are recovered exactly, that their names and numbers are recovered, or that a stated amount of information leaks.
+The results report exact match and decoded examples beside word-F1 so that the difference stays visible.
+
+\paragraph{Exploratory question: second-round rewriting.} A language model receives the three decoders' reconstructions of a prompt and rewrites them into one text.
+The question is whether word-F1 after the rewriting exceeds the mean word-F1 of the three reconstructions.
+No criterion preceded the runs, the comparison with the best single decoder has no interval, and no control with mismatched prompts was run for this protocol, so Section~\ref{sec:attack:rewriting} reports the result as exploratory.

@@ -1,20 +1,21 @@
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
-The chapter supports two statements, each within the limits of its runs.
+The chapter supports one main statement and reports one exploratory result, each within the limits of its runs.
 The matching term improves a map fitted on a small leak: with \vf{90} leaked rows, word-F1 on \vf{4{,}500} held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, as means over three seeds, and the lower bounds of both gains exceed the \vf{0.05} of the criterion (H2). % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
-A second-round language model raises word-F1 above the mean of the three decoders by \vf{0.12} to \vf{0.26} in three conditions, and above the best decoder by \vf{0.01} to \vf{0.02} (H3; one seed, selection prompts). % src: results/*/v7_2/main/framework/attacker/*-haiku.json
+In the exploratory experiment, a second-round language model raises word-F1 above the mean of the three decoders by \vf{0.12} to \vf{0.26} in three conditions, and above the best decoder by \vf{0.01} to \vf{0.02} without an interval (one seed, selection prompts). % src: results/*/v7_2/main/framework/attacker/*-haiku.json
 The ablations bound the first statement: the tested blind maps gain at most \vf{0.025} word-F1 over their controls, the gain of the matching term shrinks as the leak grows, and it depends on the temperature.
 
 \paragraph{What the attacker reads.} The attack reads the frozen hub and its decoders, the hidden states of the target model for prompts without text, the attacker's own text of the same domain, and a leak of rows.
-The leak is the only resource that ties a hidden state of the target model to text.
-Building its rows requires the character span of each token of the target model, and so its tokenizer, for the leaked prompts only.
+The leak is the only resource that ties a hidden state of the target model to text, and building its rows requires the tokenizer of the target model for the leaked prompts.
+The experiments also read \vf{500} prompts with known text to select the settings (Section~\ref{sec:attack:threat}).
 The unpaired pools carry no pairing between hidden states and text, yet they account for the difference between the supervised and the hybrid fit.
 The second round reads only the decoders' reconstructions and the kind of text.
 
 \paragraph{What the reconstructions contain.} Word-F1 counts overlapping words.
 On legal text the reconstructions keep the frame of a passage and substitute names and numbers (Table~\ref{tab:attack:legal-examples}), and after the second round entity recall stays at \vf{0.37} for a budget of \vf{10} (Section~\ref{sec:attack:rewriting}).
 On legal128w the hybrid fit also has the higher teacher-forced cross-entropy (Section~\ref{sec:attack:teacher}).
-A high word-F1 therefore does not establish that the facts of a prompt are recovered.
+Exact match under the hybrid fit is \vf{0.21} on Corpus A and zero on legal128w (Section~\ref{sec:attack:hybrid}).
+The results therefore establish a gain in word overlap; they do not establish exact recovery, recovery of the facts of a prompt, or an amount of leaked information.
 
 \paragraph{Limitations.} Six limitations bound the claims.
 \begin{itemize}

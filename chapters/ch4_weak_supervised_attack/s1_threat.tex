@@ -5,17 +5,28 @@ The target model is Pythia-1B, and the attacker observes the hidden states of it
 The goal is the text of the prompt behind an observed sequence of hidden states.
 For that prompt the attacker holds neither the text nor the token identities, and the attacker cannot query the target model.
 
-\paragraph{What the attacker holds.} The attacker holds four resources.
+\paragraph{What the attacker holds.} The attacker holds five resources.
 \begin{itemize}
 \item \textbf{The hub.} The frozen hub of Chapter~\ref{ch:hub} with its source adapters, its projectors, and its three decoders (Qwen, OLMo, SmolLM).
 \item \textbf{An unpaired pool of hidden states.} Hidden states of the target model for prompts from the domain of the prompt under attack, without their text.
 \item \textbf{An unpaired pool of hub outputs.} Text of the same domain, which the attacker passes through OLMo and its source adapter to obtain hub outputs.
 No prompt of the second pool is matched to a prompt of the first.
-\item \textbf{A leak.} A small set of hidden states of the target model whose text the attacker knows.
+\item \textbf{A leak.} A small set of prompts for which the attacker holds both the text and the target model's hidden states, one vector per token.
+\item \textbf{The tokenizer of the target model.} The attacker applies it to the leaked prompts only, to learn which characters each leaked hidden state covers.
+No tokenizer access is assumed for the prompt under attack.
 \end{itemize}
+The leak does not arrive as aligned pairs: the attacker aligns it, as described next.
 
-\paragraph{Leak, rows, and budget.} The leak consists of paired sequences: prompts for which the attacker holds both the text and the target model's hidden states.
+\paragraph{Leak, rows, and budget.} A paired sequence is one leaked prompt: its text and its hidden states under the target model.
 For each paired sequence, the attacker runs OLMo on the text and obtains the hub outputs of that prompt. % src: src/v6_4/pairs.py (build_pairs)
-A row pairs a hidden state of the target model with the hub output for the same piece of text.
+The two models split the text into different tokens, so the attacker groups their tokens by shared character boundaries, with the tokenizer of the target model.
+A row is one such group: the target model's hidden states for a short span of text, paired with the hub outputs for the same span.
+A row covers about one word and may span several tokens; a Corpus A prompt of nine words yields about nine rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
 The map of this chapter is fitted on rows.
-The size of a leak is counted in rows, or in whole paired sequences, called the budget; each table states which.
+Two units count a leak, and they are kept apart: the main experiment counts rows (\vf{90} rows, nine from each of ten prompts), and the other experiments count whole paired sequences, called the budget.
+A budget of \vf{10} is therefore not the \vf{90}-row leak, and scores under the two units are not compared.
+
+\paragraph{Resources of the experiments beyond the leak.} The experiments give the attacker more than the leak, and the results hold under these resources.
+Each unpaired pool holds \vf{20{,}000} prompts of the corpus under attack. % src: results/v7_2/main/manifest.json (training_pools)
+The settings of the attack were selected on \vf{500} further prompts whose text is known and whose hidden states were decoded (Section~\ref{sec:attack:experiments}).
+``A leak of \vf{90} rows'' thus names the paired data on which the map is fitted, not everything the experiments read.
