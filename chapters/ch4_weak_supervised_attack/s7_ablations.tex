@@ -14,6 +14,12 @@ The hybrid fit exceeds the supervised fit by \vf{0.309} word-F1 at a budget of \
 Unpaired matching thus yields its largest gain at the smallest tested budget; at \vf{300} the gain is small but still positive, with an interval of \vf{0.007} to \vf{0.013}.
 The budgets stop at \vf{1{,}000} because no larger leak was run.
 
+On legal128w the gain turns negative at larger budgets (Figure~\ref{fig:attack:budget-legal}).
+With whole paired sequences and one seed, the hybrid fit exceeds the supervised fit by \vf{0.090}, \vf{0.147}, \vf{0.104}, and \vf{0.036} word-F1 at budgets of \vf{1}, \vf{3}, \vf{5}, and \vf{10}, and falls below it by \vf{0.064} and \vf{0.048} at \vf{30} and \vf{100}. % src: results/legal128w/v7_2/main/v8_6-summary.json rows[*].E (0.0898, 0.1474, 0.1042, 0.0359, -0.0640, -0.0478; every interval excludes zero)
+A legal128w prompt holds about \vf{86} rows, so a budget of \vf{10} is a leak of \vf{856} rows and a budget of \vf{100} a leak of \vf{8{,}612} rows. % src: same file, rows[*].pairs (78, 259, 447, 856, 2569, 8612)
+With the supervision fraction selected on legal128w, $\alpha = 0.99$ and $\tau = d$, the difference is \vf{$+0.090$}, \vf{$+0.006$}, and \vf{$-0.007$} at budgets of \vf{10}, \vf{30}, and \vf{100}. % src: results/legal128w/v7_2/main/mixed-v8_7-s2.json seeds.1.budgets.*.cell_minus_benchmark (+0.0899 [0.0821, 0.0983]; +0.0064 [0.0001, 0.0122]; -0.0066 [-0.0108, -0.0022])
+A matching term with a fixed weight can therefore lower word-F1 once the leak is large, and a larger leak calls for a supervision fraction closer to one.
+
 \begin{table}[H]
 \caption{The matching term raises word-F1 by \vf{0.31} at \vf{10} paired sequences and by \vf{0.01} at \vf{300}.
 Word-F1 averaged over three decoders and three seeds, Pythia on Corpus A, \vf{500} selection prompts, which also selected the setting of the hybrid fit ($\alpha = 0.95$, $\tau = 2d$, $B = 2{,}048$).
@@ -40,6 +46,15 @@ Budget (paired sequences) & Supervised fit & Hybrid fit & Difference \\
 Word-F1 averaged over three decoders on the \vf{500} selection prompts of Corpus A; lines are means over three seeds and bands the range over seeds.
 The dotted line is the hub reference, and the gray band is the mismatched-prompt control of the plotted fits.}
 \label{fig:attack:budget}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.75\textwidth]{ch4/budget_curve_legal}
+\caption{On legal128w the hybrid fit exceeds the supervised fit at budgets of \vf{1} to \vf{10} and falls below it at \vf{30} and \vf{100}.
+Word-F1 averaged over three decoders on the \vf{500} selection prompts, seed \vf{1}, whole paired sequences, hybrid fit with $\alpha = 0.95$, $\tau = 2d$, $B = 8{,}192$.
+The dotted line is the hub reference, and the gray band is the mismatched-prompt control of the hybrid fits.}
+\label{fig:attack:budget-legal}
 \end{figure}
 
 \subsection{Matching without a leak}\label{sec:attack:blind}
@@ -114,6 +129,31 @@ On legal128w, one row from each of \vf{90} prompts yields a word-F1 of \vf{0.321
 Most of the difference lies between two prompts and ten: nine consecutive rows from each of ten prompts score \vf{0.304}, only \vf{0.017} below the leak over \vf{90} prompts (interval \vf{0.008} to \vf{0.025}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90-ext2.json seeds.1.budgets.90.axis_effect delta_h:...L90-span9 (-0.0168 [-0.0254, -0.0084])
 On the \vf{4{,}500} held-out prompts the leak over \vf{90} prompts scores \vf{0.326} under the hybrid fit and \vf{0.106} under the supervised fit. % src: results/legal128w/v7_2/main/oct_w5-summary-confirmation-A.json levels H/random/L90/all, S/random/L90
 The comparison rests on one seed and does not separate the number of prompts from the content of the particular prompts drawn.
+Figure~\ref{fig:attack:shape} shows the three leaks beside the Corpus A leak of ten prompts under the same setting.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\textwidth]{ch4/leak_shape}
+\caption{With \vf{90} leaked rows on legal128w, the hybrid fit scores \vf{0.18} for a leak from two prompts and \vf{0.30} to \vf{0.32} for a leak spread over \vf{10} or \vf{90} prompts.
+Word-F1 averaged over three decoders, seed \vf{1}, \vf{500} selection prompts, hybrid fit with $\alpha = 0.99$, $\tau = d$, $B = 8{,}192$.
+The Corpus A leak takes whole prompts, so the two corpora differ in more than the domain.}
+\label{fig:attack:shape}
+\end{figure}
+
+The best setting also shifts with the size of the leak (Figure~\ref{fig:attack:grid-size}).
+With one row from each of \vf{90} prompts, the highest cell of the grid is $\alpha = 0.8$, $\tau = 2d$, at a word-F1 of \vf{0.341} against \vf{0.108} for the supervised fit. % src: results/legal128w/v7_2/main/mixed-oct_w5-grid-L90.json selection.winners.90 (0.3411); cells b90/a1/r1/L90-random (0.1084)
+With one row from each of \vf{864} prompts it is $\alpha = 0.95$, $\tau = d$, at \vf{0.659} against \vf{0.548}. % src: results/legal128w/v7_2/main/mixed-oct_w5-grid-L864.json selection.winners.864 (0.6594); cells b864/a1/r1/L864-random (0.5480)
+The larger leak is also less sensitive to the setting: every cell with $\alpha \ge 0.9$ and $\tau \ge 0.5d$ lies between \vf{0.46} and \vf{0.66}. % src: same file, seeds.1.cells (0.4620 to 0.6594)
+Both grids rest on one seed and on the selection prompts.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{ch4/grid_leak_size}
+\caption{A larger leak moves the best cell toward a higher supervision fraction and a lower temperature (outlined), and flattens the grid.
+Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns) on legal128w, for leaks of one row from each of \vf{90} or \vf{864} prompts, seed \vf{1}, \vf{500} selection prompts, $B = 8{,}192$.
+The titles give the supervised fit on the same leak.}
+\label{fig:attack:grid-size}
+\end{figure}
 
 \begin{table}[H]
 %% BIG CHANGE: polish; reword or relocate this passage for precision and flow.

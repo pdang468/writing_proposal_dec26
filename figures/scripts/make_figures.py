@@ -2,7 +2,7 @@
 
     python figures/scripts/make_figures.py /path/to/representation_alignment
 
-Writes figures/ch4/{budget_curve,grid_search,standard_cell,rewriting,cross_entropy}.{pdf,png}.
+Writes figures/ch4/{budget_curve,grid_search,standard_cell,rewriting,cross_entropy,leak_shape,grid_leak_size,budget_curve_legal}.{pdf,png}.
 Sources: results/v7_2/main/mixed-v7_9-s5.json and, for the hub reference, results/v7_2/main/factorial.json
 (controls.true_olmo_code). Seeds, prompt counts and cell names are read from those files.
 """
@@ -18,7 +18,8 @@ import matplotlib.pyplot as plt
 ROOT = Path(sys.argv[1])
 OUT = Path(__file__).resolve().parents[1]
 INK, INK2, GRID = "#0b0b0b", "#52514e", "#e6e5e1"
-BLUE, ORANGE, VIOLET, GREEN = "#2a78d6", "#eb6834", "#6250d6", "#008300"
+BLUE, ORANGE = "#2a78d6", "#eb6834"
+HYBRID, SUPERVISED = "#4c72b0", "#dd8452"
 plt.rcParams.update({
     "font.family": "serif", "font.size": 9, "axes.edgecolor": INK2, "axes.linewidth": 0.6,
     "axes.spines.top": False, "axes.spines.right": False, "xtick.color": INK2, "ytick.color": INK2,
@@ -42,8 +43,8 @@ def budget():
     g2 = reference["controls"]["true_olmo_code"]["macro_f1"]
     budgets = [10, 30, 100, 300, 1000]
     series = {
-        "supervised fit": (lambda b: f"b{b}/a1/r1", VIOLET, "o", (0, (5, 2))),
-        "hybrid fit": (lambda b: f"b{b}/a0.95/sq/m0/t0.1152/r1/B2048", GREEN, "s", "-"),
+        "supervised fit": (lambda b: f"b{b}/a1/r1", SUPERVISED, "o", (0, (5, 2))),
+        "hybrid fit": (lambda b: f"b{b}/a0.95/sq/m0/t0.1152/r1/B2048", HYBRID, "s", "-"),
     }
     seeds = sorted(d["seeds"])
     assert seeds == ["1", "2", "3"]
@@ -139,14 +140,14 @@ def standard():
             assert d["prompts"] == 4500 and d["population"] == "confirmation"
             for key, cell in d["cells"].items():
                 per["supervised fit" if "/a1/" in key else "hybrid fit"].append(cell["macro_f1"])
-        for k, (label, color) in enumerate((("supervised fit", VIOLET), ("hybrid fit", GREEN))):
+        for k, (label, color) in enumerate((("supervised fit", SUPERVISED), ("hybrid fit", HYBRID))):
             vals = per[label]
             assert len(vals) == 3
             x = i + (k - 0.5) * width
             mean = sum(vals) / 3
-            ax.bar(x, mean, width * 0.92, color=color, alpha=0.85, label=label if i == 0 else None)
+            ax.bar(x, mean, width * 0.92, color=color, label=label if i == 0 else None)
             ax.scatter([x] * 3, vals, s=9, color=INK, zorder=3, linewidths=0)
-            ax.annotate(f"{mean:.2f}", (x, max(vals)), xytext=(0, 3), textcoords="offset points",
+            ax.annotate(f"{mean:.2f}", (x, max(vals)), xytext=(0, 5), textcoords="offset points",
                         ha="center", fontsize=8, color=INK)
             print(name, label, round(mean, 4), [round(v, 4) for v in vals])
     ax.set_xticks(range(len(CORPORA)))
@@ -206,8 +207,8 @@ def cross_entropy():
         get = lambda key: arms[key]["classes"]["content"]["excess_per_word"]
         sup = [get(f"b{b}-a1-r1") for b in budgets]
         hyb = [get(hybrid.format(b=b)) for b in budgets]
-        ax.plot(budgets, sup, color=VIOLET, marker="o", ls=(0, (5, 2)), lw=1.6, ms=4.5, label="supervised fit")
-        ax.plot(budgets, hyb, color=GREEN, marker="s", lw=1.6, ms=4.5, label="hybrid fit")
+        ax.plot(budgets, sup, color=SUPERVISED, marker="o", ls=(0, (5, 2)), lw=1.6, ms=4.5, label="supervised fit")
+        ax.plot(budgets, hyb, color=HYBRID, marker="s", lw=1.6, ms=4.5, label="hybrid fit")
         none = get("no_memory")
         ax.axhline(none, color=INK2, lw=0.8, ls=":")
         ax.annotate(f"no memory {none:.2f}", (budgets[0], none), xytext=(0, 3), textcoords="offset points",
@@ -231,3 +232,124 @@ grid()
 standard()
 rewriting()
 cross_entropy()
+
+
+def bars(ax, groups, width=0.36):
+    """Paired bars, supervised then hybrid, with the value above each bar."""
+    for i, (sup, hyb) in enumerate(groups):
+        for k, (v, color, label) in enumerate(((sup, SUPERVISED, "supervised fit"), (hyb, HYBRID, "hybrid fit"))):
+            x = i + (k - 0.5) * width
+            ax.bar(x, v, width * 0.92, color=color, label=label if i == 0 else None)
+            ax.annotate(f"{v:.2f}", (x, v), xytext=(0, 2), textcoords="offset points", ha="center", fontsize=8, color=INK)
+
+
+def leak_shape():
+    """About 90 leaked rows spread over more or fewer prompts, seed 1, 500 selection prompts."""
+    L = "results/legal128w/v7_2/main"
+    H = "a0.99/sq/m0/t0.06485/r1/B8192"
+    cell = lambda rel, key: load(rel)["seeds"]["1"]["cells"][key]
+    f1 = lambda c: c["final"]["macro_f1"]
+    specs = [
+        ("2 prompts\n90 rows", f"{L}/mixed-oct_w5b-L-prefix.json", f"b90/{H}/L90-prefix", "b90/a1/r1/L90-prefix"),
+        ("10 prompts\n9 rows each", f"{L}/mixed-oct_w5-s1-L90-ext2.json", f"b90/{H}/L90-span9", "b90/a1/r1/L90-span9"),
+        ("90 prompts\n1 row each", f"{L}/mixed-oct_w5-s1-L90.json", f"b90/{H}/L90-random", "b90/a1/r1/L90-random"),
+        ("Corpus A\n10 prompts, 90 rows", "results/v7_2/main/mixed-oct_w5b-A-prefix.json",
+         "b90/a0.99/sq/m0/t0.05761/r1/B8192/L90-prefix", "b90/a1/r1/L90-prefix"),
+    ]
+    groups = []
+    for name, rel, hk, sk in specs:
+        h, s_ = cell(rel, hk), cell(rel, sk)
+        assert h["anchor_counts"]["leak_rows" if "leak_rows" in h["anchor_counts"] else "prompts"] > 0
+        groups.append((f1(s_), f1(h)))
+        print(name.replace("\n", " "), "supervised", round(f1(s_), 4), "hybrid", round(f1(h), 4), "prompts", h["anchor_counts"].get("prompts"))
+    fig, ax = plt.subplots(figsize=(5.6, 2.9))
+    bars(ax, groups)
+    ax.axvline(2.5, color=INK2, lw=0.8, ls=":")
+    ax.annotate("legal128w", (1.0, 0.72), ha="center", fontsize=8.5, color=INK2)
+    ax.set_xticks(range(len(specs)))
+    ax.set_xticklabels([s_[0] for s_ in specs], fontsize=8)
+    ax.set_ylim(0, 0.8)
+    ax.set_ylabel("word-F1 (mean of three decoders)")
+    ax.grid(axis="y")
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=8)
+    fig.tight_layout()
+    save(fig, "ch4/leak_shape")
+
+
+def grid_leak_size():
+    """Hybrid word-F1 over supervision fraction and temperature at 90 and 864 leaked rows, legal128w, seed 1."""
+    alphas = [0.8, 0.9, 0.95, 0.97, 0.99]
+    mults = [0.1, 0.25, 0.5, 1, 2, 4]
+    fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.9))
+    for ax, rows in zip(axes, (90, 864)):
+        d = load(f"results/legal128w/v7_2/main/mixed-oct_w5-grid-L{rows}.json")
+        cells = d["seeds"]["1"]["cells"]
+        taus = d["setting"]["tau_grid"]
+        assert len(taus) == len(mults)
+        z = []
+        for a in alphas:
+            row = []
+            for t in taus:
+                keys = [k for k in cells if k.startswith(f"b{rows}/a{a:g}/sq/") and f"/t{t:g}/" in k]
+                assert len(keys) == 1, (a, t, keys)
+                row.append(cells[keys[0]]["final"]["macro_f1"])
+            z.append(row)
+        sup = cells[f"b{rows}/a1/r1/L{rows}-random"]["final"]["macro_f1"]
+        ax.imshow(z, cmap="Blues", vmin=0, vmax=0.7, aspect="auto")
+        best = max((v, i, j) for i, r in enumerate(z) for j, v in enumerate(r))
+        for i, row in enumerate(z):
+            for j, v in enumerate(row):
+                ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=7.5, color="white" if v > 0.42 else INK)
+        ax.add_patch(plt.Rectangle((best[2] - 0.5, best[1] - 0.5), 1, 1, fill=False, edgecolor=ORANGE, lw=1.8))
+        ax.set_xticks(range(len(mults)))
+        ax.set_xticklabels([f"{m:g}d" for m in mults])
+        ax.set_yticks(range(len(alphas)))
+        ax.set_yticklabels([f"{a:g}" for a in alphas])
+        ax.set_xlabel("temperature")
+        ax.set_title(f"{rows} leaked rows (supervised fit {sup:.2f})", fontsize=9)
+        for side in ("left", "bottom"):
+            ax.spines[side].set_visible(False)
+        ax.tick_params(length=0)
+        print(rows, "supervised", round(sup, 4), "best", round(best[0], 4), alphas[best[1]], mults[best[2]])
+    axes[0].set_ylabel("supervision fraction")
+    fig.tight_layout()
+    save(fig, "ch4/grid_leak_size")
+
+
+def budget_legal():
+    """legal128w: hybrid against supervised fit by budget of whole prompts, seed 1, 500 selection prompts."""
+    rows = load("results/legal128w/v7_2/main/v8_6-summary.json")["rows"]
+    budgets = [r["budget"] for r in rows]
+    sup = [r["supervised"] for r in rows]
+    hyb = [r["hybrid_B8192"] for r in rows]
+    wrong = [r["wrong_memory_large"] for r in rows]
+    g2 = load("results/legal128w/v7_2/main/mixed-v7_9-s0.json")["setting"]["corpus"]["g2"]["macro_f1"]
+    fig, ax = plt.subplots(figsize=(4.6, 3.1))
+    ax.plot(budgets, sup, color=SUPERVISED, marker="o", ls=(0, (5, 2)), lw=1.6, ms=4.5,
+            markeredgecolor="white", markeredgewidth=0.6, label="supervised fit")
+    ax.plot(budgets, hyb, color=HYBRID, marker="s", lw=1.6, ms=4.5,
+            markeredgecolor="white", markeredgewidth=0.6, label="hybrid fit")
+    ax.axhline(g2, color=INK2, lw=0.8, ls=":")
+    ax.annotate(f"hub reference {g2:.3f}", (budgets[0], g2), xytext=(0, 3), textcoords="offset points", fontsize=8, color=INK2)
+    ax.axhspan(min(wrong), max(wrong), color=INK2, alpha=0.15, lw=0)
+    ax.annotate(f"mismatched-prompt control {min(wrong):.2f} to {max(wrong):.2f}", (budgets[1], max(wrong)), xytext=(0, 3),
+                textcoords="offset points", fontsize=8, color=INK2)
+    ax.set_xscale("log")
+    ax.set_xticks(budgets)
+    ax.set_xticklabels([str(b) for b in budgets])
+    ax.minorticks_off()
+    ax.set_ylim(0, 1.05)
+    ax.set_xlabel("budget (paired sequences)")
+    ax.set_ylabel("word-F1 (mean of three decoders)")
+    ax.grid(axis="y")
+    ax.legend(loc="center right", fontsize=8, handlelength=2.6)
+    fig.tight_layout()
+    save(fig, "ch4/budget_curve_legal")
+    print("legal budgets", budgets, "sup", [round(v, 4) for v in sup], "hyb", [round(v, 4) for v in hyb],
+          "E", [(round(r["E"]["mean_diff"], 4), round(r["E"]["ci_low"], 4), round(r["E"]["ci_high"], 4)) for r in rows])
+
+
+leak_shape()
+grid_leak_size()
+budget_legal()

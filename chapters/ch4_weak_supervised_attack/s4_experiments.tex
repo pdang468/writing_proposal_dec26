@@ -38,21 +38,21 @@ Differences between rows in supervision, fitting, and evaluation prevent their s
 
 \begin{table}[H]
 %% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-\caption{The main comparison evaluates \vf{4{,}500} held-out prompts with three seeds; the other rows state their own prompts and seeds.
+\caption{The main comparison evaluates \vf{4{,}500} held-out prompts with three seeds; each result table states the seeds of its experiment.
 Settings of the hybrid fit by experiment: supervision fraction $\alpha$, temperature $\tau$ as a multiple of the scale $d$, and batch size $B$ of the matching term.
 A budget counts whole paired sequences.}
 \label{tab:attack:settings}
 \centering
 \footnotesize\setlength{\tabcolsep}{3pt}
-\begin{tabular}{p{0.24\textwidth}cccp{0.19\textwidth}p{0.15\textwidth}c}
+\begin{tabular}{p{0.27\textwidth}cccp{0.22\textwidth}p{0.20\textwidth}}
 \toprule
-Experiment & $\alpha$ & $\tau$ & $B$ & Leak & Prompts & Seeds \\
+Experiment & $\alpha$ & $\tau$ & $B$ & Leak & Prompts \\
 \midrule
-Main comparison (H2) & \vf{0.9} & $2d$ & \vf{8{,}192} & \vf{90} rows from ten prompts & \vf{4{,}500} held-out & \vf{3} \\ % src: configs/w46_{nq,legal128w}_std.yaml; results/*/v7_2/main/w46-confirmation-s{1,2,3}.json
-Second round (exploratory) & \vf{0.95} & $2d$ & \vf{8{,}192} & budget \vf{10} or \vf{100} & \vf{450} selection & \vf{1} \\ % src: results/*/v7_2/main/framework/attacker/*-haiku.json
-Teacher-forced scores & \vf{0.95} & $2d$ & \vf{8{,}192} & budgets \vf{1} to \vf{100} & \vf{500} selection & Corpus A \vf{3}, legal128w \vf{1} \\ % src: results/*/v7_2/main/framework/teacher_forced/summary.json (Corpus A three seeds, legal128w seed 1)
-Budget curve, Corpus A & \vf{0.95} & $2d$ & \vf{2{,}048} & budgets \vf{10} to \vf{1{,}000} & \vf{500} selection & \vf{3} \\ % src: results/v7_2/main/mixed-v7_9-s5.json
-Leak composition, second target model, decoder training & \vf{0.99} & $d$ & \vf{8{,}192} & \vf{90} rows, or budgets \vf{10} to \vf{100} & \vf{500} selection, \vf{4{,}500} held-out where stated & \vf{1} \\ % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json setting; mixed-v8_7-s1.json, mixed-v8_7-s2.json selection
+Main comparison (H2) & \vf{0.9} & $2d$ & \vf{8{,}192} & \vf{90} rows from ten prompts & \vf{4{,}500} held-out \\ % src: configs/w46_{nq,legal128w}_std.yaml; results/*/v7_2/main/w46-confirmation-s{1,2,3}.json
+Second round (exploratory) & \vf{0.95} & $2d$ & \vf{8{,}192} & budget \vf{10} or \vf{100} & \vf{450} selection \\ % src: results/*/v7_2/main/framework/attacker/*-haiku.json
+Teacher-forced scores, legal128w budget curve & \vf{0.95} & $2d$ & \vf{8{,}192} & budgets \vf{1} to \vf{100} & \vf{500} selection \\ % src: results/*/v7_2/main/framework/teacher_forced/summary.json (Corpus A three seeds, legal128w seed 1)
+Budget curve, Corpus A & \vf{0.95} & $2d$ & \vf{2{,}048} & budgets \vf{10} to \vf{1{,}000} & \vf{500} selection \\ % src: results/v7_2/main/mixed-v7_9-s5.json
+Leak composition, second target model, decoder training & \vf{0.99} & $d$ & \vf{8{,}192} & \vf{90} rows, or budgets \vf{10} to \vf{100} & \vf{500} selection, \vf{4{,}500} held-out where stated \\ % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json setting; mixed-v8_7-s1.json, mixed-v8_7-s2.json selection
 \bottomrule
 \end{tabular}
 \end{table}
