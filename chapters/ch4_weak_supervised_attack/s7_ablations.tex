@@ -2,7 +2,7 @@
 
 The comparisons of this section vary one aspect of the attack at a time: the size of the leak, the presence of the leak, the components of the loss, the composition of the leak, the target model, and a further training step.
 %% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-Each comparison follows its own row in Table~\ref{tab:attack:settings} and evaluates the \vf{500} selection prompts unless stated otherwise.
+Each comparison states its setting, or follows its row in Table~\ref{tab:attack:settings}, and evaluates the \vf{500} selection prompts unless stated otherwise.
 
 \subsection{Size of the leak}\label{sec:attack:budget}
 
@@ -101,6 +101,7 @@ Each row credits a component only with its difference along that order of steps;
 
 %% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
 At a fixed row count, spreading the leak across more prompts yields higher reconstruction word-F1 than drawing it from one or two prompts.
+The leaks of this subsection are fitted with $\alpha = 0.99$, $\tau = d$, and $B = 8{,}192$, a setting selected on legal128w alone, with one seed. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json setting; mixed-v8_7-s1.json, mixed-v8_7-s2.json selection
 On legal128w, one row from each of \vf{90} prompts yields a word-F1 of \vf{0.321} under the hybrid fit, against \vf{0.178} for \vf{90} rows from two prompts (Table~\ref{tab:attack:shape}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json (L90-random 0.3207); mixed-oct_w5b-L-prefix.json (L90-prefix 0.1782)
 Most of the difference lies between two prompts and ten: nine consecutive rows from each of ten prompts score \vf{0.304}, only \vf{0.017} below the leak over \vf{90} prompts (interval \vf{0.008} to \vf{0.025}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90-ext2.json seeds.1.budgets.90.axis_effect delta_h:...L90-span9 (-0.0168 [-0.0254, -0.0084])
 On the \vf{4{,}500} held-out prompts the leak over \vf{90} prompts scores \vf{0.326} under the hybrid fit and \vf{0.106} under the supervised fit. % src: results/legal128w/v7_2/main/oct_w5-summary-confirmation-A.json levels H/random/L90/all, S/random/L90

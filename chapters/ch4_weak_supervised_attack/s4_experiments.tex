@@ -38,8 +38,8 @@ Each experiment addresses a separate question under the settings in its row.
 Differences between rows in supervision, fitting, and evaluation prevent their scores from forming a single numerical progression.
 
 \begin{table}[H]
-\caption{The experiments rest on four settings of the hybrid fit.
-Supervision fraction $\alpha$, temperature $\tau$ as a multiple of the scale $d$, and batch size $B$ of the matching term; each result table states its prompts and seeds.}
+\caption{The main comparison and the ablations rest on four settings of the hybrid fit.
+Supervision fraction $\alpha$, temperature $\tau$ as a multiple of the scale $d$, and batch size $B$ of the matching term; each result table states its prompts and seeds, and the rewriting and leak-composition experiments state their settings in their own sections.}
 \label{tab:attack:settings}
 \centering
 \begin{tabular}{p{0.44\textwidth}ccc}
@@ -47,9 +47,9 @@ Supervision fraction $\alpha$, temperature $\tau$ as a multiple of the scale $d$
 Experiments & $\alpha$ & $\tau$ & $B$ \\
 \midrule
 Main comparison, \vf{90}-row leak (Section~\ref{sec:attack:hybrid}) & \vf{0.9} & $2d$ & \vf{8{,}192} \\ % src: configs/w46_{nq,legal128w}_std.yaml
-Second round, teacher-forced scores, legal128w budget curve & \vf{0.95} & $2d$ & \vf{8{,}192} \\ % src: results/*/v7_2/main/framework/attacker/*-haiku.json; framework/teacher_forced/summary.json; results/legal128w/v7_2/main/v8_6-summary.json
+Teacher-forced scores, legal128w budget curve & \vf{0.95} & $2d$ & \vf{8{,}192} \\ % src: results/*/v7_2/main/framework/teacher_forced/summary.json; results/legal128w/v7_2/main/v8_6-summary.json
 Corpus A budget curve & \vf{0.95} & $2d$ & \vf{2{,}048} \\ % src: results/v7_2/main/mixed-v7_9-s5.json
-Leak composition, second target model, training through the decoder & \vf{0.99} & $d$ & \vf{8{,}192} \\ % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json setting; mixed-v8_7-s1.json, mixed-v8_7-s2.json selection
+Second target model, training through the decoder & \vf{0.99} & $d$ & \vf{8{,}192} \\ % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json setting; mixed-v8_7-s1.json, mixed-v8_7-s2.json selection
 \bottomrule
 \end{tabular}
 \end{table}

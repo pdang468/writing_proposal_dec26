@@ -8,7 +8,7 @@ All three paired intervals exclude zero; the smallest lower bound is \vf{0.115}.
 The baseline of every gain is the mean word-F1 of the three reconstructions, not the best one: the rewriting turns three reconstructions of uneven quality into one that is better than their average.
 
 %% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-The experiment rewrites reconstructions from hybrid fits trained on whole paired sequences (Table~\ref{tab:attack:settings}), on \vf{450} of the \vf{500} selection prompts and one seed; the instruction was selected on the other \vf{50} prompts. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
+The experiment rewrites reconstructions from hybrid fits trained on whole paired sequences, with $\alpha = 0.95$, $\tau = 2d$, and $B = 8{,}192$, on \vf{450} of the \vf{500} selection prompts and one seed; the instruction was selected on the other \vf{50} prompts. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
 Word-F1 in this section is computed on lower-cased words without edge punctuation, for the reconstructions and the rewritten text alike, so its values differ slightly from those of the other sections. % src: same files, definition.normalization
 
 \begin{table}[H]
