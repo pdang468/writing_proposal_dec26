@@ -5,13 +5,13 @@
 \chapter{Translation Hub}\label{ch:hub}
 
 %% BIG CHANGE: polish; restructure the argument and pacing, retaining the stated scope.
-The translation hub connects the hidden states of three open-weight language models through a shared representation space.
-A source adapter and shared backbone map each model's hidden states into this space, and each frozen model reconstructs the source prompt from the resulting hub outputs.
-The central question is whether reconstruction succeeds across models: whether one model decodes the input information retained in another model's states.
+The translation hub is a representation space shared by three open-weight language models.
+Each model's hidden states are mapped into the hub, and each frozen model reconstructs the source prompt from the resulting hub outputs.
+The central question is whether reconstruction succeeds across models: whether one model decodes the input information retained in another model's hidden states.
 
-The hub is trained with full supervision, with all three models' hidden states available for the same prompts.
-Model-specific adapters and a shared backbone map these states into the hub; model-specific projectors connect the hub outputs to the frozen decoders.
-A reconstruction loss trains this path to recover the prompt, while two auxiliary losses encourage alignment within the shared space.
+Model-specific adapters and a shared backbone map the hidden states into the hub, and model-specific projectors connect the hub outputs to the frozen decoders.
+Training is fully supervised: the hidden states of all three models are available for the same prompts.
+A reconstruction loss trains the path from hidden states to prompt, while two auxiliary losses encourage the three models to align within the shared space.
 
 On Natural Questions validation prompts, mean cross-model word-F1 reaches \vf{0.945}, against \vf{0.120} when the decoder receives the hub outputs of a different prompt. % src: results/v6_3/hpc-final/inversion.json
 %% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
