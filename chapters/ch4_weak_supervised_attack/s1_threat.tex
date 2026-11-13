@@ -2,7 +2,8 @@
 
 The attack targets a language model whose hidden states took no part in hub training.
 The target model is Pythia-1B, and the attacker observes the hidden states of its block \vf{12} (width \vf{2048}), one vector per token. % src: configs/v7.yaml (unknowns.pythia: d3_block 12, width 2048)
-The goal is the text of the prompt behind an observed sequence of hidden states.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The attack aims to reconstruct the prompt from an observed sequence of hidden states.
 For that prompt the attacker holds neither the text nor the token identities, and the attacker cannot query the target model.
 
 \paragraph{What the attacker holds.} The attacker holds five resources.
@@ -22,11 +23,17 @@ For each paired sequence, the attacker runs OLMo on the text and obtains the hub
 The two models split the text into different tokens, so the attacker groups their tokens by shared character boundaries, with the tokenizer of the target model.
 A row is one such group: the target model's hidden states for a short span of text, paired with the hub outputs for the same span.
 A row covers about one word and may span several tokens; a Corpus A prompt of nine words yields about nine rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
-The map of this chapter is fitted on rows.
-Two units count a leak, and they are kept apart: the main experiment counts rows (\vf{90} rows, nine from each of ten prompts), and the other experiments count whole paired sequences, called the budget.
+%% BIG CHANGE: polish; reorganize explanation without changing the reported evidence.
+The affine map is fitted on these rows.
+
+%% BIG CHANGE: separate pair construction from the two units of supervision.
+The main experiment counts the leak in rows: \vf{90} rows, nine from each of ten prompts.
+Experiments with whole paired sequences count those sequences as the budget; each comparison states its unit.
 A budget of \vf{10} is therefore not the \vf{90}-row leak, and scores under the two units are not compared.
 
-\paragraph{Resources of the experiments beyond the leak.} The experiments give the attacker more than the leak, and the results hold under these resources.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\paragraph{Resources of the experiments beyond the leak.} The reported reconstruction scores depend on the unpaired pools and the data for setting selection as well as on the leak.
 Each unpaired pool holds \vf{20{,}000} prompts of the corpus under attack. % src: results/v7_2/main/manifest.json (training_pools)
 The settings of the attack were selected on \vf{500} further prompts whose text is known and whose hidden states were decoded (Section~\ref{sec:attack:experiments}).
-``A leak of \vf{90} rows'' thus names the paired data on which the map is fitted, not everything the experiments read.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+``A leak of \vf{90} rows'' thus names the paired data on which the map is fitted, rather than the full set of experimental resources.

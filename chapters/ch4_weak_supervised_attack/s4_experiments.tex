@@ -17,10 +17,14 @@ In this chapter, word-F1 without a decoder's name denotes that three-decoder mea
 The hub reference is the word-F1 that the three decoders reach from the hub outputs of OLMo for the selection prompts, without any map: \vf{0.946} on Corpus A and \vf{0.982} on legal128w. % src: results/v7_2/main/factorial.json controls.true_olmo_code.macro_f1 (0.9459); results/legal128w/v7_2/main/mixed-v7_9-s0.json setting.corpus.g2.macro_f1 (0.9824)
 It is a reference, not an upper bound: the target model and OLMo tokenize a prompt differently.
 
-\paragraph{Prompt sets.} Two disjoint sets of validation prompts are read, and neither overlaps the training prompts.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\paragraph{Prompt sets.} Evaluation separates validation prompts into two disjoint sets, neither of which overlaps the training prompts.
 The selection prompts are \vf{500} prompts drawn at random from the \vf{5{,}000} validation prompts of a corpus; they selected every setting of the attack. % src: v7_run.py (subset_seed 20260903, dev_prompts 500)
+%% BIG CHANGE: separate the next explanatory step.
+
 The held-out prompts are the other \vf{4{,}500} validation prompts; they selected no setting of the attack, although all \vf{5{,}000} validation prompts selected the hub checkpoint in Chapter~\ref{ch:hub}. % src: src/v7_2/context.py; results/v7_2/main/eval/confirmation/prompt_ids.json
-The test split of each corpus has not been read.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The test split of each corpus has not been evaluated.
 
 \paragraph{Teacher-forced scores.} Two further scores are computed under teacher forcing, where the decoder receives the true preceding tokens.
 The excess cross-entropy of a fit is the decoder's cross-entropy on the true next tokens under the mapped states, minus its cross-entropy under the hub outputs of OLMo.
@@ -28,10 +32,13 @@ The KL divergence measures the difference between the decoder's next-token distr
 Both are summed over the tokens of a word and reported in nats per content word, pooled over the three decoders. % src: teacher_forced_run.py; teacher_forced_summary.py; results/v7_2/main/framework/teacher_forced/summary.json (definition)
 
 \paragraph{Experiments and their settings.} Table~\ref{tab:attack:settings} lists the experiments.
-Each tests one question under its stated setting; the experiments do not form one numerical progression, and a score of one row is not comparable with a score of another.
+%% BIG CHANGE: polish; reorganize explanation without changing the reported evidence.
+Each experiment addresses a separate question under the settings in its row.
+Differences between rows in supervision, fitting, and evaluation prevent their scores from forming a single numerical progression.
 
 \begin{table}[H]
-\caption{The main comparison reads \vf{4{,}500} held-out prompts with three seeds; the other rows state their own prompts and seeds.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\caption{The main comparison evaluates \vf{4{,}500} held-out prompts with three seeds; the other rows state their own prompts and seeds.
 Settings of the hybrid fit by experiment: supervision fraction $\alpha$, temperature $\tau$ as a multiple of the scale $d$, and batch size $B$ of the matching term.
 A budget counts whole paired sequences.}
 \label{tab:attack:settings}
@@ -50,15 +57,18 @@ Leak composition, second target model, decoder training & \vf{0.99} & $d$ & \vf{
 \end{tabular}
 \end{table}
 
-The settings differ because the experiments were run at different times.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The experiments retain the settings selected at their respective stages of development.
 The setting of the last row was selected on legal128w alone, with whole paired sequences and one seed; the main comparison then fixed one setting for both corpora, as follows. % src: results/legal128w/v7_2/main/mixed-v8_7-s1.json selection (alpha 0.99), mixed-v8_7-s2.json selection (tau 0.06485)
 
-\paragraph{Grid search.} The setting of the main comparison comes from one grid over the supervision fraction and the temperature, on the \vf{90}-row leak, with seed \vf{1} and the \vf{500} selection prompts of each corpus (Figure~\ref{fig:attack:grid}). % src: results/v7_2/main/mixed-w46-grid.json; results/legal128w/v7_2/main/mixed-w46-grid.json; w46-selection.json
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\paragraph{Grid search.} The main comparison fixes its setting through a grid search over the supervision fraction and the temperature, on the \vf{90}-row leak, with seed \vf{1} and the \vf{500} selection prompts of each corpus (Figure~\ref{fig:attack:grid}). % src: results/v7_2/main/mixed-w46-grid.json; results/legal128w/v7_2/main/mixed-w46-grid.json; w46-selection.json
 The rule, written before the grid was run, selects the cell with the highest mean word-F1 over the two corpora. % src: w46/plan.md; w46-selection.json rule
 The selected cell is $\alpha = 0.9$, $\tau = 2d$, with a two-corpus mean of \vf{0.534}. % src: w46-selection.json best (0.5336)
 It is the best cell on Corpus A (\vf{0.768}) and not on legal128w, where it scores \vf{0.299} against \vf{0.314} for the best cell ($\alpha = 0.8$, $\tau = 2d$). % src: mixed-w46-grid.json seeds.1.cells (0.7679; legal128w 0.2993, 0.3144)
 On both corpora word-F1 falls on either side of $\tau = 2d$ for $\alpha \le 0.95$, and several cells with a low temperature score below the supervised fit.
-The matching term therefore helps only within a range of temperatures, and the selection of that range reads prompts whose text is known.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The matching term therefore helps only within a range of temperatures, and selecting that range requires prompts with known text.
 
 \begin{figure}[ht]
 \centering

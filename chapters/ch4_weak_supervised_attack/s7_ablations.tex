@@ -1,14 +1,17 @@
 \section{Ablations and Additional Comparisons}\label{sec:attack:ablations}\label{sec:attack:negative}
 
 The comparisons of this section vary one aspect of the attack at a time: the size of the leak, the presence of the leak, the components of the loss, the composition of the leak, the target model, and a further training step.
-Each rests on the setting of its row in Table~\ref{tab:attack:settings} and, unless stated, on the \vf{500} selection prompts.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Each comparison follows its own row in Table~\ref{tab:attack:settings} and evaluates the \vf{500} selection prompts unless stated otherwise.
 
 \subsection{Size of the leak}\label{sec:attack:budget}
 
-Word-F1 of the reconstructions rises with the budget, and the gain of the matching term shrinks as the budget grows.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Increasing the paired-prompt budget raises reconstruction word-F1 while reducing the gain from unpaired matching.
 On Corpus A the supervised fit scores \vf{0.348} at a budget of \vf{10} and \vf{0.876} at \vf{1{,}000}, against a hub reference of \vf{0.946} (Table~\ref{tab:attack:hybrid}, Figure~\ref{fig:attack:budget}). % src: results/v7_2/main/mixed-v7_9-s5.json seed_summary.budgets.*.macro_f1 (0.3482, 0.8759); factorial.json controls.true_olmo_code (0.9459)
-The hybrid fit exceeds it by \vf{0.309}, \vf{0.197}, and \vf{0.051} at budgets of \vf{10}, \vf{30}, and \vf{100}, and by \vf{0.010} and \vf{0.002} at \vf{300} and \vf{1{,}000}. % src: same file, seed_summary.budgets.*.cell_minus_benchmark
-The unpaired pools thus add most where the leak is smallest; at \vf{300} the gain is small but still positive, with an interval of \vf{0.007} to \vf{0.013}.
+%% BIG CHANGE: leave the intermediate budget comparisons in the table.
+The hybrid fit exceeds the supervised fit by \vf{0.309} word-F1 at a budget of \vf{10}, with the gain falling to \vf{0.002} at \vf{1{,}000}. % src: same file, seed_summary.budgets.*.cell_minus_benchmark
+Unpaired matching thus yields its largest gain at the smallest tested budget; at \vf{300} the gain is small but still positive, with an interval of \vf{0.007} to \vf{0.013}.
 The budgets stop at \vf{1{,}000} because no larger leak was run.
 
 \begin{table}[H]
@@ -41,7 +44,8 @@ The dotted line is the hub reference, and the gray band is the mismatched-prompt
 
 \subsection{Matching without a leak}\label{sec:attack:blind}
 
-Without any row, the tested blind maps stay close to their mismatched-prompt controls.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Without leaked pairs, the tested blind maps yield word-F1 close to their mismatched-prompt controls.
 Table~\ref{tab:attack:blind} lists four groups of blind maps, trained on the unpaired pools of Corpus A with Pythia as the target model.
 The groups vary the score of the matching term, select the best of twelve further runs, replace the matching term by a Gromov-Wasserstein coupling that pairs the two pools by their internal distances, or set $\alpha = 0$ in Equation~\ref{eq:attack:loss}.
 The largest gain of a blind map over its mismatched-prompt control is \vf{0.025} word-F1 (interval \vf{0.019} to \vf{0.030}), at a word-F1 of \vf{0.080} against a hub reference of \vf{0.946}. % src: results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304])
@@ -52,7 +56,8 @@ The result covers two objectives, one target model, and one corpus, and does not
 \begin{table}[H]
 \caption{No blind map gains more than \vf{0.025} word-F1 over its mismatched-prompt control.
 Word-F1 averaged over three decoders, Pythia on Corpus A; word-F1 and control are means over the maps of a row, and the last column is the largest gain of one map over its own control.
-The first row reads \vf{5{,}000} validation prompts and the others \vf{500} selection prompts.}
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The first row evaluates \vf{5{,}000} validation prompts and the others \vf{500} selection prompts.}
 \label{tab:attack:blind}
 \centering
 \small\setlength{\tabcolsep}{4pt}
@@ -103,14 +108,16 @@ Each row credits a component only with its difference along that order of steps;
 
 \subsection{Composition of the leak}\label{sec:attack:leak}
 
-At a fixed number of rows, a leak spread over many prompts decodes better than a leak taken from one or two prompts.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+At a fixed row count, spreading the leak across more prompts yields higher reconstruction word-F1 than drawing it from one or two prompts.
 On legal128w, one row from each of \vf{90} prompts yields a word-F1 of \vf{0.321} under the hybrid fit, against \vf{0.178} for \vf{90} rows from two prompts (Table~\ref{tab:attack:shape}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json (L90-random 0.3207); mixed-oct_w5b-L-prefix.json (L90-prefix 0.1782)
 Most of the difference lies between two prompts and ten: nine consecutive rows from each of ten prompts score \vf{0.304}, only \vf{0.017} below the leak over \vf{90} prompts (interval \vf{0.008} to \vf{0.025}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90-ext2.json seeds.1.budgets.90.axis_effect delta_h:...L90-span9 (-0.0168 [-0.0254, -0.0084])
 On the \vf{4{,}500} held-out prompts the leak over \vf{90} prompts scores \vf{0.326} under the hybrid fit and \vf{0.106} under the supervised fit. % src: results/legal128w/v7_2/main/oct_w5-summary-confirmation-A.json levels H/random/L90/all, S/random/L90
 The comparison rests on one seed and does not separate the number of prompts from the content of the particular prompts drawn.
 
 \begin{table}[H]
-\caption{At about \vf{90} rows, a leak spread over \vf{10} or \vf{90} prompts decodes at \vf{0.30} to \vf{0.32} under the hybrid fit; a leak from one or two prompts decodes at \vf{0.16} to \vf{0.18}.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\caption{At about \vf{90} rows, a leak spread over \vf{10} or \vf{90} prompts yields word-F1 of \vf{0.30} to \vf{0.32} under the hybrid fit; a leak from one or two prompts yields \vf{0.16} to \vf{0.18}.
 Word-F1 averaged over three decoders, Pythia on legal128w, seed \vf{1}, \vf{500} selection prompts; the hub reference is \vf{0.982}.
 The difference is hybrid minus supervised with a \vf{95} percent interval; the mismatched-prompt control of the hybrid fits lies between \vf{0.06} and \vf{0.13}.
 The last row holds \vf{864} rows and is not matched in size to the others.}
@@ -184,7 +191,8 @@ Lender Credit Decision 58 Section 10.8 Expenses; Indemnities 58 Section 10.9 Res
 
 \subsection{A second target model}\label{sec:attack:llama}
 
-The gain of the matching term does not depend on Pythia in the one comparison available.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The matching term also improves reconstruction for Llama in the one available comparison with a second target model.
 Llama-3.2-1B, observed at block \vf{12} (width \vf{2048}), replaces Pythia on Corpus A with a leak of \vf{90} rows from ten prompts. % src: configs/v7.yaml (unknowns.llama: d3_block 12, width 2048)
 Llama reaches a word-F1 of \vf{0.632} under the hybrid fit and \vf{0.370} under the supervised fit, against \vf{0.604} and \vf{0.352} for Pythia (Table~\ref{tab:attack:llama}). % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json; results/v7_2/main/mixed-oct_w5b-A-prefix.json
 The comparison covers one seed, one block of each model, and two models of about one billion parameters.
@@ -207,14 +215,18 @@ Llama-3.2-1B & \vf{0.632} & \vf{0.370} & \vf{$+0.263$} [\vf{0.251}, \vf{0.274}] 
 
 \subsection{Training the map through the decoder}\label{sec:attack:decoderkl}
 
-A further training step lowers the teacher-forced scores and raises word-F1 by a small amount.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Further training of the affine map through the frozen decoder lowers teacher-forced cross-entropy and yields a small increase in word-F1.
 The step starts from a hybrid fit on legal128w and trains the map through the frozen SmolLM decoder, on the prompts of the leak, with one of two losses. % src: oct_w4/plan.md; results/legal128w/v7_2/main/oct_w4-summary.json
-The cross-entropy loss is the decoder's cross-entropy on the true next word.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The cross-entropy loss is the decoder's cross-entropy on the true next token.
 The KL loss is the KL divergence between the decoder's next-token distributions under the hub outputs of OLMo and under the mapped states.
-The selection prompts chose the KL loss at every budget. % src: oct_w4-summary.json budgets.*.selected (kl/beta0)
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Selection scores favored the KL loss at every budget. % src: oct_w4-summary.json budgets.*.selected (kl/beta0)
 On the \vf{4{,}500} held-out prompts, the KL loss lowers the cross-entropy of SmolLM by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at budgets of \vf{10}, \vf{30}, and \vf{100}, and raises its word-F1 by \vf{0.009}, \vf{0.011}, and \vf{0.023} (Table~\ref{tab:attack:decoderkl}). % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce; confirmation.f1_gain_vs_start.kl/beta0.f1
 The cross-entropy loss raises the cross-entropy on the selection prompts at budgets of \vf{10} and \vf{30}, by \vf{0.17} and \vf{0.16} nats. % src: oct_w4-summary.json budgets.{10,30}.development.gain_vs_start.ce/beta0.ce (-0.1720, -0.1562)
-The KL loss thus lowers cross-entropy on the held-out prompts, while word-F1 rises by \vf{0.023} at most; the cross-entropy loss was read on the selection prompts only.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The KL loss thus lowers cross-entropy on the held-out prompts, while word-F1 rises by \vf{0.023} at most; the cross-entropy loss was evaluated on the selection prompts only.
 The comparison covers one decoder, one seed, and one corpus.
 
 \begin{table}[H]

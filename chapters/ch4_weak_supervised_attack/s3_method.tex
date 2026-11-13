@@ -1,6 +1,7 @@
 \section{Mapping into the Hub and Rewriting Reconstructions}\label{sec:attack:method}
 
-The attack has two rounds.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The affine map connects the target model to the frozen hub; an optional second round rewrites the resulting reconstructions.
 In the first round, a trained affine map sends each hidden state of the target model into the hub, and the frozen projectors and decoders reconstruct the prompt: Pythia block \vf{12} $\to$ affine map $\to$ hub $\to$ projector $\to$ decoder.
 In the second round, a language model rewrites the three decoders' reconstructions into one text.
 Only the affine map is trained.
@@ -13,15 +14,19 @@ Only the affine map is trained.
 where $\mu$ is the mean hidden state of the unpaired pool, $W$ is a matrix from \vf{2048} to \vf{512} dimensions, and $b$ is a bias. % src: src/v7/adapter.py; src/v7_2/preprocess.py (centering on pool U); configs/v7.yaml (width 2048, hub_dim 512)
 The map acts on one hidden state at a time, as the hub does (Section~\ref{sec:hub:design}).
 
-\paragraph{Loss.} The loss combines a supervised term on the rows of the leak with a matching term on the unpaired pools:
+\paragraph{Loss.} %% BIG CHANGE: polish; reorganize explanation without changing the reported evidence.
+The two training terms constrain the map through different data.
+The supervised term compares paired representations of the same text span, while the matching term compares representations drawn from the unpaired pools.
+Their weighted sum is
 \begin{equation}
 \mathcal{L}(\alpha) = \alpha\,\big(\mathcal{L}_{\text{sup}} + \lambda\,\mathcal{R}\big) + (1-\alpha)\,\mathcal{L}_{\text{match}} .
 \label{eq:attack:loss}
 \end{equation}
 The supervision fraction $\alpha$ weights the two terms. % src: results/v7_2/main/mixed-v7_9-s5.json (definition)
-At $\alpha = 1$ the loss reads the leak only, and the result is called the supervised fit.
-At $0 < \alpha < 1$ the loss reads the leak and the unpaired pools, and the result is called the hybrid fit.
-At $\alpha = 0$ the loss reads no row, and the result is called a blind map.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+At $\alpha = 1$ the objective contains only the supervised term and its ridge penalty, and the result is called the supervised fit.
+At $0 < \alpha < 1$ the objective combines supervised fitting with unpaired matching, and the result is called the hybrid fit.
+At $\alpha = 0$ the objective contains only the matching term, and the result is called a blind map.
 
 \paragraph{Supervised term.} $\mathcal{L}_{\text{sup}}$ is the mean squared distance between the map's output and the hub output of the same row, divided by $\rho_H^2$.
 The constant $\rho_H$ is the root-mean-square distance of the pooled hub outputs from their mean, so the term does not depend on the scale of the hub. % src: src/v7_2/context.py (rho_H); src/v7/loss.py
@@ -29,7 +34,8 @@ The ridge penalty $\mathcal{R}$ is the squared Frobenius norm of $W$ divided by 
 Rows follow the token groups of Section~\ref{sec:hub:training}, because the two models split a text into different tokens.
 Each side of a row averages its model's vectors over one token group, weighted by character coverage and without the normalization to unit length of Chapter~\ref{ch:hub}. % src: src/v6_4/pairs.py
 
-\paragraph{Matching term.} $\mathcal{L}_{\text{match}}$ reads a batch of $B$ mapped hidden states $\hat m_1 \ldots \hat m_B$ from the unpaired pool of the target model and a batch of $B$ hub outputs $h_1 \ldots h_B$ from the unpaired pool of the hub.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\paragraph{Matching term.} $\mathcal{L}_{\text{match}}$ compares a batch of $B$ mapped hidden states $\hat m_1 \ldots \hat m_B$ from the unpaired pool of the target model with a batch of $B$ hub outputs $h_1 \ldots h_B$ from the unpaired pool of the hub.
 No row of the first batch is matched to a row of the second.
 The score of a pair is its negative squared distance, $\sigma(u, v) = -\lVert u - v\rVert^2 / \rho_H^2$.
 Each mapped state is first replaced by a weighted average of the hub batch, with weights that favor the nearest hub outputs:
@@ -45,7 +51,9 @@ The loss then asks that the average $\bar h_i$ identify the mapped state it came
 \label{eq:attack:return}
 \end{equation}
 $\mathcal{L}_{\text{match}}$ averages $\ell_i$ over the batch and adds the same loss with the two batches exchanged, each with weight one half. % src: src/v7_2/abc_sqdist.py (abc_sqdist_loss)
-The matching term is low when mapped states and hub outputs are close to one another in a consistent way; it reads no text and no row.
+%% BIG CHANGE: polish; reorganize explanation without changing the reported evidence.
+The return prediction encourages consistency between a mapped state and its weighted combination of hub outputs.
+The matching term requires neither text nor supplied pairs.
 
 \paragraph{Temperature.} The temperature $\tau$ is a multiple of a scale $d$ that comes from the hub alone.
 The scale $d$ is the median gap between the highest and the second-highest score of a hub output against the other hub outputs of its batch, over \vf{100} batches of \vf{512} hub outputs. % src: src/v7_2/gap.py; results/*/v7_2/main/mixed-v7_9-s0.json gap
@@ -58,6 +66,7 @@ A seed fixes the initial map, the draw of the leak, and the order of the batches
 
 \paragraph{Second round.} Each of the three decoders reconstructs the prompt from the mapped states, as in Section~\ref{sec:hub:eval}.
 A language model, Claude Haiku~\vf{5.5}, then receives the three reconstructions, with the SmolLM reconstruction first, and returns one text. % src: results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json (model claude-haiku-5-5, system_B); attacker_run.py (LEVEL2_ORDER)
-Its instruction reads: ``You get three noisy copies of the same question. Copy 1 is the most reliable; start from it and apply majority rules where the copies disagree. Fix spelling, broken words and repeats. Reply with the text only, inside \texttt{<text></text>}.''
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Its instruction is: ``You get three noisy copies of the same question. Copy 1 is the most reliable; start from it and apply majority rules where the copies disagree. Fix spelling, broken words and repeats. Reply with the text only, inside \texttt{<text></text>}.''
 On legal128w the instruction says ``SEC filing excerpt'' in place of ``question''.
 The language model sees no hidden state and no part of the true prompt; the kind of text is the only outside information it receives.

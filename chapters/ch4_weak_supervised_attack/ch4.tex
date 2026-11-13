@@ -4,18 +4,26 @@
 
 \chapter{Weakly Supervised Attack with a Small Leak}\label{ch:attack}
 
-This chapter connects a language model to the frozen translation hub of Chapter~\ref{ch:hub}, and measures how much of the input prompt the frozen decoders then reconstruct from that model's hidden states.
-An affine map sends the hidden states of that model, the target model, into the hub; the projectors and decoders of Chapter~\ref{ch:hub} reconstruct the prompt without any change.
-The setting is weakly supervised: the attacker holds a small leak, a set of hidden states whose text is known, and a large pool of hidden states whose text is unknown.
-The chapter tests one main hypothesis and reports one exploratory result.
-The hypothesis is that a matching term that compares mapped hidden states with unpaired hub outputs improves a map fitted on the leak alone.
-With a leak of \vf{90} rows, mean word-F1 over three seeds on \vf{4{,}500} held-out Natural Questions prompts rises from \vf{0.35} to \vf{0.77}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
-The exploratory result comes from separate experiments: a language model that rewrites the decoders' reconstructions in a second round raises word-F1 above the mean of the three decoders.
-Word-F1 measures word overlap; the chapter does not claim that prompts are recovered exactly or that their facts are recovered.
+%% BIG CHANGE: polish; restructure the argument and pacing, retaining the stated scope.
+The frozen translation hub of Chapter~\ref{ch:hub} reconstructs prompts from the hidden states of its training models.
+This chapter asks whether a model excluded from that training can be connected to the same hub with limited paired data.
+An affine map sends the target model's hidden states into the hub, after which the frozen projectors and decoders reconstruct the prompt.
 
-Section~\ref{sec:attack:threat} states the threat model and Section~\ref{sec:attack:hypotheses} the hypothesis.
-Section~\ref{sec:attack:method} describes the map, the loss, and the second round, and Section~\ref{sec:attack:experiments} the experiments and the selection of the setting.
-Section~\ref{sec:attack:hybrid} reports the main result and Section~\ref{sec:attack:rewriting} the exploratory one, Section~\ref{sec:attack:ablations} the ablation study, and Section~\ref{sec:attack:discussion} the discussion and the limitations.
+The paired data come from a small leak: prompts for which both text and target hidden states are available.
+A supervised term fits the map to these correspondences, while a matching term compares mapped states with unpaired hub outputs.
+The main hypothesis is that adding this matching term improves reconstruction over fitting the map on the leak alone.
+With a leak of \vf{90} rows, mean word-F1 over three seeds on \vf{4{,}500} held-out Natural Questions prompts rises from \vf{0.35} to \vf{0.77}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Word-F1 measures word overlap; this gain does not establish exact or factual recovery.
+
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Separate experiments examine a second round in which a language model rewrites the three decoders' reconstructions into one text.
+The rewritten text exceeds their mean word-F1, but the evidence remains exploratory.
+
+Sections~\ref{sec:attack:threat} and~\ref{sec:attack:hypotheses} define the attacker's resources and the main hypothesis.
+Sections~\ref{sec:attack:method} and~\ref{sec:attack:experiments} describe the method and experimental design.
+Section~\ref{sec:attack:hybrid} reports the matching result, Section~\ref{sec:attack:rewriting} examines rewriting, and Section~\ref{sec:attack:ablations} tests how the matching result varies with the attack conditions.
+Section~\ref{sec:attack:discussion} draws together the findings and their limits.
 
 \input{chapters/ch4_weak_supervised_attack/s1_threat}
 \input{chapters/ch4_weak_supervised_attack/s2_hypotheses}

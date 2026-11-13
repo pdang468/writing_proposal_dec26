@@ -1,15 +1,19 @@
 \section{Exploratory Result: Second-Round Rewriting}\label{sec:attack:rewriting}
 
-In all three tested conditions, the rewritten text scores above the mean of the three decoders' reconstructions; the result is exploratory.
-After Claude Haiku rewrites the three decoders' reconstructions, word-F1 rises from \vf{0.727} to \vf{0.861} on Corpus A at a budget of \vf{10}, from \vf{0.539} to \vf{0.802} on legal128w at a budget of \vf{10}, and from \vf{0.772} to \vf{0.896} on legal128w at a budget of \vf{100} (Table~\ref{tab:attack:rewriting}, Figure~\ref{fig:attack:rewriting}). % src: results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json; results/legal128w/v7_2/main/framework/attacker/attacker-b{10,100}-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json, table."hybrid rung B".word_f1
-The lowest lower bound of the three gains is \vf{0.115}.
+Second-round rewriting raises word-F1 above the mean of the three decoders' reconstructions in all three tested conditions.
+%% BIG CHANGE: retain one illustrative comparison; all three conditions remain in the table.
+On Corpus A at a budget of \vf{10} paired prompts, Claude Haiku raises word-F1 from the decoder mean of \vf{0.727} to \vf{0.861}. % src: results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json; results/legal128w/v7_2/main/framework/attacker/attacker-b{10,100}-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json, table."hybrid rung B".word_f1
+Table~\ref{tab:attack:rewriting} and Figure~\ref{fig:attack:rewriting} report the corresponding gains on legal128w at budgets of \vf{10} and \vf{100}.
+All three paired intervals exclude zero; the smallest lower bound is \vf{0.115}.
 The baseline of every gain is the mean word-F1 of the three reconstructions, not the best one: the rewriting turns three reconstructions of uneven quality into one that is better than their average.
 
-The experiment rewrites hybrid fits with whole paired sequences (Table~\ref{tab:attack:settings}), on \vf{450} of the \vf{500} selection prompts and one seed; the other \vf{50} prompts chose the instruction. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The experiment rewrites reconstructions from hybrid fits trained on whole paired sequences (Table~\ref{tab:attack:settings}), on \vf{450} of the \vf{500} selection prompts and one seed; the instruction was selected on the other \vf{50} prompts. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
 Word-F1 in this section is computed on lower-cased words without edge punctuation, for the reconstructions and the rewritten text alike, so its values differ slightly from those of the other sections. % src: same files, definition.normalization
 
 \begin{table}[H]
-\caption{Rewriting three reconstructions raises word-F1 by \vf{0.12} to \vf{0.26}; over the SmolLM reconstruction alone the rise is \vf{0.01} to \vf{0.02}.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\caption{Rewriting exceeds the mean of the three decoders by \vf{0.12} to \vf{0.26} word-F1; the gain over SmolLM alone is \vf{0.01} to \vf{0.02}.
 Hybrid fits with $\alpha = 0.95$, $\tau = 2d$, $B = 8{,}192$, seed \vf{1}, \vf{450} selection prompts; the gain is after minus the mean of three, with a \vf{95} percent interval from a paired bootstrap over prompts.}
 \label{tab:attack:rewriting}
 \centering
@@ -33,10 +37,13 @@ Word-F1 on \vf{450} selection prompts, seed \vf{1}: the mean of the three decode
 \label{fig:attack:rewriting}
 \end{figure}
 
-\paragraph{Where the gain comes from.} Three comparisons locate the gain.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\paragraph{Comparison with individual decoders.} The gain over the decoder mean is larger than the gain over the best decoder.
 Given one reconstruction, the language model changes word-F1 by \vf{$-0.002$}, \vf{$+0.023$}, and \vf{$+0.012$} in the three conditions. % src: same files, table."hybrid rung A".word_f1.gain (-0.0017, +0.0226, +0.0119)
 The SmolLM reconstruction alone scores \vf{0.854}, \vf{0.779}, and \vf{0.890}, within \vf{0.007}, \vf{0.023}, and \vf{0.007} of the rewritten text. % src: recomputed from the endpoint decoding records and corpus manifests on the 450 prompt ids of the Haiku cache, with the same normalization as the rewritten outputs (0.8539, 0.7793, 0.8897); stored at three decimals in best-decoder-haiku-p7.md
-Most of the gain over the mean therefore equals the advantage of the best decoder, which the instruction names as the most reliable copy; the rewritten text scores \vf{0.01} to \vf{0.02} above it, without a paired interval.
+%% BIG CHANGE: polish; reorganize explanation without changing the reported evidence.
+Most of the gain over the mean is already attained by the best decoder, SmolLM, which the instruction names as the most reliable copy.
+The rewritten text scores \vf{0.01} to \vf{0.02} above SmolLM, without a paired interval for that difference.
 The comparison does not separate the contribution of the two further reconstructions from the instruction that puts SmolLM first.
 On the hub's own outputs the rewriting raises word-F1 from \vf{0.946} to \vf{0.979} on Corpus A and lowers it from \vf{0.984} to \vf{0.969} on legal128w, so the second round can also remove correct words. % src: same files, table."G2 rung B".word_f1 (0.9462, 0.9786; 0.9838, 0.9691)
 
@@ -48,4 +55,5 @@ Two partial controls exist.
 For the rewriting of one reconstruction, the mismatched-prompt control gains at most \vf{0.011} word-F1. % src: same files, table."wrong memory rung A".word_f1.gain (+0.0027, +0.0107, +0.0023)
 With an open model, Qwen3-8B, on another legal128w fit, the rewriting of three reconstructions gains \vf{0.165} against \vf{0.025} for its mismatched-prompt control. % src: results/legal128w/v7_2/main/framework/attacker/attacker-b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random-s1-stock.json table."hybrid rung B" (+0.1652), "wrong memory rung B" (+0.0253)
 The result also rests on one seed, on selection prompts, and on one language model with one instruction, and its gain over the best decoder has no interval.
-A test of the question needs that interval and the missing control.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+A confirmatory test requires a paired interval for the gain over the best decoder and a mismatched-prompt control for the same rewriting protocol.

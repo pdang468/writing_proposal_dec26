@@ -1,28 +1,39 @@
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
-The chapter supports one main statement and reports one exploratory result, each within the limits of its runs.
-The matching term improves a map fitted on a small leak: with \vf{90} leaked rows, word-F1 on \vf{4{,}500} held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, as means over three seeds, and the lower bounds of both gains exceed the \vf{0.05} of the criterion (H2). % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
-In the exploratory experiment, a second-round language model raises word-F1 above the mean of the three decoders by \vf{0.12} to \vf{0.26} in three conditions, and above the best decoder by \vf{0.01} to \vf{0.02} without an interval (one seed, selection prompts). % src: results/*/v7_2/main/framework/attacker/*-haiku.json
-The ablations bound the first statement: the tested blind maps gain at most \vf{0.025} word-F1 over their controls, the gain of the matching term shrinks as the leak grows, and it depends on the temperature.
+%% BIG CHANGE: polish; restructure the argument and pacing, retaining the stated scope.
+Unpaired matching improves reconstruction word-F1 when the affine map is fitted on a small leak.
+With \vf{90} leaked rows, mean word-F1 on \vf{4{,}500} held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, averaged over three seeds. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
+Both gains meet H2, including its required interval lower bound of \vf{0.05}.
+The ablations delimit this result: the gain shrinks as the leak grows and depends on the temperature, while the tested blind maps exceed their controls by at most \vf{0.025} word-F1.
 
-\paragraph{What the attacker reads.} The attack reads the frozen hub and its decoders, the hidden states of the target model for prompts without text, the attacker's own text of the same domain, and a leak of rows.
-The leak is the only resource that ties a hidden state of the target model to text, and building its rows requires the tokenizer of the target model for the leaked prompts.
-The experiments also read \vf{500} prompts with known text to select the settings (Section~\ref{sec:attack:threat}).
+The exploratory rewriting experiment yields a different comparison.
+A second-round language model exceeds the mean of the three decoders by \vf{0.12} to \vf{0.26} word-F1 in three conditions, but exceeds the best decoder by only \vf{0.01} to \vf{0.02}, without an interval for that difference. % src: results/*/v7_2/main/framework/attacker/*-haiku.json
+This result rests on one seed and selection prompts; it does not establish a reliable improvement over the best decoder.
+
+\paragraph{Resources and alignment.} The attack requires the frozen hub and its decoders, the hidden states of the target model for prompts without text, the attacker's own text of the same domain, and a leak of rows.
+%% BIG CHANGE: polish; reorganize explanation without changing the reported evidence.
+The leak supplies the paired correspondences for fitting the map; constructing those rows requires the target tokenizer for the leaked prompts.
+The experiments also select settings on \vf{500} prompts with known text (Section~\ref{sec:attack:threat}).
 The unpaired pools carry no pairing between hidden states and text, yet they account for the difference between the supervised and the hybrid fit.
-The second round reads only the decoders' reconstructions and the kind of text.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The second round receives only the decoders' reconstructions and the kind of text.
 
-\paragraph{What the reconstructions contain.} Word-F1 counts overlapping words.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\paragraph{What the reconstructions contain.} Word-F1 measures overlap between the reconstructed and reference words.
 On legal text the reconstructions keep the frame of a passage and substitute names and numbers (Table~\ref{tab:attack:legal-examples}), and after the second round entity recall stays at \vf{0.37} for a budget of \vf{10} (Section~\ref{sec:attack:rewriting}).
 On legal128w the hybrid fit also has the higher teacher-forced cross-entropy (Section~\ref{sec:attack:teacher}).
-Exact match under the hybrid fit is \vf{0.21} on Corpus A and zero on legal128w (Section~\ref{sec:attack:hybrid}).
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Exact match under the hybrid fit is \vf{0.21} on Corpus A and rounds to zero on legal128w (Section~\ref{sec:attack:hybrid}).
 The results therefore establish a gain in word overlap; they do not establish exact recovery, recovery of the facts of a prompt, or an amount of leaked information.
 
 \paragraph{Limitations.} Six limitations bound the claims.
 \begin{itemize}
-\item \textbf{Held-out prompts.} Only the main comparison and two ablations read the \vf{4{,}500} held-out prompts.
-Most other scores come from the \vf{500} selection prompts, which also selected the settings; the second round reads \vf{450} of them, and one blind comparison reads all \vf{5{,}000} validation prompts.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+\item \textbf{Held-out prompts.} Only the main comparison and two ablations evaluate the \vf{4{,}500} held-out prompts.
+Most other scores come from the \vf{500} selection prompts, which also selected the settings; the second round evaluates \vf{450} of them, and one blind comparison evaluates all \vf{5{,}000} validation prompts.
 The held-out prompts are held out from the attack settings, not from the hub checkpoint, which all validation prompts selected.
-The test splits have not been read.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+The test splits have not been evaluated.
 \item \textbf{Seeds.} The main comparison and the Corpus A budget curve rest on three seeds; the second round and the legal128w teacher-forced scores rest on one, and each ablation table states its seeds.
 The intervals describe variation over prompts, not over seeds.
 \item \textbf{Several settings.} The experiments differ in supervision fraction, temperature, batch size, and form of the leak (Table~\ref{tab:attack:settings}), so their scores do not combine into one curve.

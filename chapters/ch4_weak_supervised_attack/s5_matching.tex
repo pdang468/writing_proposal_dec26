@@ -1,12 +1,13 @@
 \section{Matching Improves Reconstruction from a Small Leak}\label{sec:attack:hybrid}
 
-The matching term raises word-F1 on both corpora, by more than the \vf{0.10} that H2 requires.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+At a fixed leak of \vf{90} rows, unpaired matching raises reconstruction word-F1 on both corpora and meets the gain criterion of H2.
 On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit on Corpus A, and from \vf{0.102} to \vf{0.321} on legal128w (Table~\ref{tab:attack:main}, Figure~\ref{fig:attack:standard}). % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds)
 The gain is \vf{0.411} on Corpus A and \vf{0.219} on legal128w, and in each of the three seeds it is at least \vf{0.402} and \vf{0.201}. % src: same files, hybrid minus supervised per seed (0.4018, 0.4189, 0.4135; 0.2010, 0.2444, 0.2112)
-The same \vf{90} rows thus yield more than twice the word overlap when the map also reads the unpaired pools, which contain no text.
-The gain is a gain in word overlap: exact match, the share of prompts reconstructed verbatim, is \vf{0.21} under the hybrid fit on Corpus A and zero on legal128w, where no held-out prompt is reconstructed exactly by two of the three decoders. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl, field exact_match, three decoders and three seeds (Corpus A hybrid 0.2121: SmolLM 0.4153, OLMo 0.1676, Qwen 0.0534; supervised 0.0001; legal128w hybrid: SmolLM 0.0001, OLMo 0, Qwen 0)
-
-The criterion of H2 also asks for a lower bound above \vf{0.05}, and both corpora meet it.
+%% BIG CHANGE: polish; reorganize explanation without changing the reported evidence.
+The hybrid fit therefore exceeds twice the supervised word-F1 on each corpus with the same \vf{90}-row leak.
+The additional training signal comes from the two unpaired pools.
+Both corpora also meet the interval criterion of H2: the lower bound of the gain exceeds \vf{0.05}.
 On the held-out prompts the interval of the gain is \vf{0.408} to \vf{0.415} on Corpus A and \vf{0.215} to \vf{0.222} on legal128w. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113)
 On the \vf{500} selection prompts the three-seed gain is \vf{0.410} with an interval of \vf{0.401} to \vf{0.420} on Corpus A, and \vf{0.218} with an interval of \vf{0.208} to \vf{0.227} on legal128w. % src: results/v7_2/main/mixed-w46-std.json seed_summary.budgets.90.cell_minus_benchmark (0.4104 [0.4005, 0.4196]); results/legal128w/v7_2/main/mixed-w46-std.json (0.2175 [0.2076, 0.2268])
 
@@ -37,10 +38,20 @@ Word-F1 averaged over three decoders on the \vf{4{,}500} held-out prompts, with 
 \label{fig:attack:standard}
 \end{figure}
 
+%% BIG CHANGE: separate exact recovery from the word-overlap result; clarify rounding.
+
+Exact match distinguishes this word-overlap gain from full-prompt recovery.
+Under the hybrid fit, exact match is \vf{0.21} on Corpus A and rounds to zero on legal128w. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl, field exact_match, three decoders and three seeds (Corpus A hybrid 0.2121: SmolLM 0.4153, OLMo 0.1676, Qwen 0.0534; supervised 0.0001; legal128w hybrid: SmolLM 0.0001, OLMo 0, Qwen 0)
+Two of the three decoders reconstruct no held-out legal128w prompt exactly.
+
 \paragraph{What the scores mean.} On the selection prompts, the mismatched-prompt control of the hybrid fit is \vf{0.110} on Corpus A and \vf{0.073} on legal128w, so the hybrid scores depend on the prompt's own hidden states. % src: mixed-w46-std.json seeds.*.cells.*.wrong_memory.macro_f1 (means 0.1104, 0.0733)
-The supervised fit on legal128w, at \vf{0.102}, is close to its control of \vf{0.070}: \vf{90} rows alone convey little of a legal prompt. % src: same file (0.0698)
+The supervised fit on legal128w, at \vf{0.102}, is close to its control of \vf{0.070}: fitting the map on \vf{90} rows alone yields little word overlap beyond the control. % src: same file (0.0698)
+
+%% BIG CHANGE: separate the reconstruction reference from the mismatched-prompt control.
 On the selection prompts, the hybrid fit stays below the hub reference on both corpora: a word-F1 of \vf{0.762} against \vf{0.946} on Corpus A, and \vf{0.320} against \vf{0.982} on legal128w.
 The legal128w score is the lower one; the two corpora differ in domain and in prompt length, and the leak covers a smaller part of a legal prompt, so the comparison does not isolate the cause.
+
+%% BIG CHANGE: distinguish variation across decoders from variation across corpora.
 The decoders also differ: on the held-out prompts the hybrid fit scores \vf{0.886} through SmolLM, \vf{0.762} through OLMo, and \vf{0.650} through Qwen on Corpus A, and \vf{0.430}, \vf{0.160}, and \vf{0.372} on legal128w. % src: w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (0.8859, 0.7622, 0.6495; 0.4303, 0.1602, 0.3722)
 
 \paragraph{Decoded examples.} Table~\ref{tab:attack:examples} shows three held-out Corpus A prompts through the SmolLM decoder, whose median prompt scores \vf{0.90} under the hybrid fit and \vf{0.40} under the supervised fit. % src: results/v7_2/main/mixed-v7_9/confirmation/{b90-a0.9-sq-m0-t0.11522-r1-B8192-L90-span9, b90-a1-r1-L90-span9}/decoding.jsonl, SmolLM records, seed 1 (medians 0.9000, 0.4000)
@@ -73,13 +84,15 @@ who played robin on once upon a time & Hybrid & \hit{who played} \miss{roon} \hi
 
 \subsection{Teacher-forced scores differ across corpora}\label{sec:attack:teacher}
 
-The teacher-forced scores agree with word-F1 on Corpus A and disagree with it on legal128w.
-The comparison reads a separate experiment with whole paired sequences (Table~\ref{tab:attack:settings}), on the selection prompts.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Matching lowers teacher-forced excess cross-entropy on Corpus A but raises it on legal128w, where free-running word-F1 is nevertheless higher at a budget of \vf{10}.
+The comparison draws on a separate experiment with whole paired sequences (Table~\ref{tab:attack:settings}), on the selection prompts.
 On Corpus A the hybrid fit has the lower excess cross-entropy at all three budgets, from \vf{7.61} to \vf{1.76} nats per content word at a budget of \vf{10} (Table~\ref{tab:attack:ce}, Figure~\ref{fig:attack:ce}). % src: results/v7_2/main/framework/teacher_forced/summary.json arms.{b10-a1-r1, b10-a0.95-sq-m0-t0.1152-r1-B8192}.classes.content.excess_per_word (7.6127, 1.7640)
 The supervised fit at that budget is worse than a decoder with no memory at all (\vf{6.08}). % src: same file, arms.no_memory (6.0751)
 On legal128w the hybrid fit has the higher excess cross-entropy at every budget: \vf{2.82} against \vf{2.46} at a budget of \vf{10}, where its word-F1 is the higher one, \vf{0.523} against \vf{0.487}. % src: results/legal128w/v7_2/main/framework/teacher_forced/summary.json (2.8195, 2.4597); results/legal128w/v7_2/main/v8_6-summary.json rows (hybrid_B8192 0.5228, supervised 0.4869)
 The KL divergence follows the excess cross-entropy within \vf{0.25} nats in every cell.
-Matching therefore does not always improve the decoder's next-word prediction, and teacher-forced cross-entropy and free-running word-F1 need not move together.
+%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
+Matching therefore does not always improve the decoder's next-token prediction, and teacher-forced cross-entropy and free-running word-F1 need not move together.
 The legal128w scores rest on one seed, and no interval is stored for the KL divergence.
 
 \begin{table}[H]
