@@ -1,32 +1,46 @@
-\section{Supervised Budget Curve}\label{sec:attack:budget}
+\section{The Supervised Fit at Increasing Budgets}\label{sec:attack:budget}
 
-\paragraph{Question.} How does free-run word-F1 of the unseen model grow with the number of paired sequences under the affine map and the supervised fit ($\alpha = 1$)?
+The supervised fit meets the criterion of H2.
+At \vf{1{,}000} paired sequences on Corpus A, word-F1 is \vf{0.876}, against a hub reference of \vf{0.946} and a mismatched-prompt control of \vf{0.11}; half of the reference is \vf{0.473}. % src: results/v7_2/main/mixed-v7_9-s4.json seed_summary.budgets.1000.macro_f1.b1000/a1/r1 (0.8759), seeds.*.cells.b1000/a1/r1.wrong_memory (0.1087 to 0.1154); factorial.json controls.true_olmo_code (0.9459)
+An affine map fitted on \vf{1{,}000} prompts thus brings the hidden states of Pythia within \vf{0.07} word-F1 of the hub's own OLMo outputs.
+The scores are means over three seeds on the \vf{500} selection prompts.
 
-\paragraph{Setting.} Corpus A; budgets 10, 30, 100, 300, 1,000 paired prompts drawn at random; three seeds; macro word-F1 over 500 validation-subset prompts and three decoders. The first measurement (V6.4) fitted the map on the raw hub output with paired rows only; the benchmark of every later version (V7.8 onward) is the residual plus ridge fit of Section~\ref{sec:attack:method}.
-
-\paragraph{Result.} Table~\ref{tab:attack:budget} gives the curve. The ridge fit reaches 0.35 at 10 pairs and 0.88 at 1,000, against the ceiling G2 of 0.946. The \emph{knee}, the smallest budget whose gain above the floor reaches 95 percent of the gain at 1,000, is near 500 pairs; 300 pairs under the affine map match a 256-dimensional PCA restriction at 1,000.
+Word-F1 rises with the budget at every step (Table~\ref{tab:attack:budget}, Figure~\ref{fig:attack:budget}).
+The supervised fit scores \vf{0.348} at \vf{10} paired sequences and \vf{0.758} at \vf{100}. % src: mixed-v7_9-s4.json seed_summary.budgets.{10,100}.macro_f1.b*/a1/r1
+The knee is the smallest budget whose gain above the control reaches \vf{95} percent of the gain at the largest budget.
+The knee is \vf{300}: the fit at \vf{300} recovers \vf{96} percent of the gain at \vf{1{,}000}, and the fit at \vf{100} recovers \vf{85} percent. % src: computed from Table values and the controls of the same cells (0.8452 - 0.1103) / (0.8759 - 0.1125) = 0.963; (0.7582 - 0.1102) / 0.7634 = 0.849
+Budgets of \vf{10} to \vf{100} paired sequences are therefore where the supervised fit leaves most to recover, and the following sections concentrate on them.
 
 \begin{table}[H]
-\caption{Supervised budget curve, Corpus A. Macro word-F1, mean over three seeds. Result; \texttt{mixed-v7\_9-s4.json} and \texttt{mixed-v7\_9-s5.json}, reference rows, seeds 1 to 3.}
+\caption{The supervised fit rises from \vf{0.35} at \vf{10} paired sequences to \vf{0.88} at \vf{1{,}000}, against a hub reference of \vf{0.946}.
+Word-F1 averaged over three decoders and three seeds, Pythia on Corpus A, \vf{500} selection prompts; the range over seeds is at most \vf{0.051} in every cell.
+The mismatched-prompt control of these cells lies between \vf{0.10} and \vf{0.15}.}
 \label{tab:attack:budget}
 \centering
 \begin{tabular}{lccccc}
 \toprule
-Budget (paired prompts) & 10 & 30 & 100 & 300 & 1000 \\
+Budget (paired sequences) & 10 & 30 & 100 & 300 & 1{,}000 \\
 \midrule
-Residual only ($\alpha = 1$, no ridge) & 0.303 & 0.441 & 0.656 & 0.817 & 0.884 \\
-Residual + ridge ($\alpha = 1$; benchmark) & 0.348 & 0.536 & 0.758 & 0.845 & 0.876 \\
-Hub ceiling G2 & \multicolumn{5}{c}{0.946} \\
-Wrong-memory control & \multicolumn{5}{c}{0.10 to 0.15} \\ %% FIX: was 0.05 to 0.09; the cells of mixed-v7_9-s5.json give 0.104 to 0.145
+Supervised fit & \vf{0.348} & \vf{0.536} & \vf{0.758} & \vf{0.845} & \vf{0.876} \\ % src: results/v7_2/main/mixed-v7_9-s4.json seed_summary.budgets.*.macro_f1.b*/a1/r1.mean (0.3482, 0.5355, 0.7582, 0.8452, 0.8759)
+Supervised fit without the ridge penalty & \vf{0.303} & \vf{0.441} & \vf{0.656} & \vf{0.817} & \vf{0.884} \\ % src: same file, b*/a1/r0.mean (0.3028, 0.4412, 0.6558, 0.8174, 0.8837); seed range at most 0.051 (b10/a1/r0)
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.75\textwidth]{ch4/budget_curve} %% FIX: figure added; figures/scripts/make_figures.py, mixed-v7_9-s5.json
-\caption{Budget curve on Corpus A. Macro word-F1 over three decoders and 500 validation-subset prompts; lines are the three-seed mean, bands the range over seeds. The dotted line is the hub ceiling G2; the gray band is the mismatched-prompt control of the drawn cells.}
+\includegraphics[width=0.75\textwidth]{ch4/budget_curve}
+\caption{The hybrid fit exceeds the supervised fit by \vf{0.31} word-F1 at \vf{10} paired sequences and by \vf{0.01} at \vf{300}.
+Word-F1 averaged over three decoders on the \vf{500} selection prompts of Corpus A; lines are means over three seeds and bands the range over seeds.
+The dotted line is the hub reference, and the gray band is the mismatched-prompt control of the plotted fits.}
 \label{fig:attack:budget}
 \end{figure}
 
-\paragraph{Reading.} H2 holds: the affine map closes most of the distance to the ceiling by 300 pairs. The first measurement also showed that the decoders differ: at 1,000 pairs SmolLM read the mapped states at 0.936 word-F1 and Qwen at 0.713 (seed 1, V6.4), so macro scores average a strong and a weak decoder. The low-budget end is where the fit is weakest, and it is the regime of the rest of the chapter.
+The ridge penalty raises the supervised fit at \vf{10} to \vf{300} paired sequences and lowers it by \vf{0.008} at \vf{1{,}000} (Table~\ref{tab:attack:budget}).
+The gain at small budgets is consistent with the size of the map: about one million weights, against \vf{92} rows at a budget of \vf{10}.
+
+The three decoders do not read the mapped states equally.
+At \vf{1{,}000} paired sequences the supervised fit scores \vf{0.964} through SmolLM, \vf{0.886} through OLMo, and \vf{0.778} through Qwen, against hub references of \vf{0.986}, \vf{0.971}, and \vf{0.881}. % src: mixed-v7_9-s4.json seeds.*.cells.b1000/a1/r1.final.per_decoder, mean of three seeds (0.9643, 0.8855, 0.7780); factorial.json controls.true_olmo_code.per_decoder (0.9855, 0.9714, 0.8806)
+The three-decoder mean therefore hides a distance to the reference of \vf{0.02} for SmolLM and \vf{0.10} for Qwen.
+
+The result does not show how the fit behaves on held-out prompts or on a second corpus: all scores come from the selection prompts of Corpus A.

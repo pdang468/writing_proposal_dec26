@@ -1,12 +1,25 @@
+\providecommand{\vf}[1]{\textcolor{blue}{#1}}
+\providecommand{\hit}[1]{\textcolor{green!45!black}{#1}}
+\providecommand{\miss}[1]{\textcolor{red}{\textbf{#1}}}
+
 \chapter{Weakly Supervised Attack with a Small Leak}\label{ch:attack}
 
+This chapter attaches a language model that took no part in hub training to the frozen translation hub of Chapter~\ref{ch:hub}, and measures how much of the input prompt the frozen decoders then reconstruct from that model's hidden states.
+An affine map sends the hidden states of the new model into the hub; the projectors and decoders of Chapter~\ref{ch:hub} reconstruct the prompt without any change.
+The setting is weakly supervised: the attacker holds a small leak, a set of hidden states whose text is known, and a large pool of hidden states whose text is unknown.
+On Natural Questions prompts, a map fitted on a leak of \vf{10} prompts reaches a word-F1 of \vf{0.35}; a matching term, which compares mapped hidden states with unpaired hub outputs, raises that word-F1 to \vf{0.66}. % src: results/v7_2/main/mixed-v7_9-s5.json seed_summary.budgets.10.macro_f1 (0.3482, 0.6569)
+Both scores are means over three seeds on \vf{500} prompts that also selected the settings of the fit.
 
-% \input{chapters/ch4_weak_supervised_attack/s1_threat}
-% \input{chapters/ch4_weak_supervised_attack/s2_hypotheses}
-% \input{chapters/ch4_weak_supervised_attack/s3_method}
-% \input{chapters/ch4_weak_supervised_attack/s4_budget}
-% \input{chapters/ch4_weak_supervised_attack/s5_blind}
-% \input{chapters/ch4_weak_supervised_attack/s6_hybrid}
-% \input{chapters/ch4_weak_supervised_attack/s7_leak}
-% \input{chapters/ch4_weak_supervised_attack/s8_negative}
-% \input{chapters/ch4_weak_supervised_attack/s9_discussion}
+The chapter states the threat model (Section~\ref{sec:attack:threat}) and the hypotheses with their criteria (Section~\ref{sec:attack:hypotheses}), then the method and the evaluation (Section~\ref{sec:attack:method}).
+Four results sections follow: the supervised fit at increasing leak sizes (Section~\ref{sec:attack:budget}), matching without any leak (Section~\ref{sec:attack:blind}), the supervised fit with the matching term (Section~\ref{sec:attack:hybrid}), and the composition of a small leak (Section~\ref{sec:attack:leak}).
+Section~\ref{sec:attack:negative} lists four changes to the method with small or negative effects on word-F1, and Section~\ref{sec:attack:discussion} states what the results show and what they leave open.
+
+\input{chapters/ch4_weak_supervised_attack/s1_threat}
+\input{chapters/ch4_weak_supervised_attack/s2_hypotheses}
+\input{chapters/ch4_weak_supervised_attack/s3_method}
+\input{chapters/ch4_weak_supervised_attack/s4_budget}
+\input{chapters/ch4_weak_supervised_attack/s5_blind}
+\input{chapters/ch4_weak_supervised_attack/s6_hybrid}
+\input{chapters/ch4_weak_supervised_attack/s7_leak}
+\input{chapters/ch4_weak_supervised_attack/s8_negative}
+\input{chapters/ch4_weak_supervised_attack/s9_discussion}

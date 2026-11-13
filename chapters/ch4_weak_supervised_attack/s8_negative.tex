@@ -1,27 +1,30 @@
-\section{Negative Results}\label{sec:attack:negative}
+\section{Changes with Small or Negative Effects}\label{sec:attack:negative}
 
-Each row changed one thing against the carried settings and failed its own prediction. They bound the method and stay out of the main narrative.
+Four changes to the method were tested against the fits of the previous sections; each lowers word-F1 or raises it by less than \vf{0.01} (Table~\ref{tab:attack:negative}).
+Each row compares one change with the fit it replaces, on the same prompts.
 
 \begin{table}[H]
-\caption{Discarded changes. Each number is against the carried setting at the stated budget. Result; report paths in \texttt{documents/experiment-log.md}.}
+\caption{Each of four changes to the method lowers word-F1 or raises it by a point estimate below \vf{0.01}.
+Word-F1 averaged over three decoders unless a decoder is named, Pythia as the unseen model, \vf{500} selection prompts unless stated; brackets are \vf{95} percent intervals.}
 \label{tab:attack:negative}
 \centering
-\small
-\begin{tabular}{llll}
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{0.34\textwidth}p{0.20\textwidth}p{0.36\textwidth}}
 \toprule
-Version & Change & Outcome & Verdict \\
+Change & Setting & Result \\
 \midrule
-V4.1 & frequency and position clues for blind maps & clues break the null; both gate designs fail & no-go \\
-V5 & learned hub slots instead of interpolation & slots 0.762 against interpolation 0.790, interval below 0 & no-go \\
-V7.3 & pseudo-anchors from the decoder's own output & position rule +0.007; log-prob rule collapses to 2 to 5 tokens (0.041) & no-go \\
-V7.4 & contrastive supervised term & endpoint 0.12 against ridge 0.88 (location error) & replaced by residual \\
-V8 & two-layer SiLU adapter & $-0.12$ at budget 10 against affine & no-go \\
-V8 & projectors on normalized hub output & $-0.15$ (SmolLM collapse) & no-go \\
-V8.2 & $\tau$ rescaled to batch 8192 & within 0.006, three seeds & no change \\
-w43 & decoder-side fine-tune of the map on teacher-forced KL & content-word CE $-0.20$ nats at budget 10, word-F1 +0.01 & no gain in the read-out \\
-w44c & Llama-3.2-3B as a stronger decoder & $-0.273$ against SmolLM on hybrid memories & no-go \\
+A contrastive supervised term in place of the squared distance & Corpus A, \vf{1{,}000} paired sequences, seed \vf{1} & \vf{0.122}, against \vf{0.879} for a closed-form ridge regression on the same rows \\ % src: results/v7_2/main/mixed.json seeds.1.cells.b1000/a1.final.macro_f1 (0.1224); seeds.1.budgets.1000.ridge.macro_f1 (0.8792)
+Rows inferred from the decoder's own output, with no leak & Corpus A, seed \vf{1} & \vf{0.129}, above its control by \vf{0.007} [\vf{0.003}, \vf{0.010}] \\ % src: results/v7_2/main/pseudo-anchors.json seeds.1.pairings.position.rounds.2 (0.1289; +0.0066 [0.0028, 0.0104]); the round was chosen on the same prompts
+A two-layer map in place of the affine map, hybrid fit & Corpus A, \vf{10} paired sequences, three seeds & \vf{0.610} against \vf{0.726}, a difference of \vf{$-0.117$} [\vf{$-0.123$}, \vf{$-0.110$}] \\ % src: results/v7_2/main/mixed-v8-s2.json seed_summary.budgets.10.axis_effect (b10/a0.95/sq/m0/t0.1152/r1/B8192/two: -0.1165 [-0.1228, -0.1102]); macro_f1 (0.6097, 0.7262)
+Further training of the map through the frozen SmolLM decoder & legal128w, \vf{10} paired sequences, seed \vf{1}, SmolLM, \vf{4{,}500} held-out prompts & a gain of \vf{0.009} [\vf{0.006}, \vf{0.012}] \\ % src: results/legal128w/v7_2/main/oct_w4-summary.json budgets.10.confirmation.f1_gain_vs_start.kl/beta0 (+0.0092 [0.0062, 0.0123])
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Reading.} The map's capacity is not the limit (two-layer loses), the decoder's capacity is not the limit (Llama-3B loses), and self-generated anchors do not replace supplied ones. What remains is the information in the pairs and in the unpaired pool, which is where the hybrid acts.
+The contrastive term is an InfoNCE loss on the rows of the leak; the comparison changes both the objective and the fitting procedure, so it favors the ridge regression under these settings without identifying the cause of the difference. % src: v7_2/plan.md (paired InfoNCE term)
+The inferred rows pair each hidden state with the hub output at the same position of the decoder's own reconstruction, so the map trains on its own errors.
+The two-layer map scores \vf{0.117} word-F1 below the affine map at a budget of \vf{10}; the supervised fit was not compared.
+The further training raises SmolLM word-F1 by \vf{0.009} on prompts held out from the selection of the attack settings, a gain that is positive and small.
+The further training starts from the hybrid fit and minimizes, on the prompts of the leak, the Kullback--Leibler divergence between SmolLM's next-token distributions under the hub outputs of OLMo and under the mapped states, both with the ground-truth prefix. % src: oct_w4/plan.md (question; losses, row b)
+
+Each row is one comparison under one setting; none shows that the change fails under other budgets, corpora, or schedules.

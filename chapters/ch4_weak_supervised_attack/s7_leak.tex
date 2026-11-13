@@ -1,69 +1,154 @@
-\section{Leak Study at About 100 Paired Rows}\label{sec:attack:leak}
+\section{The Composition of a Small Leak}\label{sec:attack:leak}
 
-The budget so far counted whole paired prompts. A realistic leak is smaller and scattered: a handful of token rows whose text the attacker knows, spread over many prompts. This section fixes the leak at 90 aligned rows and varies its shape, its word content, the corpus, and the decoder.
+This section asks whether the composition of a leak, at a fixed number of rows, changes word-F1.
+The budgets of the previous sections count whole paired sequences; a leak may instead hold a few rows from each of many prompts, or rows of one kind of word.
+The leak is fixed near \vf{90} rows, the size of ten Corpus A prompts, and varies which rows it holds.
+The corpus is legal128w, whose prompts average \vf{61} words (Section~\ref{sec:hub:legal}), so that \vf{90} rows fit in one or two prompts or spread over ninety.
+The hybrid fit has $\alpha = 0.99$, $\tau = d$, and $B = 8{,}192$; the supervised fit reads the same rows. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json setting (alphas 0.99, tau_sqdist 0.06485, blind_batch_rows 8192)
+All results of this section rest on one seed.
 
-\subsection{Shape: 90 rows over 90 prompts against one whole prompt}
-\paragraph{Question.} At a matched row count, does spreading the leak across prompts beat one whole prompt?
+\subsection{Rows spread over many prompts}\label{sec:attack:leak:spread}
 
-\paragraph{Setting.} legal128w hub; Pythia block 12 $\to$ affine map $\to$ hub $\to$ frozen projectors $\to$ Qwen, OLMo, SmolLM, free-run over the 128-token prompt. Hybrid: $\alpha = 0.99$, $\tau = 1\,d_{\text{sq}} = 0.0649$, $B = 8192$, ridge $\lambda = 1$, 3,000 updates (the V8.7 selection on legal128w). Supervised: $\alpha = 1$. Leaks: 90 random rows, one per prompt; 78 rows from one whole prompt (budget 1); ten prompts with nine rows each. Seed 1; 500 validation-subset prompts for levels, 4,500 confirmation prompts for decisions.
-
-\paragraph{Result.} Table~\ref{tab:attack:shape}. Ninety single rows over ninety prompts (hybrid 0.326 on confirmation) beat one whole prompt of 78 rows (0.161) by a factor of two; ten prompts with nine rows each sit between (0.304). The supervised fit shows the same order at a lower level (0.106, 0.087, 0.094). The hybrid's gain $E$ over the supervised fit is +0.220 [+0.217, +0.223] at 90 scattered rows.
+The first part of H6 meets its criterion.
+Under the hybrid fit, \vf{90} rows taken one from each of \vf{90} prompts yield a word-F1 of \vf{0.321}, against \vf{0.178} for \vf{90} rows from two prompts (Table~\ref{tab:attack:shape}).
+The difference of \vf{0.14} exceeds the \vf{0.03} of the criterion. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json (L90-random 0.3207); mixed-oct_w5b-L-prefix.json (L90-prefix 0.1782)
+No interval is stored for that difference, because the two fits come from separate runs.
+One whole prompt of \vf{78} rows scores \vf{0.162}. % src: mixed-oct_w5b-L.json (b1 0.1615)
+For these sampled leaks, spreading the rows over prompts raises word-F1; the comparison does not separate the number of prompts from the content of the particular prompts drawn.
+Most of the difference lies between one or two prompts and ten: ten prompts with nine consecutive rows each score \vf{0.304}, only \vf{0.017} below the leak over \vf{90} prompts (interval \vf{0.008} to \vf{0.025}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90-ext2.json seeds.1.budgets.90.axis_effect delta_h:...L90-span9 (-0.0168 [-0.0254, -0.0084])
+On the \vf{4{,}500} held-out prompts the leak over \vf{90} prompts scores \vf{0.326} under the hybrid fit and \vf{0.106} under the supervised fit, a gain of \vf{0.220} (interval \vf{0.217} to \vf{0.223}). % src: results/legal128w/v7_2/main/oct_w5-summary-confirmation-A.json levels H/random/L90/all, S/random/L90; contrasts E/random/L90/all
+The supervised fit stays below \vf{0.11} for every leak of about \vf{90} rows, and for the leaks spread over \vf{10} or \vf{90} prompts the gain of the matching term is about twice the supervised score.
 
 \begin{table}[H]
-\caption{Leak shape on legal128w at about 90 rows. Macro word-F1, seed 1. Result; confirmation prompts where marked, else validation subset. \texttt{oct\_w5-report.md}, \texttt{mixed-oct\_w5b-L.json}, \texttt{mixed-oct\_w5-s1-L90-ext3.json}.}
+\caption{At about \vf{90} rows, a leak spread over \vf{10} or \vf{90} prompts decodes at \vf{0.30} to \vf{0.32} under the hybrid fit; a leak from one or two prompts decodes at \vf{0.16} to \vf{0.18}.
+Word-F1 averaged over three decoders, Pythia on legal128w, seed \vf{1}, \vf{500} selection prompts; the hub reference is \vf{0.982}.
+The difference is hybrid minus supervised with a \vf{95} percent interval; the mismatched-prompt control of the hybrid fits lies between \vf{0.06} and \vf{0.13}.
+The last row holds \vf{864} rows and is not matched in size to the others.}
 \label{tab:attack:shape}
 \centering
-\small %% FIX: the intervals widen the table
-\begin{tabular}{lcccc}
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
 \toprule
-Leak & Rows & Hybrid & Supervised & $E$ \\
+Leak & Prompts & Rows & Hybrid fit & Supervised fit & Difference \\
 \midrule
-90 prompts $\times$ 1 row (confirmation, 4,500) & 90 & 0.326 & 0.106 & +0.220 [+0.217, +0.223] \\
-10 prompts $\times$ 9 rows (validation subset) & 90 & 0.304 & 0.094 & +0.210 [+0.200, +0.220] \\
-1 prompt, whole (validation subset) & 78 & 0.161 & 0.087 & +0.075 [+0.067, +0.082] \\ %% FIX: +0.075, mixed-oct_w5b-L.json
-864 prompts $\times$ 1 row (validation subset) & 864 & 0.628 & 0.548 & +0.080 [+0.072, +0.088] \\ %% FIX: filled from mixed-oct_w5-s1-L864.json (validation subset); confirmation, 4,500 prompts: 0.631, 0.546, +0.085 [+0.082, +0.087]
+One row per prompt & \vf{90} & \vf{90} & \vf{0.321} & \vf{0.108} & \vf{$+0.212$} [\vf{0.202}, \vf{0.222}] \\ % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json cells *L90-random (0.3207, 0.1084, +0.2123 [0.2022, 0.2218]; control 0.1006)
+Nine consecutive rows per prompt & \vf{10} & \vf{90} & \vf{0.304} & \vf{0.094} & \vf{$+0.210$} [\vf{0.200}, \vf{0.220}] \\ % src: mixed-oct_w5-s1-L90-ext2.json cells *L90-span9 (0.3039, 0.0938, +0.2101 [0.1999, 0.2197]; control 0.1043)
+One prompt and part of a second & \vf{2} & \vf{90} & \vf{0.178} & \vf{0.049} & \vf{$+0.130$} [\vf{0.121}, \vf{0.138}] \\ % src: mixed-oct_w5b-L-prefix.json cells *L90-prefix (0.1782, 0.0487, +0.1295 [0.1213, 0.1378]; control 0.0605)
+One whole prompt & \vf{1} & \vf{78} & \vf{0.162} & \vf{0.087} & \vf{$+0.075$} [\vf{0.067}, \vf{0.082}] \\ % src: mixed-oct_w5b-L.json cells b1/* (0.1615, 0.0867, +0.0748 [0.0669, 0.0822]; control 0.0738)
+\midrule
+One row per prompt & \vf{864} & \vf{864} & \vf{0.628} & \vf{0.548} & \vf{$+0.080$} [\vf{0.072}, \vf{0.088}] \\ % src: mixed-oct_w5-s1-L864.json cells *L864-random (0.6281, 0.5480, +0.0801 [0.0724, 0.0876]; control 0.1266)
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Word content of the leaked rows}
-\paragraph{Question.} At 90 rows, one per prompt, does the word class of the leaked tokens change the hybrid's word-F1 and its gain?
+With \vf{864} rows, one from each of \vf{864} prompts, the supervised fit reaches \vf{0.548} and the gain of the matching term falls to \vf{0.080}.
+On the held-out prompts the two scores are \vf{0.631} and \vf{0.546}, a gain of \vf{0.085} (interval \vf{0.082} to \vf{0.087}). % src: oct_w5-summary-confirmation-A.json levels H/random/L864/all, S/random/L864; contrasts E/random/L864/all
+The gain thus shrinks as the leak grows, as it does on Corpus A (Section~\ref{sec:attack:hybrid}).
 
-\paragraph{Setting.} Five leak rules differing only in the predicate on the drawn row's word: any word (random); stop word; mid-frequency (rank 101 to 1,000 in the legal128w training table); rare (rank above 1,000 or absent); one repeated word. Later extensions: balanced class shares; every form distinct; and, inside a fixed shape, each class reduced to its own rows (17 to 36 rows) against a count-matched random subset. Predictions written before the run: stop-word leaks lose at least 0.03 (P1); mid-frequency leaks gain at least 0.03 (P2); one repeated word loses against mid (P9).
-
-\paragraph{Result.} On confirmation, random 0.326, mid-frequency 0.252, stop words 0.056 (validation subset: rare 0.226, one word 0.053). P1 and P9 hold; P2 is contradicted: mid-frequency leaks lower the hybrid by 0.074 and its gain by 0.062 [0.065, 0.059] against random. No rule beats random (balanced $-0.057$, distinct +0.009, span9 $-0.017$). Inside a fixed shape, every class cell sits within 0.03 of its row-count control, so the class effect at 90 $\times$ 1 is prompt coverage, not word content. Stop-word leaks give the hybrid no gain at 90 rows ($E$ +0.000) and a large one at 864 rows ($E$ +0.263).
-
-\paragraph{Reading.} H6 holds: the shape of the leak, how many prompts it touches, matters more than which words leak. Content-rich words are not better anchors; a leak of stop words is useless until there are many of them.
-
-\subsection{Corpus: question prompts against legal text}
-\paragraph{Question.} Why does the same leak give 0.60 on Corpus A and 0.33 on legal128w, and is the shortfall the model's, the text length's, or the domain's?
-
-\paragraph{Result.} Table~\ref{tab:attack:corpus}. A second unseen model, Llama-3.2-1B layer 12 on Corpus A, reaches hybrid 0.632 against supervised 0.370 at exactly 90 rows, the same level and gain as Pythia (0.604, 0.352), so the shortfall tracks the corpus, not the model. On legal10s, the legal documents cut to Corpus A's length, the hybrid reaches 0.318 against 0.114 ($E$ +0.204 [+0.191, +0.216]); the gain lies between legal128w (+0.129 at the exact-90 shape) and Corpus A (+0.253), so length explains part of the difference and domain the rest. A prefix read of the first nine decoded words against the first nine true words gives 0.366 for the random-90 hybrid on legal128w against 0.735 for the budget-10 hybrid on Corpus A: the legal shortfall sits in the opening words, not in the 128-token length. \todo{legal10s is labeled "pilot, not comparable": the SmolLM G2 comparability bound missed the $-0.03$ margin by 0.002.}
+Table~\ref{tab:attack:legal-examples} shows three reconstructions under the leak of one row from each of \vf{90} prompts, through the SmolLM decoder, whose median prompt scores \vf{0.55}. % src: results/legal128w/v7_2/main/mixed-v7_9/runs/b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random-s1/endpoint/decoding.jsonl, SmolLM records (median 0.5502, maximum 0.836)
+Through SmolLM no selection prompt is reconstructed exactly; the highest score is \vf{0.84}.
+In the three examples the errors are fluent substitutions: ``registrant'' becomes ``insurer'', and dates, exhibit numbers, section numbers, and a company name are replaced by others of the same kind.
+The reconstruction itself does not mark which words match the source and which are substitutions.
 
 \begin{table}[H]
-\caption{Exact-90 leak across corpora and unseen models. Macro word-F1, seed 1, 500 validation-subset prompts; $E$ = hybrid minus supervised, paired document bootstrap. Result; \texttt{oct\_w5b-report.md}, \texttt{nqllama/.../mixed-oct\_w5b-s1-prefix.json}.}
-\label{tab:attack:corpus}
+\caption{On legal text, the hybrid fit at \vf{90} rows recovers the frame of a passage and substitutes names and numbers.
+Reconstructions through the SmolLM decoder for three legal128w selection prompts, chosen at high, intermediate, and low word-F1 (seed \vf{1}, one row from each of \vf{90} prompts).
+Decoded words that match the true prompt are green; the others are red and bold.}
+\label{tab:attack:legal-examples}
 \centering
-\begin{tabular}{llccc}
+\footnotesize
+\begin{tabular}{p{0.42\textwidth}p{0.42\textwidth}c}
 \toprule
-Corpus & Unseen model & Hybrid & Supervised & $E$ \\
+True prompt & Decoded & Word-F1 \\
 \midrule
-Corpus A & Pythia-1B & 0.604 & 0.352 & +0.253 [+0.242, +0.263] \\
-Corpus A & Llama-3.2-1B & 0.632 & 0.370 & +0.263 [+0.251, +0.274] \\ %% FIX: interval from nqllama mixed-oct_w5b-s1-prefix.json (paired prompt bootstrap, 1,000 resamples)
-legal10s & Pythia-1B & 0.318 & 0.114 & +0.204 [+0.191, +0.216] \\
-legal128w & Pythia-1B & 0.178 & 0.049 & +0.129 [+0.121, +0.138] \\
+disclosure controls and procedures, as of the end of the period covered by this report based on such evaluation; and (d) Disclosed in this report any change in the registrant's internal control over financial reporting that occurred during the registrant's most recent fiscal quarter (the registrant's fourth fiscal quarter in the case of an annual report) that has materially affected, or is reasonably likely to materially affect, the registrant's internal control over financial reporting; and & \miss{responsibility} \hit{controls and procedures, as of the end of the period covered by this report based on such evaluation; and} \miss{(i) Considered} \hit{in this report any change in the} \miss{insurer's} \hit{internal control over financial reporting that occurred during the} \miss{insurer's} \hit{most recent fiscal} \miss{year} \hit{(the} \miss{insurer's first} \hit{fiscal} \miss{year} \hit{in the case of} \miss{a} \hit{annual report) that has materially affected, or is reasonably likely to materially affect, the} \miss{insurer's} \hit{internal control over financial} \miss{reporting} & \vf{0.83} \\ % src: decoding.jsonl above, law-edgar-00014181, smollm (0.8322); truth results/legal128w/v7_2/main/position/dev-truth.json
+\midrule
+operations for the year's endedDecember31, 2010 and 2009are filed as Exhibit 99.2 herewith. (d)Exhibits ExhibitNo. Description Stock Purchase Agreement, dated as of December23, 2010.,.(1) Audited financial statements as of and for the years ended December 31, 2010 and 2009 for CMAC, Inc. & \miss{references} \hit{for the} \miss{year} \hit{of} \miss{finished} \hit{December 2009 and} \miss{2000 are} \hit{filed as} \miss{Examination 61.2 hereafter. (A) Ex. No.} \hit{Description Stock Purchase Agreement, dated as of} \miss{June 07,2009, (B) Unaudited} \hit{financial statements as} \miss{of} \hit{and for the} \miss{months} \hit{ended} \miss{December 2009} \hit{and} \miss{2000} \hit{for} \miss{Kelebank, LLC.} & \vf{0.55} \\ % src: same file, law-edgar-00009775 (0.5455)
+\midrule
+Lender Credit Decision 58 Section 10.8 Expenses; Indemnities 58 Section 10.9 Resignation of Administrative Agent 59 Section 10.10 Release of Collateral or Guarantors 60 ARTICLE 11 MISCELLANEOUS 60 Section 11.1 Amendments, Waivers, Etc 60 Section 11.2 Assignments and Participations; & \hit{Lender} \miss{Creditability 31} \hit{Section} \miss{2.2 Exclusions; Unearned Benefits 26} \hit{Section} \miss{2.2} \hit{Resignation of Administrative} \miss{Officer9} \hit{Section} \miss{2.9} \hit{Release of Collateral and} \miss{Guarantors9} \hit{Section} \miss{2.9 Refusals, Exceptions9} \hit{Section} \miss{2.9} \hit{Amendments,} \miss{Revocations, Exceptions9 Section 2.9} \hit{Assignments} \miss{and Subscriptions;} & \vf{0.40} \\ % src: same file, law-edgar-00007393 (0.4000)
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Decoder side: is the loss in the map or in the read-out?}
-\paragraph{Question.} At 90 rows on legal128w the map retrieves its own hub output as well as Corpus A's map (top-1 0.51 against 0.49) yet decodes 0.32 against 0.60. Is the loss on the decoder side, and does a stronger decoder recover it?
+\subsection{Word class of the leaked rows}\label{sec:attack:leak:words}
 
-\paragraph{Result.} Two parts. (1) Llama-3.2-3B, attached to the frozen legal128w hub by a projector-only fit (validation cross-entropy 7.66 $\to$ 0.045), passes its gate (G2 0.983, $-0.002$ against SmolLM) but decodes the hybrid memories at 0.214 against SmolLM's 0.487 ($-0.273$ [$-0.292$, $-0.255$]): a stronger language model does not recover the loss. (2) A stock Qwen3-8B rewrite of the three decodings (attacker rung B) lifts the random-90 hybrid from 0.340 to 0.505 (+0.165 [+0.155, +0.176]) and content recall from 0.21 to 0.38, with the mismatched-prompt control at +0.025: the three decodings hold more text than word-F1 credits.
+The second part of H6 meets its criterion: no rule that restricts the leaked words exceeds a random draw of rows by \vf{0.03}.
+Each rule takes one eligible row from each of \vf{90} prompts and skips a prompt without an eligible row, so the rules can differ in the prompts they draw as well as in the words they leak (Table~\ref{tab:attack:words}). % src: src/v7_2/anchors_linear.py (leak rules: prompts without an eligible row are skipped)
+Stop words are the words of a fixed stop list; mid-frequency words have rank \vf{101} to \vf{1{,}000} in the word counts of the legal128w training prompts, and rare words a rank above \vf{1{,}000}. % src: oct_w5/plan.md section 3; src/v7_2/anchors_linear.py (rank bands)
+The mid-frequency and rare rules also admit groups of punctuation alone whose forms fall in those ranks. % src: src/v7_2/anchors_linear.py (mid, rare against mid_word, rare_word)
+The one-word rule leaks the same mid-frequency word in all \vf{90} prompts, and the distinct rule draws rows at random but leaks no word twice.
 
-\paragraph{Reading.} H7 holds: a stronger decoder does not recover the legal shortfall. Further decoder-side analysis is left to future work (Chapter~\ref{ch:future}).
-% author to revise
-The map's error on legal text is structured: it lands far enough from the true hub output that the decoders miss the opening words, and a rewrite of the three decodings recovers a third of the gap.
+\begin{table}[H]
+\caption{No word class improves on a random draw of rows; stop-word rows and one repeated word give the hybrid fit no gain.
+Word-F1 averaged over three decoders, Pythia on legal128w, seed \vf{1}, \vf{500} selection prompts, \vf{90} rows from \vf{90} prompts.
+The last column is the hybrid fit under the rule minus the hybrid fit under the random draw, with a \vf{95} percent interval.}
+\label{tab:attack:words}
+\centering
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Leaked rows & Hybrid fit & Supervised fit & Hybrid fit minus random draw \\
+\midrule
+Random draw & \vf{0.321} & \vf{0.108} & \\ % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json cells *L90-random (0.3207, 0.1084)
+Distinct words & \vf{0.329} & \vf{0.109} & \vf{$+0.009$} [\vf{0.001}, \vf{0.017}] \\ % src: mixed-oct_w5-s1-L90-ext.json cells *L90-distinct (0.3295, 0.1087); axis_effect delta_h (+0.0088 [0.0007, 0.0166])
+Mid-frequency words & \vf{0.242} & \vf{0.094} & \vf{$-0.078$} [\vf{$-0.087$}, \vf{$-0.069$}] \\ % src: mixed-oct_w5-s1-L90.json cells *L90-mid (0.2423, 0.0938); delta_h (-0.0784 [-0.0871, -0.0692])
+Rare words & \vf{0.226} & \vf{0.072} & \vf{$-0.095$} [\vf{$-0.104$}, \vf{$-0.086$}] \\ % src: same file, *L90-rare (0.2255, 0.0717); delta_h (-0.0952 [-0.1041, -0.0860])
+Stop words & \vf{0.058} & \vf{0.056} & \vf{$-0.263$} [\vf{$-0.273$}, \vf{$-0.252$}] \\ % src: same file, *L90-stop (0.0582, 0.0555); delta_h (-0.2625 [-0.2725, -0.2516])
+One repeated word & \vf{0.054} & \vf{0.057} & \vf{$-0.267$} [\vf{$-0.278$}, \vf{$-0.256$}] \\ % src: same file, *L90-one_word (0.0535, 0.0568); delta_h (-0.2672 [-0.2781, -0.2563])
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{What the decoded text looks like}
-\placeholder{Three worked examples per corpus (low, medium, high word-F1), true text against the three decodings, from \texttt{results/legal128w/v7\_2/main/long-freerun/examples.md} and the Corpus A ledger; the long free-run read: recovered prompts emit end-of-sequence at the memory's row count with 8 percent unsupported words, failed prompts (lists, tables) loop to the cap; hallucination is fluent substitution of numbers, dates, and names.}
+The largest positive difference is \vf{0.009}, for distinct words; every class rule lowers the hybrid fit.
+The evaluation plan had predicted, before the run, that mid-frequency words would raise the hybrid fit by at least \vf{0.03}; on the held-out prompts they lower it by \vf{0.074} (interval \vf{0.072} to \vf{0.077}), so that prediction is contradicted. % src: oct_w5/plan.md section 6 (P2); results/legal128w/v7_2/main/oct_w5-summary-confirmation-B.json decisions.P2 (-0.0743 [-0.0773, -0.0715], contradicted)
+A leak of stop words gives the matching term nothing to add at \vf{90} rows: on the held-out prompts the hybrid and supervised fits both score \vf{0.056}. % src: oct_w5-summary-confirmation-A.json levels H/stop/L90/all (0.0564), S/stop/L90 (0.0561); contrasts E/stop/L90/all (+0.0004 [-0.0011, 0.0019])
+At \vf{864} stop-word rows the hybrid fit reaches \vf{0.461} against \vf{0.198} for the supervised fit on the held-out prompts. % src: same file, levels H/stop/L864/all (0.4610), S/stop/L864 (0.1980)
+The one-word rule leaks a single word and scores as low as the stop-word rule; whether the stop-word leak fails for the same reason, few distinct words, was not measured.
+
+The word-class rules therefore lower word-F1 by as much as \vf{0.27}, more than the spread over prompts changes it (\vf{0.14}), and none raises it.
+The comparison does not isolate word class from the prompts each rule draws or from punctuation, and the results hold for one seed and one corpus.
+
+\subsection{A second unseen model}\label{sec:attack:leak:llama}
+
+The Corpus A result does not depend on Pythia in the one comparison available.
+With a leak of ten prompts and \vf{90} rows, Llama-3.2-1B reaches a word-F1 of \vf{0.632} under the hybrid fit and \vf{0.370} under the supervised fit, against \vf{0.604} and \vf{0.352} for Pythia (Table~\ref{tab:attack:llama}). % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json; results/v7_2/main/mixed-oct_w5b-A-prefix.json
+The gain in word-F1 from the matching term is \vf{0.263} for Llama and \vf{0.253} for Pythia, on the \vf{500} Corpus A selection prompts with seed \vf{1}.
+The comparison covers one seed, one layer of each model, and two models of about one billion parameters.
+
+\begin{table}[H]
+\caption{A second unseen model reproduces the gain of the matching term on Corpus A.
+Word-F1 averaged over three decoders, seed \vf{1}, \vf{500} selection prompts, a leak of \vf{90} rows from ten prompts (whole prompts, the last one in part), hybrid fit with $\alpha = 0.99$, $\tau = d$, $B = 8{,}192$.
+The difference is hybrid minus supervised with a \vf{95} percent interval; the mismatched-prompt controls lie between \vf{0.11} and \vf{0.17}.}
+\label{tab:attack:llama}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Unseen model & Hybrid fit & Supervised fit & Difference \\
+\midrule
+Pythia-1B & \vf{0.604} & \vf{0.352} & \vf{$+0.253$} [\vf{0.243}, \vf{0.264}] \\ % src: results/v7_2/main/mixed-oct_w5b-A-prefix.json cells *L90-prefix (0.6042, 0.3516, +0.2526 [0.2426, 0.2640]; controls 0.1063, 0.1433)
+Llama-3.2-1B & \vf{0.632} & \vf{0.370} & \vf{$+0.263$} [\vf{0.251}, \vf{0.274}] \\ % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json cells *L90-prefix (0.6324, 0.3696, +0.2628 [0.2514, 0.2742]; controls 0.1544, 0.1680)
+\bottomrule
+\end{tabular}
+\end{table}
+
+Under the hybrid fit, the Corpus A leak of ten prompts yields a word-F1 of \vf{0.604} where the legal128w leak of ten prompts yields \vf{0.304} (Table~\ref{tab:attack:shape}).
+The two corpora differ in domain and in prompt length, and the legal leak takes nine rows from each prompt while the Corpus A leak takes whole prompts and part of a last one; the comparison does not separate these causes.
+
+\subsection{A larger decoder and a rewriting model}\label{sec:attack:leak:decoder}
+
+Two further comparisons hold the mapped states of the \vf{90}-prompt leak fixed and change how text is reconstructed from them.
+The first contradicts H7: a larger decoder does not raise word-F1 on the same mapped states.
+Llama-3.2-3B was attached to the frozen legal128w hub by training one linear projector with the decoding loss of Section~\ref{sec:hub:training}; the hub and the map stayed fixed. % src: oct_w5/decoder-plan.md part 3; results/legal128w/v7_2/main/oct_w5c-projector-llama3b.json training
+From the hub outputs of OLMo, the new decoder reaches a word-F1 of \vf{0.983}, against \vf{0.986} for SmolLM, the best hub decoder, so the projector attaches it to the hub. % src: oct_w5c-projector-llama3b.json arms.G2 (0.9833; new_minus_best -0.0023 [-0.0057, 0.0010])
+From the mapped states of the hybrid fit, with one row from each of \vf{90} prompts, the new decoder reaches a word-F1 of \vf{0.214} against \vf{0.487} for SmolLM.
+The difference is \vf{$-0.273$} (interval \vf{$-0.292$} to \vf{$-0.255$}); its upper bound lies below \vf{0.02}, so the criterion of H7 is not met and the planned prediction is contradicted. % src: same file, arms.b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random (0.2140; smollm 0.4873; new_minus_best -0.2733 [-0.2918, -0.2551])
+The larger decoder scores at the level of Qwen (\vf{0.265}) and OLMo (\vf{0.210}) on those states; SmolLM is the exception among the four. % src: same file, hub_decoders (qwen 0.2648, olmo 0.2099)
+The result covers one larger decoder attached by its projector alone, on \vf{500} selection prompts; it does not show that decoder size is irrelevant under a joint fit.
+
+A rewriting model recovers more words from the three reconstructions than their mean word-F1 credits.
+An off-the-shelf Qwen3-8B model receives the three decoders' reconstructions of a prompt and writes one text.
+On \vf{450} selection prompts, word-F1 rises from \vf{0.340}, the mean of the three reconstructions, to \vf{0.505} after rewriting, a gain of \vf{0.165} (interval \vf{0.155} to \vf{0.176}). % src: results/legal128w/v7_2/main/framework/attacker/attacker-b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random-s1-stock.json table."hybrid rung B" (0.3400, 0.5052, +0.1652 [0.1547, 0.1759]); prompts_reported 450
+The same step applied to the mismatched-prompt control gains \vf{0.025} word-F1, so the gain depends on the reconstructions of the prompt itself.
+The comparison does not separate words copied from the reconstructions from words that the rewriting model infers from them. % src: same file, table."wrong memory rung B" (+0.0253 [0.0214, 0.0292])
+The other \vf{50} selection prompts chose the instruction given to the rewriting model. % src: oct_w5/decoder-plan.md part 2 (selection sample: first 50 prompt ids)
+Word-F1 counts overlapping words; the rewriting result does not show that the rewritten text is correct in meaning.

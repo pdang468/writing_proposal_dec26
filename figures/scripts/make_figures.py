@@ -3,8 +3,8 @@
     python figures/scripts/make_figures.py /path/to/representation_alignment
 
 Writes figures/ch4/budget_curve.{pdf,png}.
-Sources: results/v7_2/main/mixed-v7_9-s5.json and, for the G2 ceiling, the zero-noise row of
-results/v7_2/main/oct_w5c-noise.json. Seeds, prompt counts and cell names are read from those files.
+Sources: results/v7_2/main/mixed-v7_9-s5.json and, for the hub reference, results/v7_2/main/factorial.json
+(controls.true_olmo_code). Seeds, prompt counts and cell names are read from those files.
 """
 import json
 import sys
@@ -38,12 +38,12 @@ def save(fig, rel):
 
 def budget():
     d = json.loads((ROOT / "results/v7_2/main/mixed-v7_9-s5.json").read_text())
-    noise_a = json.loads((ROOT / "results/v7_2/main/oct_w5c-noise.json").read_text())
-    g2 = noise_a["sets"]["iso-r0"]["macro_word_f1"]
+    reference = json.loads((ROOT / "results/v7_2/main/factorial.json").read_text())
+    g2 = reference["controls"]["true_olmo_code"]["macro_f1"]
     budgets = [10, 30, 100, 300, 1000]
     series = {
-        "supervised (residual + ridge)": (lambda b: f"b{b}/a1/r1", VIOLET, "o", (0, (5, 2))),
-        "hybrid": (lambda b: f"b{b}/a0.95/sq/m0/t0.1152/r1/B2048", GREEN, "s", "-"),
+        "supervised fit": (lambda b: f"b{b}/a1/r1", VIOLET, "o", (0, (5, 2))),
+        "hybrid fit": (lambda b: f"b{b}/a0.95/sq/m0/t0.1152/r1/B2048", GREEN, "s", "-"),
     }
     seeds = sorted(d["seeds"])
     assert seeds == ["1", "2", "3"]
@@ -58,9 +58,9 @@ def budget():
                 markeredgecolor="white", markeredgewidth=0.6, label=label)
         print(label, [round(m, 3) for m in mean])
     ax.axhline(g2, color=INK2, lw=0.8, ls=":")
-    ax.annotate(f"hub ceiling G2 {g2:.3f}", (10, g2), xytext=(0, 3), textcoords="offset points", fontsize=8, color=INK2)
+    ax.annotate(f"hub reference {g2:.3f}", (10, g2), xytext=(0, 3), textcoords="offset points", fontsize=8, color=INK2)
     ax.axhspan(min(wrong), max(wrong), color=INK2, alpha=0.15, lw=0)
-    ax.annotate(f"wrong memory {min(wrong):.2f} to {max(wrong):.2f}", (10, max(wrong)), xytext=(0, 3),
+    ax.annotate(f"mismatched-prompt control {min(wrong):.2f} to {max(wrong):.2f}", (10, max(wrong)), xytext=(0, 3),
                 textcoords="offset points", fontsize=8, color=INK2)
     print("wrong memory range", min(wrong), max(wrong))
     ax.set_xscale("log")
@@ -68,8 +68,8 @@ def budget():
     ax.set_xticklabels([str(b) for b in budgets])
     ax.minorticks_off()
     ax.set_ylim(0, 1.02)
-    ax.set_xlabel("budget (paired prompts)")
-    ax.set_ylabel("macro word-F1")
+    ax.set_xlabel("budget (paired sequences)")
+    ax.set_ylabel("word-F1 (mean of three decoders)")
     ax.grid(axis="y")
     ax.legend(loc="center right", fontsize=8, handlelength=2.6)
     fig.tight_layout()
