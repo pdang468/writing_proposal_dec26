@@ -4,7 +4,7 @@
 
 \chapter{Weakly Supervised Attack with a Small Leak}\label{ch:attack}
 
-This chapter connects a language model to the frozen translation hub of Chapter~\ref{ch:hub}, and measures how much of the input prompt the frozen decoders then reconstruct from that model's embeddings.
+This chapter connects a language model to the frozen translation hub of Chapter~\ref{ch:hub}, and measures how much of the input prompt the frozen decoders then reconstruct from that model's hidden states.
 An affine map sends the hidden states of that model, the target model, into the hub; the projectors and decoders of Chapter~\ref{ch:hub} reconstruct the prompt without any change.
 The setting is weakly supervised: the attacker holds a small leak, a set of hidden states whose text is known, and a large pool of hidden states whose text is unknown.
 The chapter makes two points.

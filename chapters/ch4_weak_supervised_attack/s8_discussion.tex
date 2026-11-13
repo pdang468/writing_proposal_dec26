@@ -1,7 +1,7 @@
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
 The chapter supports two statements, each within the limits of its runs.
-The matching term improves a map fitted on a small leak: with \vf{90} leaked rows, word-F1 on \vf{4{,}500} held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, as means over three seeds, and every seed shows a gain (H2). % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
+The matching term improves a map fitted on a small leak: with \vf{90} leaked rows, word-F1 on \vf{4{,}500} held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, as means over three seeds, and the lower bounds of both gains exceed the \vf{0.05} of the criterion (H2). % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
 A second-round language model raises word-F1 above the mean of the three decoders by \vf{0.12} to \vf{0.26} in three conditions, and above the best decoder by \vf{0.01} to \vf{0.02} (H3; one seed, selection prompts). % src: results/*/v7_2/main/framework/attacker/*-haiku.json
 The ablations bound the first statement: the tested blind maps gain at most \vf{0.025} word-F1 over their controls, the gain of the matching term shrinks as the leak grows, and it depends on the temperature.
 

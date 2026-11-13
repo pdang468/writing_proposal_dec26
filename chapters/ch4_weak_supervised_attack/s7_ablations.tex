@@ -39,36 +39,6 @@ The dotted line is the hub reference, and the gray band is the mismatched-prompt
 \label{fig:attack:budget}
 \end{figure}
 
-Table~\ref{tab:attack:examples} shows single prompts at a budget of \vf{10}, through the SmolLM decoder.
-At a word-F1 of \vf{0.78}, the median of the hybrid fit through SmolLM, the reconstruction changes the question word and one verb form; at \vf{0.43} it keeps the question frame and replaces the names. % src: results/v7_2/main/mixed-v7_9/runs/b10-a0.95-sq-m0-t0.1152-r1-B2048-s1/endpoint/decoding.jsonl, SmolLM records (median 0.7778)
-The supervised fit on the same leak keeps function words and loses the content of all three prompts.
-Three selected prompts show the scale of word-F1, not the frequency of each error.
-
-\begin{table}[H]
-\caption{At a budget of \vf{10}, the hybrid fit reconstructs content words that the supervised fit loses.
-Reconstructions through the SmolLM decoder for three Corpus A selection prompts, chosen at high, intermediate, and low word-F1 of the hybrid fit (seed \vf{1}); the final row is generated under the mismatched-prompt control of the hybrid fit.
-Decoded words that match the true prompt are green; the others are red and bold.}
-\label{tab:attack:examples}
-\centering
-\small
-\begin{tabular}{p{0.30\textwidth}lp{0.36\textwidth}c}
-\toprule
-True prompt & Fit & Decoded & Word-F1 \\
-\midrule
-where does the menthol in cigarettes come from & Hybrid & \hit{where does the menthol in cigarettes come from} & \vf{1.00} \\ % src: results/v7_2/main/mixed-v7_9/runs/b10-a0.95-sq-m0-t0.1152-r1-B2048-s1/endpoint/decoding.jsonl, nq-00056151, smollm
- & Supervised & \hit{where} \miss{did} \hit{the} \miss{minott yumtza} \hit{come from} & \vf{0.53} \\ % src: results/v7_2/main/mixed-v7_9/runs/b10-a1-r1-s1/endpoint/decoding.jsonl, nq-00056151, smollm
-\midrule
-does grace have a baby in will and grace & Hybrid & \miss{when} \hit{grace} \miss{has} \hit{a baby in will and grace} & \vf{0.78} \\ % src: same files, nq-00090413
- & Supervised & \miss{who win has the fight} \hit{in} \miss{well of shame} & \vf{0.11} \\
-\midrule
-who sang hello john gotta new motor & Hybrid & \hit{who sang} \miss{goodbye jimmy don't} \hit{new} \miss{gun} & \vf{0.43} \\ % src: same files, nq-00063609
- & Supervised & \hit{who} \miss{sings come xan xan} \hit{new} \miss{clean} & \vf{0.29} \\
-\midrule
-where does the menthol in cigarettes come from & Hybrid & \miss{who played skeletarde's daughter} \hit{in the} \miss{quest end} \emph{(mismatched prompt)} & \vf{0.25} \\ % src: .../b10-a0.95-sq-m0-t0.1152-r1-B2048-s1/wrong_memory/decoding.jsonl, nq-00056151, smollm
-\bottomrule
-\end{tabular}
-\end{table}
-
 \subsection{Matching without a leak}\label{sec:attack:blind}
 
 Without any row, the tested blind maps stay close to their mismatched-prompt controls.
