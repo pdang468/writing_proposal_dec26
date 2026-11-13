@@ -1,9 +1,9 @@
 \section{Method and Evaluation}\label{sec:attack:method}
 
 The attack trains one affine map; two later comparisons train a two-layer map (Section~\ref{sec:attack:negative}) and a projector for a further decoder (Section~\ref{sec:attack:leak}).
-A hidden state of the unseen model passes through the map into the hub; the frozen projector of a decoder maps the result into that decoder's input space, and the frozen decoder reconstructs the prompt: Pythia block \vf{12} $\to$ affine map $\to$ hub $\to$ projector $\to$ decoder.
+The map sends each hidden state of the target model into the hub; the frozen projector of a decoder maps the result into that decoder's input space, and the frozen decoder reconstructs the prompt: Pythia block \vf{12} $\to$ affine map $\to$ hub $\to$ projector $\to$ decoder.
 
-\paragraph{Map.} The map sends a hidden state $s$ of the unseen model to a point $\hat m$ of the hub:
+\paragraph{Map.} The map sends a hidden state $s$ of the target model to a point $\hat m$ of the hub:
 \begin{equation}
 \hat m = W(s - \mu) + b ,
 \label{eq:attack:map}
@@ -28,7 +28,7 @@ The constant $\rho_H$ is the root-mean-square distance of the pooled hub outputs
 The ridge penalty $\mathcal{R}$ is the squared Frobenius norm of $W$ divided by $\rho_H^2$, with $\lambda = 1$. % src: configs/v7_9_s4.yaml (mixed.ridge_lambdas); src/v7_2/mixed.py
 Unless a table states otherwise, the supervised fit includes the ridge penalty.
 
-\paragraph{Matching term.} $\mathcal{L}_{\text{match}}$ reads a batch of $B$ mapped hidden states $\hat m_1 \ldots \hat m_B$ from the unpaired pool of the unseen model and a batch of $B$ hub outputs $h_1 \ldots h_B$ from the unpaired pool of the hub.
+\paragraph{Matching term.} $\mathcal{L}_{\text{match}}$ reads a batch of $B$ mapped hidden states $\hat m_1 \ldots \hat m_B$ from the unpaired pool of the target model and a batch of $B$ hub outputs $h_1 \ldots h_B$ from the unpaired pool of the hub.
 No row of the first batch is matched to a row of the second.
 The score of a pair is its negative squared distance, $\sigma(u, v) = -\lVert u - v\rVert^2 / \rho_H^2$.
 Each mapped state is first replaced by a weighted average of the hub batch, with weights that favor the nearest hub outputs:
@@ -62,8 +62,8 @@ The result files do not record how the second setting was chosen. \todo{Author: 
 
 \paragraph{Data.} The corpora are Corpus A and legal128w of Chapter~\ref{ch:hub}, each with its own frozen hub.
 All training data come from the \vf{40{,}000} training prompts of a corpus. % src: results/v7_2/main/manifest.json (training_pools); results/v7_2/main/anchors-linear.json (pool_size 40000)
-The training prompts are divided once, at random, into two halves of \vf{20{,}000}: the hidden states of the unseen model on one half form its unpaired pool, and the hub outputs of OLMo on the other half form the unpaired pool of the hub.
-The paired sequences of a leak are drawn at random from all \vf{40{,}000} training prompts, and the leaks of one seed are nested: a larger budget contains the smaller ones. % src: src/v7_2/anchors_linear.py (nested permutation); mixed-v7_9-s5.json anchor_counts (prompts_in_U)
+The training prompts are divided once, at random, into two halves of \vf{20{,}000}: one half supplies the unpaired pool of the target model, as hidden states, and the other half supplies the unpaired pool of the hub, as hub outputs of OLMo.
+A leak draws its paired sequences at random from all \vf{40{,}000} training prompts, and the leaks of one seed are nested: a larger budget contains the smaller ones. % src: src/v7_2/anchors_linear.py (nested permutation); mixed-v7_9-s5.json anchor_counts (prompts_in_U)
 On Corpus A, ten paired sequences hold \vf{92} rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (seed 1)
 
 \paragraph{Decoding and score.} Evaluation follows Section~\ref{sec:hub:eval}: each of the three decoders generates greedily from the projected output of the map, without the ground-truth prefix, up to the memory length plus \vf{8} tokens on Corpus A and plus \vf{32} tokens on legal128w. % src: configs/v7.yaml (cap_margin 8); configs/v7_legal128w.yaml (cap_margin 32)
@@ -76,7 +76,7 @@ A map whose word-F1 equals its control gains nothing, in mean word-F1, from the 
 
 \paragraph{Hub reference.} The hub reference is the word-F1 that the three decoders reach from the hub outputs of OLMo for the evaluation prompts.
 It measures the frozen hub without any map and averages the three directions from OLMo, including OLMo to itself, where Chapter~\ref{ch:hub} averages the six cross-model directions.
-It is a reference, not an upper bound: the unseen model and OLMo tokenize a prompt differently, so even a map that fitted every row exactly would give the decoders a different sequence.
+It is a reference, not an upper bound: the target model and OLMo tokenize a prompt differently, so even a map that fitted every row exactly would give the decoders a different sequence.
 The hub reference is \vf{0.946} on Corpus A and \vf{0.982} on legal128w. % src: results/v7_2/main/factorial.json controls.true_olmo_code.macro_f1 (0.9459); results/legal128w/v7_2/main/mixed-v7_9-s0.json setting.corpus.g2.macro_f1 (0.9824)
 
 \paragraph{Prompt sets.} Two disjoint sets of validation prompts are read, and neither overlaps the training prompts.

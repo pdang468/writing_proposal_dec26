@@ -3,27 +3,30 @@
 The attack targets a language model whose hidden states took no part in hub training.
 The target model is Pythia-1B, and the attacker observes the hidden states of its block \vf{12} (width \vf{2048}), one vector per token. % src: configs/v7.yaml (unknowns.pythia: d3_block 12, width 2048)
 The goal is the text of the prompt behind an observed sequence of hidden states.
-For that prompt the attacker holds neither the text nor the token identities, and the attacker cannot query the unseen model.
+For that prompt the attacker holds neither the text nor the token identities, and the attacker cannot query the target model.
 
 \paragraph{What the attacker holds.} The attacker holds four resources.
 \begin{itemize}
 \item \textbf{The hub.} The frozen hub of Chapter~\ref{ch:hub} with its source adapters, its projectors, and its three decoders (Qwen, OLMo, SmolLM).
-\item \textbf{An unpaired pool of hidden states.} Hidden states of the unseen model for prompts of the target domain, without their text.
+\item \textbf{An unpaired pool of hidden states.} Hidden states of the target model for prompts from the domain of the prompt under attack, without their text.
 \item \textbf{An unpaired pool of hub outputs.} Text of the same domain, which the attacker passes through OLMo and its source adapter to obtain hub outputs.
 No prompt of the second pool is matched to a prompt of the first.
-\item \textbf{A leak.} A small set of hidden states of the unseen model whose text the attacker knows.
+\item \textbf{A leak.} A small set of hidden states of the target model whose text the attacker knows.
 \end{itemize}
 
-\paragraph{Paired sequences, rows, and budget.} A paired sequence is one prompt of the leak: its text is known, and its hidden states under the unseen model are observed.
-The attacker passes the text through OLMo and the hub, and aligns the tokens of the two models into the token groups of Section~\ref{sec:hub:training}.
-Each token group yields one row: the mean of the unseen model's hidden states over the group, paired with the mean of the hub outputs of OLMo over the same group.
-Both means are weighted by the characters each token covers and are not normalized to unit length, unlike the group vectors of Chapter~\ref{ch:hub}.
-A paired sequence is a supplied anchor, a known correspondence between the unseen model's hidden states and the hub outputs for one text; the main fits read supplied anchors only, and Section~\ref{sec:attack:negative} reports one test of inferred ones.
-The leak is the set of rows the attacker holds.
-The budget is the number of paired sequences in the leak; Section~\ref{sec:attack:leak} counts rows instead, because there a leak may hold part of a prompt.
+\paragraph{Paired sequences, rows, and budget.} A paired sequence is one prompt for which the attacker holds both the text and the target model's hidden states.
+The attacker runs OLMo on the same text and maps OLMo's hidden states into the hub, which gives the hub outputs for that prompt. % src: src/v6_4/pairs.py (build_pairs)
+The two models split the text into different tokens, so their vectors are matched by token group, the unit defined in Section~\ref{sec:hub:training}.
+Each token group gives one row: the target model's hidden states averaged over the group, paired with the hub outputs averaged over the same group.
+The averages weight each token by the characters it covers and are not normalized to unit length, unlike the group vectors of Chapter~\ref{ch:hub}.
+The leak is the set of all rows the attacker holds.
+The budget is the number of paired sequences in the leak.
+Section~\ref{sec:attack:leak} counts rows instead, because a leak there may contain only part of a prompt.
+A paired sequence is a supplied anchor: a correspondence, given to the attacker, between the target model's hidden states and the hub outputs for one text.
+The main fits read supplied anchors only, and Section~\ref{sec:attack:negative} reports one test of anchors inferred without a leak.
 
-\paragraph{What a leak requires.} Aligning a paired sequence requires the character span of each token of the unseen model, and so its tokenizer, for the leaked prompts only.
+\paragraph{What a leak requires.} Aligning a paired sequence requires the character span of each token of the target model, and so its tokenizer, for the leaked prompts only.
 No tokenizer access is assumed for the prompts under attack.
 A row supplies the correspondence for one span of text, although its hidden state may also encode the rest of the prompt.
 
-\paragraph{Second unseen model.} Llama-3.2-1B, observed at block \vf{12} (width \vf{2048}), replaces Pythia in one comparison on Corpus A (Section~\ref{sec:attack:leak}). % src: configs/v7.yaml (unknowns.llama: d3_block 12, width 2048)
+\paragraph{Second target model.} Llama-3.2-1B replaces Pythia in one comparison on Corpus A (Section~\ref{sec:attack:leak}); the attacker observes its block \vf{12} (width \vf{2048}). % src: configs/v7.yaml (unknowns.llama: d3_block 12, width 2048)

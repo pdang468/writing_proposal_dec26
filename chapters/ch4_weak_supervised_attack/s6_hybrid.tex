@@ -2,7 +2,7 @@
 
 The hybrid fit meets the criteria of H4 and H5.
 At \vf{10}, \vf{30}, and \vf{100} paired sequences on Corpus A, the hybrid fit exceeds the supervised fit by \vf{0.309}, \vf{0.197}, and \vf{0.051} word-F1 (Table~\ref{tab:attack:hybrid}).
-The lowest lower bound of the three intervals is \vf{0.047}, above the \vf{0.03} of H4. % src: results/v7_2/main/mixed-v7_9-s5.json seed_summary.budgets.{10,30,100}.cell_minus_benchmark (b*/a0.95/sq/m0/t0.1152/r1/B2048)
+Of the three intervals, the lowest lower bound is \vf{0.047}, above the \vf{0.03} of H4. % src: results/v7_2/main/mixed-v7_9-s5.json seed_summary.budgets.{10,30,100}.cell_minus_benchmark (b*/a0.95/sq/m0/t0.1152/r1/B2048)
 At \vf{300} and \vf{1{,}000} the difference is \vf{0.010} and \vf{0.002}, inside the $\pm$\vf{0.02} of H5. % src: same file, budgets 300 and 1000 (+0.0099 [0.0069, 0.0128]; +0.0016 [-0.0008, 0.0038])
 The unpaired pools thus add most where the leak is smallest: at \vf{10} paired sequences the matching term raises word-F1 from \vf{0.348} to \vf{0.657}.
 At \vf{300} the gain is smaller but still positive, with an interval of \vf{0.007} to \vf{0.013}.
@@ -98,4 +98,4 @@ A larger batch raises word-F1 further at a budget of \vf{10}: by \vf{0.040} from
 Section~\ref{sec:attack:leak} sets $B = 8{,}192$.
 
 The results of this section do not show a gain on held-out prompts: the \vf{500} selection prompts chose the setting and report the scores.
-They cover one corpus and one unseen model, and the intervals describe variation over prompts for three seeds, not variation over seeds.
+They cover one corpus and one target model, and the intervals describe variation over prompts for three seeds, not variation over seeds.

@@ -1,10 +1,10 @@
 \section{Matching without a Leak}\label{sec:attack:blind}
 
 The blind maps meet the criterion of H3: none exceeds its mismatched-prompt control by \vf{0.05}.
-The largest difference among the blind maps of Table~\ref{tab:attack:blind} is \vf{0.025}, with an interval of \vf{0.019} to \vf{0.030}, at a word-F1 of \vf{0.080} against a hub reference of \vf{0.946}. % src: results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304])
+Among the blind maps of Table~\ref{tab:attack:blind}, the largest difference is \vf{0.025}, with an interval of \vf{0.019} to \vf{0.030}, at a word-F1 of \vf{0.080} against a hub reference of \vf{0.946}. % src: results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304])
 The tested blind maps therefore gain at most \vf{0.025} word-F1 from the prompt's own hidden states.
 
-Table~\ref{tab:attack:blind} collects four groups of blind maps, all trained on the unpaired pools of Corpus A with Pythia as the unseen model.
+Table~\ref{tab:attack:blind} collects four groups of blind maps, all trained on the unpaired pools of Corpus A with Pythia as the target model.
 The first group trains the matching term under three variants of its score, with three seeds each, and is the only group scored on all \vf{5{,}000} validation prompts.
 The second group is the single map with the highest word-F1 among twelve further runs of the matching term; the selection favors that map, so its difference is biased upward.
 The third group replaces the matching term by a Gromov--Wasserstein coupling of samples from the two pools, followed by a ridge fit to the coupled pairs. % src: results/v7_2/main/gw.json (budget_note, ridge_normalization)
@@ -35,4 +35,4 @@ In the first group, seven of the nine differences are negative. % src: results/v
 The highest blind word-F1 of the table is \vf{0.153}, for a Gromov--Wasserstein map, against a control of \vf{0.141}, so most of that score is also present under the mismatched prompt.
 
 The tested blind maps thus stay below the margin of H3, although some recover slightly more word overlap than their controls.
-The result does not show that no unpaired method can attach an unseen model; two objectives were tested, the matching term and a Gromov--Wasserstein coupling, with one unseen model, one corpus, and one layer.
+The result does not show that no unpaired method can attach a target model; two objectives were tested, the matching term and a Gromov--Wasserstein coupling, with one target model, one corpus, and one layer.

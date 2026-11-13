@@ -10,12 +10,12 @@ All results of this section rest on one seed.
 \subsection{Rows spread over many prompts}\label{sec:attack:leak:spread}
 
 The first part of H6 meets its criterion.
-Under the hybrid fit, \vf{90} rows taken one from each of \vf{90} prompts yield a word-F1 of \vf{0.321}, against \vf{0.178} for \vf{90} rows from two prompts (Table~\ref{tab:attack:shape}).
+One leak takes one row from each of \vf{90} prompts; under the hybrid fit it yields a word-F1 of \vf{0.321}, against \vf{0.178} for \vf{90} rows from two prompts (Table~\ref{tab:attack:shape}).
 The difference of \vf{0.14} exceeds the \vf{0.03} of the criterion. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json (L90-random 0.3207); mixed-oct_w5b-L-prefix.json (L90-prefix 0.1782)
 No interval is stored for that difference, because the two fits come from separate runs.
 One whole prompt of \vf{78} rows scores \vf{0.162}. % src: mixed-oct_w5b-L.json (b1 0.1615)
 For these sampled leaks, spreading the rows over prompts raises word-F1; the comparison does not separate the number of prompts from the content of the particular prompts drawn.
-Most of the difference lies between one or two prompts and ten: ten prompts with nine consecutive rows each score \vf{0.304}, only \vf{0.017} below the leak over \vf{90} prompts (interval \vf{0.008} to \vf{0.025}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90-ext2.json seeds.1.budgets.90.axis_effect delta_h:...L90-span9 (-0.0168 [-0.0254, -0.0084])
+Most of the difference lies between one or two prompts and ten: with nine consecutive rows from each of ten prompts, the leak scores \vf{0.304}, only \vf{0.017} below the leak over \vf{90} prompts (interval \vf{0.008} to \vf{0.025}). % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90-ext2.json seeds.1.budgets.90.axis_effect delta_h:...L90-span9 (-0.0168 [-0.0254, -0.0084])
 On the \vf{4{,}500} held-out prompts the leak over \vf{90} prompts scores \vf{0.326} under the hybrid fit and \vf{0.106} under the supervised fit, a gain of \vf{0.220} (interval \vf{0.217} to \vf{0.223}). % src: results/legal128w/v7_2/main/oct_w5-summary-confirmation-A.json levels H/random/L90/all, S/random/L90; contrasts E/random/L90/all
 The supervised fit stays below \vf{0.11} for every leak of about \vf{90} rows, and for the leaks spread over \vf{10} or \vf{90} prompts the gain of the matching term is about twice the supervised score.
 
@@ -100,7 +100,7 @@ One repeated word & \vf{0.054} & \vf{0.057} & \vf{$-0.267$} [\vf{$-0.278$}, \vf{
 \end{table}
 
 The largest positive difference is \vf{0.009}, for distinct words; every class rule lowers the hybrid fit.
-The evaluation plan had predicted, before the run, that mid-frequency words would raise the hybrid fit by at least \vf{0.03}; on the held-out prompts they lower it by \vf{0.074} (interval \vf{0.072} to \vf{0.077}), so that prediction is contradicted. % src: oct_w5/plan.md section 6 (P2); results/legal128w/v7_2/main/oct_w5-summary-confirmation-B.json decisions.P2 (-0.0743 [-0.0773, -0.0715], contradicted)
+Before the run, the evaluation plan predicted that mid-frequency words would raise the hybrid fit by at least \vf{0.03}; on the held-out prompts they lower it by \vf{0.074} (interval \vf{0.072} to \vf{0.077}), so that prediction is contradicted. % src: oct_w5/plan.md section 6 (P2); results/legal128w/v7_2/main/oct_w5-summary-confirmation-B.json decisions.P2 (-0.0743 [-0.0773, -0.0715], contradicted)
 A leak of stop words gives the matching term nothing to add at \vf{90} rows: on the held-out prompts the hybrid and supervised fits both score \vf{0.056}. % src: oct_w5-summary-confirmation-A.json levels H/stop/L90/all (0.0564), S/stop/L90 (0.0561); contrasts E/stop/L90/all (+0.0004 [-0.0011, 0.0019])
 At \vf{864} stop-word rows the hybrid fit reaches \vf{0.461} against \vf{0.198} for the supervised fit on the held-out prompts. % src: same file, levels H/stop/L864/all (0.4610), S/stop/L864 (0.1980)
 The one-word rule leaks a single word and scores as low as the stop-word rule; whether the stop-word leak fails for the same reason, few distinct words, was not measured.
@@ -108,7 +108,7 @@ The one-word rule leaks a single word and scores as low as the stop-word rule; w
 The word-class rules therefore lower word-F1 by as much as \vf{0.27}, more than the spread over prompts changes it (\vf{0.14}), and none raises it.
 The comparison does not isolate word class from the prompts each rule draws or from punctuation, and the results hold for one seed and one corpus.
 
-\subsection{A second unseen model}\label{sec:attack:leak:llama}
+\subsection{A second target model}\label{sec:attack:leak:llama}
 
 The Corpus A result does not depend on Pythia in the one comparison available.
 With a leak of ten prompts and \vf{90} rows, Llama-3.2-1B reaches a word-F1 of \vf{0.632} under the hybrid fit and \vf{0.370} under the supervised fit, against \vf{0.604} and \vf{0.352} for Pythia (Table~\ref{tab:attack:llama}). % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json; results/v7_2/main/mixed-oct_w5b-A-prefix.json
@@ -116,14 +116,14 @@ The gain in word-F1 from the matching term is \vf{0.263} for Llama and \vf{0.253
 The comparison covers one seed, one layer of each model, and two models of about one billion parameters.
 
 \begin{table}[H]
-\caption{A second unseen model reproduces the gain of the matching term on Corpus A.
+\caption{A second target model reproduces the gain of the matching term on Corpus A.
 Word-F1 averaged over three decoders, seed \vf{1}, \vf{500} selection prompts, a leak of \vf{90} rows from ten prompts (whole prompts, the last one in part), hybrid fit with $\alpha = 0.99$, $\tau = d$, $B = 8{,}192$.
 The difference is hybrid minus supervised with a \vf{95} percent interval; the mismatched-prompt controls lie between \vf{0.11} and \vf{0.17}.}
 \label{tab:attack:llama}
 \centering
 \begin{tabular}{lccc}
 \toprule
-Unseen model & Hybrid fit & Supervised fit & Difference \\
+Target model & Hybrid fit & Supervised fit & Difference \\
 \midrule
 Pythia-1B & \vf{0.604} & \vf{0.352} & \vf{$+0.253$} [\vf{0.243}, \vf{0.264}] \\ % src: results/v7_2/main/mixed-oct_w5b-A-prefix.json cells *L90-prefix (0.6042, 0.3516, +0.2526 [0.2426, 0.2640]; controls 0.1063, 0.1433)
 Llama-3.2-1B & \vf{0.632} & \vf{0.370} & \vf{$+0.263$} [\vf{0.251}, \vf{0.274}] \\ % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json cells *L90-prefix (0.6324, 0.3696, +0.2628 [0.2514, 0.2742]; controls 0.1544, 0.1680)
@@ -148,7 +148,7 @@ The result covers one larger decoder attached by its projector alone, on \vf{500
 A rewriting model recovers more words from the three reconstructions than their mean word-F1 credits.
 An off-the-shelf Qwen3-8B model receives the three decoders' reconstructions of a prompt and writes one text.
 On \vf{450} selection prompts, word-F1 rises from \vf{0.340}, the mean of the three reconstructions, to \vf{0.505} after rewriting, a gain of \vf{0.165} (interval \vf{0.155} to \vf{0.176}). % src: results/legal128w/v7_2/main/framework/attacker/attacker-b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random-s1-stock.json table."hybrid rung B" (0.3400, 0.5052, +0.1652 [0.1547, 0.1759]); prompts_reported 450
-The same step applied to the mismatched-prompt control gains \vf{0.025} word-F1, so the gain depends on the reconstructions of the prompt itself.
+Applied to the mismatched-prompt control, the same step gains \vf{0.025} word-F1, so the gain depends on the reconstructions of the prompt itself.
 The comparison does not separate words copied from the reconstructions from words that the rewriting model infers from them. % src: same file, table."wrong memory rung B" (+0.0253 [0.0214, 0.0292])
 The other \vf{50} selection prompts chose the instruction given to the rewriting model. % src: oct_w5/decoder-plan.md part 2 (selection sample: first 50 prompt ids)
 Word-F1 counts overlapping words; the rewriting result does not show that the rewritten text is correct in meaning.

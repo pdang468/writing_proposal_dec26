@@ -5,7 +5,7 @@
 \chapter{Weakly Supervised Attack with a Small Leak}\label{ch:attack}
 
 This chapter connects a language model to the frozen translation hub of Chapter~\ref{ch:hub}, and measures how much of the input prompt the frozen decoders then reconstruct from that model's embeddings.
-An affine map sends the hidden states of the new model into the hub; the projectors and decoders of Chapter~\ref{ch:hub} reconstruct the prompt without any change.
+An affine map sends the hidden states of that model, the target model, into the hub; the projectors and decoders of Chapter~\ref{ch:hub} reconstruct the prompt without any change.
 The setting is weakly supervised: the attacker holds a small leak, a set of hidden states whose text is known, and a large pool of hidden states whose text is unknown.
 On Natural Questions prompts, a map fitted on a leak of \vf{10} prompts reaches a word-F1 of \vf{0.35}; a matching term, which compares mapped hidden states with unpaired hub outputs, raises that word-F1 to \vf{0.66}. % src: results/v7_2/main/mixed-v7_9-s5.json seed_summary.budgets.10.macro_f1 (0.3482, 0.6569)
 

@@ -2,7 +2,7 @@
 
 The supervised fit meets the criterion of H2.
 At \vf{1{,}000} paired sequences on Corpus A, word-F1 is \vf{0.876}, against a hub reference of \vf{0.946} and a mismatched-prompt control of \vf{0.11}; half of the reference is \vf{0.473}. % src: results/v7_2/main/mixed-v7_9-s4.json seed_summary.budgets.1000.macro_f1.b1000/a1/r1 (0.8759), seeds.*.cells.b1000/a1/r1.wrong_memory (0.1087 to 0.1154); factorial.json controls.true_olmo_code (0.9459)
-An affine map fitted on \vf{1{,}000} prompts thus brings the hidden states of Pythia within \vf{0.07} word-F1 of the hub's own OLMo outputs.
+Fitted on \vf{1{,}000} prompts, an affine map thus brings the hidden states of Pythia within \vf{0.07} word-F1 of the hub's own OLMo outputs.
 The scores are means over three seeds on the \vf{500} selection prompts.
 
 Word-F1 rises with the budget at every step (Table~\ref{tab:attack:budget}, Figure~\ref{fig:attack:budget}).
