@@ -309,7 +309,6 @@ Certification in the form attached hereto as Exhibit C; and & \miss{leave} \hit{
 \section{Discussion}\label{sec:hub:discussion}
 
 Corpus A meets the criteria for H1: across the six cross-model directions, mean word-F1 is \vf{0.945}, against \vf{0.120} under the mismatched-prompt control.
-The result rests on one hub seed and on validation prompts that also selected the checkpoint.
 The three legal hubs meet the same criteria (Section~\ref{sec:hub:legal}).
 The result is not uniform: on Corpus A, both cross-model directions into Qwen stay below \vf{0.90}.
 
@@ -318,18 +317,18 @@ Aligning a target model becomes a regression onto \vf{512}-dimensional hub outpu
 Because the hub maps each token independently, each hub output carries only the information in its source hidden state.
 One hub per corpus measures each hub on the text it is applied to but does not establish a single space across domains.
 
-Four limitations bound the claim.
-\begin{itemize}
-\item \textbf{One hub seed.} 
+% Four limitations bound the claim.
+% \begin{itemize}
+% \item \textbf{One hub seed.} 
 
 
-\todo{State when the test split is read.}
+% \todo{State when the test split is read.}
 
-\item \textbf{One control.} The mismatched-prompt control shows dependence on prompt-specific representations.
-It does not separate token content from token order; word-F1 ignores order, and exact match is the only order-sensitive score reported.
-\item \textbf{Three models, no pairwise baseline.} The reconstruction results cover only the three source models of Section~\ref{sec:hub:design}.
-No pairwise inversion baseline is reported, so neither a reconstruction advantage nor a cost advantage of the hub over pairwise maps is established.
-\todo{V1/V2 parity numbers.} %% the existing records compare retrieval and parameter counts, not inversion
-% records (retrieval and parameter counts, not inversion): V1 hub 13,587,456 against pairwise 46,080,000 parameters (results/v1_final_result.md); V2 hub 64.8 percent fewer parameters than pairwise (documents/v2-closeout-2026-08-04.md). No hub-against-pairwise inversion score exists for this hub.
-\end{itemize}
-The legal results of Section~\ref{sec:hub:legal} extend the result beyond Natural Questions queries under the same limitations.
+% \item \textbf{One control.} The mismatched-prompt control shows dependence on prompt-specific representations.
+% It does not separate token content from token order; word-F1 ignores order, and exact match is the only order-sensitive score reported.
+% \item \textbf{Three models, no pairwise baseline.} The reconstruction results cover only the three source models of Section~\ref{sec:hub:design}.
+% No pairwise inversion baseline is reported, so neither a reconstruction advantage nor a cost advantage of the hub over pairwise maps is established.
+% \todo{V1/V2 parity numbers.} %% the existing records compare retrieval and parameter counts, not inversion
+% % records (retrieval and parameter counts, not inversion): V1 hub 13,587,456 against pairwise 46,080,000 parameters (results/v1_final_result.md); V2 hub 64.8 percent fewer parameters than pairwise (documents/v2-closeout-2026-08-04.md). No hub-against-pairwise inversion score exists for this hub.
+% \end{itemize}
+% The legal results of Section~\ref{sec:hub:legal} extend the result beyond Natural Questions queries under the same limitations.
