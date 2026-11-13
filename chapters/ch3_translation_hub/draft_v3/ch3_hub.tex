@@ -4,10 +4,9 @@
 
 \chapter{Translation Hub}\label{ch:hub}
 
-%% BIG CHANGE: polish; restructure the argument and pacing, retaining the stated scope.
 The translation hub is a representation space shared by three open-weight language models.
-Each model's hidden states are mapped into the hub, and each frozen model reconstructs the source prompt from the resulting hub outputs.
-The central question is whether reconstruction succeeds across models: whether one model decodes the input information retained in another model's hidden states.
+Each model’s hidden states are mapped into the hub, and each frozen model reconstructs the source prompt from the resulting hub outputs.
+The central question is whether reconstruction succeeds across models: whether one model decodes the input information retained in another model’s hidden states.
 
 Model-specific adapters and a shared backbone map the hidden states into the hub, and model-specific projectors connect the hub outputs to the frozen decoders.
 Training is fully supervised: the hidden states of all three models are available for the same prompts.
