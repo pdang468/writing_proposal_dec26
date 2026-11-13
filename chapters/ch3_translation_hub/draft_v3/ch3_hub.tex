@@ -158,15 +158,16 @@ The test split is excluded from training and from selection.
 \section{Evaluation}\label{sec:hub:eval}
 
 %% BIG CHANGE: move the rationale before the decoding procedure.
-\paragraph{Why free-running decoding.} Teacher-forced accuracy can overstate reconstruction, because the ground-truth prefix carries information about the next token.
+\paragraph{Free-running decoding.}
+This work employs the free-running decoding as evaluation metric because the ground-truth prefix carries information about the next token.
 Free-running decoding removes that prefix, so the reconstruction must come from the memory and the decoder's own outputs.
 Teacher-forced Acc@1 therefore selects the checkpoint and nothing more; free-running word-F1 evaluates H1.
 
-\paragraph{Autoregressive reconstruction.} The hub is evaluated under free-running decoding.
-Each decoder conditions on the projected hub outputs and on its own generated prefix; greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap. % src: configs/v6_3.yaml (cap_margin 8); src/v6_3/inversion.py (CAP_RULE, batched_greedy_decode)
-The cap is the memory length plus \vf{8} tokens on Corpus A and plus \vf{32} tokens on the legal corpora. % src: configs/v6_3.yaml (cap_margin 8); configs/v6_3_legal{128w,10s,10w}.yaml (cap_margin 32)
+\paragraph{Autoregressive reconstruction.}
+Each decoder conditions on the projected hub outputs and on its own generated prefix; greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap. 
+The cap is the memory length plus \vf{32} tokens on the legal corpora.
 Two metrics compare the reconstruction with the source prompt.
-Word-F1 is the harmonic mean of word precision and recall over word multisets, averaged over prompts; exact match is the fraction of reconstructions equal to their reference after Unicode and whitespace normalization. % src: src/v4/clues/production_decoder.py (word_f1); src/v6_3/inversion.py (exact_match); src/v3/evaluate.py (canonicalize_text: NFKC, collapsed whitespace)
+Word-F1 is the harmonic mean of word precision and recall over word multisets, averaged over prompts; exact match is the fraction of reconstructions equal to their reference after Unicode and whitespace normalization. 
 Word-F1 ignores word order, so exact match is reported as the order-sensitive metric.
 
 \paragraph{Control.} The mismatched-prompt control replaces the source memory with the hub outputs of another prompt and keeps the original reference.
