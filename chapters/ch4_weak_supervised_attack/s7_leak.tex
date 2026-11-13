@@ -2,7 +2,7 @@
 
 This section asks whether the composition of a leak, at a fixed number of rows, changes word-F1.
 The budgets of the previous sections count whole paired sequences; a leak may instead hold a few rows from each of many prompts, or rows of one kind of word.
-The leak is fixed near \vf{90} rows, the size of ten Corpus A prompts, and varies which rows it holds.
+The leak is fixed near \vf{90} rows, the size of ten Corpus A prompts, and only the choice of rows varies.
 The corpus is legal128w, whose prompts average \vf{61} words (Section~\ref{sec:hub:legal}), so that \vf{90} rows fit in one or two prompts or spread over ninety.
 The hybrid fit has $\alpha = 0.99$, $\tau = d$, and $B = 8{,}192$; the supervised fit reads the same rows. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json setting (alphas 0.99, tau_sqdist 0.06485, blind_batch_rows 8192)
 All results of this section rest on one seed.

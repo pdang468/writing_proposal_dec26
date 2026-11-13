@@ -1,7 +1,7 @@
 \section{Changes with Small or Negative Effects}\label{sec:attack:negative}
 
 Four changes to the method were tested against the fits of the previous sections; each lowers word-F1 or raises it by less than \vf{0.01} (Table~\ref{tab:attack:negative}).
-Each row compares one change with the fit it replaces, on the same prompts.
+Each row names its own comparison, on the same prompts.
 
 \begin{table}[H]
 \caption{Each of four changes to the method lowers word-F1 or raises it by a point estimate below \vf{0.01}.
@@ -24,7 +24,7 @@ Further training of the map through the frozen SmolLM decoder & legal128w, \vf{1
 The contrastive term is an InfoNCE loss on the rows of the leak; the comparison changes both the objective and the fitting procedure, so it favors the ridge regression under these settings without identifying the cause of the difference. % src: v7_2/plan.md (paired InfoNCE term)
 The inferred rows pair each hidden state with the hub output at the same position of the decoder's own reconstruction, so the map trains on its own errors.
 The two-layer map scores \vf{0.117} word-F1 below the affine map at a budget of \vf{10}; the supervised fit was not compared.
-The further training raises SmolLM word-F1 by \vf{0.009} on prompts held out from the selection of the attack settings, a gain that is positive and small.
 The further training starts from the hybrid fit and, on the prompts of the leak, minimizes the Kullback--Leibler divergence between SmolLM's next-token distributions under the hub outputs of OLMo and under the mapped states, both with the ground-truth prefix. % src: oct_w4/plan.md (question; losses, row b)
+It raises SmolLM word-F1 by \vf{0.009} on prompts held out from the selection of the attack settings, a gain that is positive and small.
 
 Each row is one comparison under one setting; none shows that the change fails under other budgets, corpora, or schedules.

@@ -58,7 +58,7 @@ where does the menthol in cigarettes come from & Hybrid & \miss{who played skele
 \end{table}
 
 \paragraph{Selection of the setting.} The setting of the hybrid fit was selected in five steps on the selection prompts with seed \vf{1}; seeds \vf{2} and \vf{3} then repeated every fit with the selected values. % src: results/v7_2/main/mixed-v7_9-s{1..5}.json selection (selection_seed 1), setting.seeds
-Each step changes one setting, keeps the value with the highest mean word-F1 over budgets \vf{10}, \vf{30}, and \vf{100}, and passes it to the next step.
+Each step changes one component of the setting, keeps the value with the highest mean word-F1 over budgets \vf{10}, \vf{30}, and \vf{100}, and passes it to the next step.
 Steps \vf{4} and \vf{5} add a term only if it raises that mean by \vf{0.02} with the lower bound above zero.
 Step \vf{5} tests a moment penalty, which penalizes the distance of the mean and the radius of the mapped states from those of the hub outputs.
 Table~\ref{tab:attack:steps} reports the difference that each step makes, as a mean over the three seeds.
@@ -85,12 +85,12 @@ Step & Comparison & 10 & 30 & 100 & 300 & 1{,}000 \\
 \end{tabular}
 \end{table}
 
-Four settings each raise word-F1 at small budgets: the squared-distance score, a supervision fraction below one, a higher temperature, and a larger batch for the matching term.
+Four components each raise word-F1 at small budgets: the squared-distance score, a supervision fraction below one, a higher temperature, and a larger batch for the matching term.
 At a budget of \vf{10} the four differences are \vf{0.043}, \vf{0.096}, \vf{0.110}, and \vf{0.092}, and all four fall below \vf{0.01} at \vf{300}. % src: Table rows of steps 1 to 3
 Steps \vf{1} to \vf{3} run without the ridge penalty, so the second row compares the hybrid fit with a supervised fit that also lacks it.
 The first row compares the two scores each at its own temperature $d$, not at one temperature. % src: mixed-v7_9-s1.json cell names (sq at t0.05761, cos at t0.02939)
 The ridge penalty passes its rule in step \vf{4}; the moment penalty changes word-F1 by at most \vf{0.002} and stays off. % src: mixed-v7_9-s4.json selection.on_minus_off (+0.0309 [0.0264, 0.0354]); mixed-v7_9-s5.json selection.on_minus_off (+0.0005 [-0.0006, 0.0016])
-Each row credits a setting only with its difference along that order of steps.
+Each row credits a component only with its difference along that order of steps.
 
 \paragraph{Temperature and batch beyond the grid.} Steps \vf{2} and \vf{3} each selected the largest value on their grid, so two further comparisons extend the grids.
 Among temperatures from $0.2d$ to $20d$, $2d$ keeps the highest mean word-F1 over budgets \vf{10}, \vf{30}, and \vf{100} (\vf{0.734}, against \vf{0.621} at $4d$; seed \vf{1}). % src: results/v7_2/main/mixed-v7_10-s1.json and mixed-v7_10-s1-ext.json selection.candidates (t0.1152 0.7343, t0.2304 0.6207)

@@ -24,4 +24,4 @@ Word-F1 does not rise above that of a random draw of rows when the leaked words 
 Criterion: at \vf{90} rows, the leak spread over \vf{90} prompts exceeds the leak from two prompts by at least \vf{0.03}, and no word-class rule exceeds the random draw by \vf{0.03}.
 
 \paragraph{Hypothesis H7: a larger decoder raises word-F1 on the same mapped states.} H7 is the prediction of the evaluation plan.
-Criterion, written before the run: the difference in word-F1 is larger decoder minus best hub decoder, and its lower bound lies above \vf{0.03}; an upper bound below \vf{0.02} contradicts H7.
+Criterion, written before the run: the larger decoder exceeds the best hub decoder in word-F1, with the lower bound of the difference above \vf{0.03}; an upper bound below \vf{0.02} contradicts H7.
