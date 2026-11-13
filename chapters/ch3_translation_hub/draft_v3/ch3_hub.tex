@@ -128,7 +128,7 @@ The learning rate rises to $3\times10^{-4}$ over \vf{250} warmup updates and fol
 Teacher-forced Acc@1 selects the checkpoint.
 Acc@1 is the fraction of prompt tokens that the decoder ranks first given the ground-truth prefix, the end-of-sequence token excluded.
 It is averaged within prompts, over the \vf{5{,}000} validation prompts, and over the six cross-model directions.
-A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained: on Corpus NQ (Natural Questions queries), update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
+A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained: on Corpus A (Natural Questions queries), update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
 The test split is excluded from training and from selection.
 
 % \paragraph{Cost of the token-wise design.} Mapping each token independently costs selection accuracy. A variant with a two-layer transformer inside each adapter, trained on the same prompts with the same objective, reached \vf{0.987} on the selection score against \vf{0.954} for the token-wise hub. % src: results/v6_2/hpc-final/{a,b}/report.json cross_mean (variant B 0.9870, variant A 0.9536)
@@ -139,7 +139,7 @@ The test split is excluded from training and from selection.
 
 \paragraph{Autoregressive reconstruction.} The hub is evaluated under free-running decoding.
 Each decoder conditions on the projected hub outputs and on its own generated prefix; greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap. % src: configs/v6_3.yaml (cap_margin 8); src/v6_3/inversion.py (CAP_RULE, batched_greedy_decode)
-The cap is the memory length plus \vf{8} tokens on Corpus NQ and plus \vf{32} tokens on the legal corpora. % src: configs/v6_3.yaml (cap_margin 8); configs/v6_3_legal{128w,10s,10w}.yaml (cap_margin 32)
+The cap is the memory length plus \vf{8} tokens on Corpus A and plus \vf{32} tokens on the legal corpora. % src: configs/v6_3.yaml (cap_margin 8); configs/v6_3_legal{128w,10s,10w}.yaml (cap_margin 32)
 Two metrics compare the reconstruction with the source prompt.
 Word-F1 is the harmonic mean of word precision and recall over word multisets, averaged over prompts; exact match is the fraction of reconstructions equal to their reference after Unicode and whitespace normalization. % src: src/v4/clues/production_decoder.py (word_f1); src/v6_3/inversion.py (exact_match); src/v3/evaluate.py (canonicalize_text: NFKC, collapsed whitespace)
 Word-F1 ignores word order, so exact match is reported as the order-sensitive metric.
@@ -153,14 +153,14 @@ A decoder that ignores its memory would score about the same under matched and m
 Prompt $i$ receives the memory of prompt $i+1$, and the last prompt receives the memory of the first.
 % src: src/v6_3/inversion.py (shuffled_indices: (i + 1) mod n); src/v8/projectors.py (wrong_partner: same rule)
 
-\paragraph{Prompt sets.} Corpus NQ contains Natural Questions query strings, split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts.
+\paragraph{Prompt sets.} Corpus A contains Natural Questions query strings, split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts.
 Near-duplicate questions never cross a split, and the test split has not been evaluated. % src: configs/v3.yaml (split_schema_version v2-stage2-textcluster-v1); src/v3/splits.py
 The validation prompts average \vf{nine} words and range from \vf{6} to \vf{19}. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
 All scores in this chapter are computed on the validation split, which also selects the checkpoint, so no score is held out.
 
 \paragraph{Criteria for H1.} One score summarizes the hub: mean cross-model word-F1, the free-running word-F1 averaged over the six cross-model directions on the validation split.
 A corpus fails H1 if that mean falls below \vf{0.90} or if the mismatched-prompt control on the same prompts reaches \vf{0.20}.
-Both thresholds come from the evaluation plan of the legal-window hubs and were applied to Corpus NQ retrospectively; no threshold preceded its training run. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); no threshold precedes the Corpus NQ run
+Both thresholds come from the evaluation plan of the legal-window hubs and were applied to Corpus A retrospectively; no threshold preceded its training run. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); no threshold precedes the Corpus A run
 Per-direction scores show the variation that the mean hides.
 
 %% ------------------------------------------------------------------
@@ -168,7 +168,7 @@ Per-direction scores show the variation that the mean hides.
 
 \subsection{The hub reconstructs prompts across models}\label{sec:hub:translation}
 
-Corpus NQ meets both criteria for H1.
+Corpus A meets both criteria for H1.
 On its \vf{5{,}000} validation prompts, cross-model word-F1 averages \vf{0.945}, against \vf{0.120} under the mismatched-prompt control; exact match averages \vf{0.71} and is zero under the control. % src: results/v6_3/hpc-final/inversion.json cross_mean (hub 0.9445, exact 0.7116; shuffled 0.1203, exact 0.0)
 The decoded and true prompts thus share most of their words, and \vf{71} percent of reconstructions equal their prompt.
 The drop of \vf{0.82} under the control shows that reconstruction depends on the prompt's own hub outputs.
@@ -180,14 +180,14 @@ The four cross-model directions into OLMo and SmolLM score \vf{0.966} to \vf{0.9
 \centering
 \includegraphics[width=0.62\textwidth]{ch3/direction_recovery_nq}
 \caption{The OLMo and SmolLM decoders reconstruct every source above 0.96 word-F1; the Qwen decoder reaches 0.84 to 0.88.
-Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} Corpus NQ validation prompts; diagonal cells are self-reconstruction.
+Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} Corpus A validation prompts; diagonal cells are self-reconstruction.
 The mismatched-prompt control scores \vf{0.120} to \vf{0.121} in every direction.
 One hub seed.}
 \label{fig:hub:directions}
 \end{figure}
 
 \begin{table}[H]
-\caption{On Corpus NQ, both mean reconstruction scores exceed their controls by at least \vf{0.81}.
+\caption{On Corpus A, both mean reconstruction scores exceed their controls by at least \vf{0.81}.
 Free-running word-F1, one hub seed; each control is evaluated on the same prompts and directions as its score.
 Self-reconstruction is a within-model reference; only the cross-model directions test H1.}
 \label{tab:hub:reads}
@@ -210,7 +210,7 @@ Three selected prompts show the scale of word-F1, not the frequency of each erro
 
 \begin{table}[H]
 \caption{At an intermediate score one word changes; at a low score the names are lost.
-Reconstructions from OLMo $\to$ Qwen on Corpus NQ validation prompts, selected at high, intermediate, and low word-F1; the final row is generated under mismatched memory and scored against the original prompt.
+Reconstructions from OLMo $\to$ Qwen on Corpus A validation prompts, selected at high, intermediate, and low word-F1; the final row is generated under mismatched memory and scored against the original prompt.
 Decoded words that match the true prompt are green; the others are red and bold.}
 \label{tab:hub:examples}
 \centering
@@ -234,7 +234,7 @@ who played uncle in only fools and horses & \hit{who} \miss{plays the girl jinx}
 % The weakness follows the decoder, not the source.
 % Qwen's own states yield word-F1 of \vf{0.841} through the Qwen decoder, below both cross-model directions into it, and reach \vf{0.969} and \vf{0.990} through the other two decoders. % src: same; qwen->qwen 0.8411, qwen->olmo 0.9689, qwen->smollm 0.9896
 % Exact match widens the gap: \vf{0.35} to \vf{0.45} into Qwen against \vf{0.78} to \vf{0.94} into the other decoders. % src: same, exact_match
-% Corpus NQ therefore meets the criteria for H1, although two cross-model directions fall below the word-F1 threshold.
+% Corpus A therefore meets the criteria for H1, although two cross-model directions fall below the word-F1 threshold.
 % The scores do not identify the cause.
 
 %% ------------------------------------------------------------------
@@ -251,7 +251,7 @@ Each corpus has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % sr
 \paragraph{Results.} All three legal hubs meet both criteria for H1 (Table~\ref{tab:hub:legal}).
 On the \vf{5{,}000} validation prompts of each corpus, mean cross-model word-F1 lies between \vf{0.970} and \vf{0.977}, against \vf{0.044} to \vf{0.152} under the mismatched-prompt control. % src: results/legal{128w,10s,10w}/v6_3/inversion.json cross_mean (hub 0.9769, 0.9705, 0.9767; shuffled 0.1519, 0.0441, 0.0706)
 Every cross-model direction exceeds \vf{0.90}; the lowest is Qwen $\to$ OLMo on legal128w, at \vf{0.955}. % src: same files, directions (cross minima 0.9552, 0.9634, 0.9670)
-The lower scores into Qwen on Corpus NQ do not recur: the cross-model directions into Qwen score \vf{0.973} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9829, 0.9730; 0.9858, 0.9752)
+The lower scores into Qwen on Corpus A do not recur: the cross-model directions into Qwen score \vf{0.973} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9829, 0.9730; 0.9858, 0.9752)
 
 \begin{table}[H]
 \caption{Each legal hub exceeds a mean cross-model word-F1 of \vf{0.90} with a control below \vf{0.20}.
@@ -271,7 +271,7 @@ legal10w & \vf{5{,}000} validation & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % sr
 
 Exact match averages \vf{0.58} on legal128w, \vf{0.78} on legal10s, and \vf{0.83} on legal10w, so a high word-F1 does not mean that every prompt is reconstructed exactly.
 The lower exact match on legal128w is consistent with its longer prompts, but the comparison does not isolate length from content.
-As on Corpus NQ, each validation split also selected its hub's checkpoint, so no legal score is held out.
+As on Corpus A, each validation split also selected its hub's checkpoint, so no legal score is held out.
 
 \begin{figure}[ht]
 \centering

@@ -1,20 +1,20 @@
 \section{Experimental Design and Setting Selection}\label{sec:attack:experiments}
 
-\paragraph{Corpora and pools.} The corpora are Corpus NQ and legal128w of Chapter~\ref{ch:hub}, each with its own frozen hub.
+\paragraph{Corpora and pools.} The corpora are Corpus A and legal128w of Chapter~\ref{ch:hub}, each with its own frozen hub.
 All training data come from the \vf{40{,}000} training prompts of a corpus. % src: results/v7_2/main/manifest.json (training_pools); results/v7_2/main/anchors-linear.json (pool_size 40000)
 The training prompts are divided once, at random, into two halves of \vf{20{,}000}: one half supplies the unpaired pool of the target model, as hidden states, and the other half supplies the unpaired pool of the hub, as hub outputs of OLMo.
 A leak draws its paired sequences at random from all \vf{40{,}000} training prompts. % src: src/v7_2/anchors_linear.py
 
 \paragraph{The 90-row leak.} The main experiment gives the attacker \vf{90} rows: the first nine rows of each of ten prompts. % src: w46/plan.md (leak span9); src/v7_2/anchors_linear.py (span_start_pairs); mixed-w46-std.json anchor_counts (prompts 10, leak_rows 90)
-The leak has the same form on both corpora, although a Corpus NQ prompt averages nine words and a legal128w prompt \vf{61} (Sections~\ref{sec:hub:eval} and~\ref{sec:hub:legal}).
-Ten Corpus NQ prompts are thus leaked almost whole, and ten legal128w prompts in their opening words.
+The leak has the same form on both corpora, although a Corpus A prompt averages nine words and a legal128w prompt \vf{61} (Sections~\ref{sec:hub:eval} and~\ref{sec:hub:legal}).
+Ten Corpus A prompts are thus leaked almost whole, and ten legal128w prompts in their opening words.
 
-\paragraph{Decoding and score.} Evaluation follows Section~\ref{sec:hub:eval}: each of the three decoders generates greedily from the projected output of the map, without the ground-truth prefix, up to the memory length plus \vf{32} tokens (plus \vf{8} in the Corpus NQ experiments other than the main comparison). % src: configs/v7_cap32.yaml; configs/v7_legal128w.yaml (cap_margin 32); configs/v7.yaml (cap_margin 8)
+\paragraph{Decoding and score.} Evaluation follows Section~\ref{sec:hub:eval}: each of the three decoders generates greedily from the projected output of the map, without the ground-truth prefix, up to the memory length plus \vf{32} tokens (plus \vf{8} in the Corpus A experiments other than the main comparison). % src: configs/v7_cap32.yaml; configs/v7_legal128w.yaml (cap_margin 32); configs/v7.yaml (cap_margin 8)
 The score is word-F1, averaged over prompts and over the three decoders. % src: src/v7_2/f1.py; src/v7_2/factorial.py
 In this chapter, word-F1 without a decoder's name denotes that three-decoder mean.
 
 \paragraph{Control and hub reference.} The mismatched-prompt control gives each decoder the mapped states of another prompt, the one whose number of rows is nearest, and scores the output against the original prompt. % src: src/v6_4/controls.py (length_matched)
-The hub reference is the word-F1 that the three decoders reach from the hub outputs of OLMo for the selection prompts, without any map: \vf{0.946} on Corpus NQ and \vf{0.982} on legal128w. % src: results/v7_2/main/factorial.json controls.true_olmo_code.macro_f1 (0.9459); results/legal128w/v7_2/main/mixed-v7_9-s0.json setting.corpus.g2.macro_f1 (0.9824)
+The hub reference is the word-F1 that the three decoders reach from the hub outputs of OLMo for the selection prompts, without any map: \vf{0.946} on Corpus A and \vf{0.982} on legal128w. % src: results/v7_2/main/factorial.json controls.true_olmo_code.macro_f1 (0.9459); results/legal128w/v7_2/main/mixed-v7_9-s0.json setting.corpus.g2.macro_f1 (0.9824)
 It is a reference, not an upper bound: the target model and OLMo tokenize a prompt differently.
 
 \paragraph{Prompt sets.} Two disjoint sets of validation prompts are read, and neither overlaps the training prompts.
@@ -43,8 +43,8 @@ Experiment & $\alpha$ & $\tau$ & $B$ & Leak & Prompts & Seeds \\
 \midrule
 Main comparison (H2) & \vf{0.9} & $2d$ & \vf{8{,}192} & \vf{90} rows from ten prompts & \vf{4{,}500} held-out & \vf{3} \\ % src: configs/w46_{nq,legal128w}_std.yaml; results/*/v7_2/main/w46-confirmation-s{1,2,3}.json
 Second round (H3) & \vf{0.95} & $2d$ & \vf{8{,}192} & budget \vf{10} or \vf{100} & \vf{450} selection & \vf{1} \\ % src: results/*/v7_2/main/framework/attacker/*-haiku.json
-Teacher-forced scores & \vf{0.95} & $2d$ & \vf{8{,}192} & budgets \vf{1} to \vf{100} & \vf{500} selection & NQ \vf{3}, legal \vf{1} \\ % src: results/*/v7_2/main/framework/teacher_forced/summary.json (Corpus NQ three seeds, legal128w seed 1)
-Budget curve, Corpus NQ & \vf{0.95} & $2d$ & \vf{2{,}048} & budgets \vf{10} to \vf{1{,}000} & \vf{500} selection & \vf{3} \\ % src: results/v7_2/main/mixed-v7_9-s5.json
+Teacher-forced scores & \vf{0.95} & $2d$ & \vf{8{,}192} & budgets \vf{1} to \vf{100} & \vf{500} selection & Corpus A \vf{3}, legal128w \vf{1} \\ % src: results/*/v7_2/main/framework/teacher_forced/summary.json (Corpus A three seeds, legal128w seed 1)
+Budget curve, Corpus A & \vf{0.95} & $2d$ & \vf{2{,}048} & budgets \vf{10} to \vf{1{,}000} & \vf{500} selection & \vf{3} \\ % src: results/v7_2/main/mixed-v7_9-s5.json
 Leak composition, second target model, decoder training & \vf{0.99} & $d$ & \vf{8{,}192} & \vf{90} rows, or budgets \vf{10} to \vf{100} & \vf{500} selection, \vf{4{,}500} held-out where stated & \vf{1} \\ % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json setting; mixed-v8_7-s1.json, mixed-v8_7-s2.json selection
 \bottomrule
 \end{tabular}
@@ -56,7 +56,7 @@ The setting of the last row was selected on legal128w alone, with whole paired s
 \paragraph{Grid search.} The setting of the main comparison comes from one grid over the supervision fraction and the temperature, on the \vf{90}-row leak, with seed \vf{1} and the \vf{500} selection prompts of each corpus (Figure~\ref{fig:attack:grid}). % src: results/v7_2/main/mixed-w46-grid.json; results/legal128w/v7_2/main/mixed-w46-grid.json; w46-selection.json
 The rule, written before the grid was run, selects the cell with the highest mean word-F1 over the two corpora. % src: w46/plan.md; w46-selection.json rule
 The selected cell is $\alpha = 0.9$, $\tau = 2d$, with a two-corpus mean of \vf{0.534}. % src: w46-selection.json best (0.5336)
-It is the best cell on Corpus NQ (\vf{0.768}) and not on legal128w, where it scores \vf{0.299} against \vf{0.314} for the best cell ($\alpha = 0.8$, $\tau = 2d$). % src: mixed-w46-grid.json seeds.1.cells (0.7679; legal128w 0.2993, 0.3144)
+It is the best cell on Corpus A (\vf{0.768}) and not on legal128w, where it scores \vf{0.299} against \vf{0.314} for the best cell ($\alpha = 0.8$, $\tau = 2d$). % src: mixed-w46-grid.json seeds.1.cells (0.7679; legal128w 0.2993, 0.3144)
 On both corpora word-F1 falls on either side of $\tau = 2d$ for $\alpha \le 0.95$, and several cells with a low temperature score below the supervised fit.
 The matching term therefore helps only within a range of temperatures, and the selection of that range reads prompts whose text is known.
 

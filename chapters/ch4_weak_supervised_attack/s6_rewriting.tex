@@ -1,7 +1,7 @@
 \section{A Second-Round Language Model Improves Reconstruction Further}\label{sec:attack:rewriting}
 
 The second round meets the criterion of H3 in all three tested conditions.
-After Claude Haiku rewrites the three decoders' reconstructions, word-F1 rises from \vf{0.727} to \vf{0.861} on Corpus NQ at a budget of \vf{10}, from \vf{0.539} to \vf{0.802} on legal128w at a budget of \vf{10}, and from \vf{0.772} to \vf{0.896} on legal128w at a budget of \vf{100} (Table~\ref{tab:attack:rewriting}, Figure~\ref{fig:attack:rewriting}). % src: results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json; results/legal128w/v7_2/main/framework/attacker/attacker-b{10,100}-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json, table."hybrid rung B".word_f1
+After Claude Haiku rewrites the three decoders' reconstructions, word-F1 rises from \vf{0.727} to \vf{0.861} on Corpus A at a budget of \vf{10}, from \vf{0.539} to \vf{0.802} on legal128w at a budget of \vf{10}, and from \vf{0.772} to \vf{0.896} on legal128w at a budget of \vf{100} (Table~\ref{tab:attack:rewriting}, Figure~\ref{fig:attack:rewriting}). % src: results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json; results/legal128w/v7_2/main/framework/attacker/attacker-b{10,100}-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json, table."hybrid rung B".word_f1
 The lowest lower bound of the three gains is \vf{0.115}, above zero.
 The before-score is the mean word-F1 of the three reconstructions, so the rewriting turns three reconstructions of uneven quality into one that is better than their average.
 
@@ -18,7 +18,7 @@ Hybrid fits with $\alpha = 0.95$, $\tau = 2d$, $B = 8{,}192$, seed \vf{1}, \vf{4
 \toprule
 Condition & Mean of three & SmolLM alone & After rewriting & Gain \\
 \midrule
-Corpus NQ, budget 10 & \vf{0.727} & \vf{0.854} & \vf{0.861} & \vf{$+0.134$} [\vf{0.124}, \vf{0.145}] \\ % src: attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json table."hybrid rung B".word_f1 (0.7271, 0.8610, +0.1339 [0.1237, 0.1449]); SmolLM alone recomputed from the per-prompt records (0.8539)
+Corpus A, budget 10 & \vf{0.727} & \vf{0.854} & \vf{0.861} & \vf{$+0.134$} [\vf{0.124}, \vf{0.145}] \\ % src: attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json table."hybrid rung B".word_f1 (0.7271, 0.8610, +0.1339 [0.1237, 0.1449]); SmolLM alone recomputed from the per-prompt records (0.8539)
 legal128w, budget 10 & \vf{0.539} & \vf{0.779} & \vf{0.802} & \vf{$+0.263$} [\vf{0.252}, \vf{0.273}] \\ % src: legal128w attacker-b10-...-haiku.json (0.5393, 0.8020, +0.2627 [0.2522, 0.2729]); SmolLM alone recomputed (0.7793)
 legal128w, budget 100 & \vf{0.772} & \vf{0.890} & \vf{0.896} & \vf{$+0.124$} [\vf{0.115}, \vf{0.135}] \\ % src: legal128w attacker-b100-...-haiku.json (0.7721, 0.8963, +0.1242 [0.1145, 0.1349]); SmolLM alone recomputed (0.8897)
 \bottomrule
@@ -38,9 +38,9 @@ Given one reconstruction, the language model changes word-F1 by \vf{$-0.002$}, \
 The SmolLM reconstruction alone scores \vf{0.854}, \vf{0.779}, and \vf{0.890}, within \vf{0.007}, \vf{0.023}, and \vf{0.007} of the rewritten text. % src: recomputed from the endpoint decoding records and corpus manifests on the 450 prompt ids of the Haiku cache, with the same normalization as the rewritten outputs (0.8539, 0.7793, 0.8897); stored at three decimals in best-decoder-haiku-p7.md
 Most of the gain over the mean therefore equals the advantage of the best decoder, which the instruction names as the most reliable copy; the rewritten text scores \vf{0.01} to \vf{0.02} above it, without a paired interval.
 The comparison does not separate the contribution of the two further reconstructions from the instruction that puts SmolLM first.
-On the hub's own outputs the rewriting raises word-F1 from \vf{0.946} to \vf{0.979} on Corpus NQ and lowers it from \vf{0.984} to \vf{0.969} on legal128w, so the second round can also remove correct words. % src: same files, table."G2 rung B".word_f1 (0.9462, 0.9786; 0.9838, 0.9691)
+On the hub's own outputs the rewriting raises word-F1 from \vf{0.946} to \vf{0.979} on Corpus A and lowers it from \vf{0.984} to \vf{0.969} on legal128w, so the second round can also remove correct words. % src: same files, table."G2 rung B".word_f1 (0.9462, 0.9786; 0.9838, 0.9691)
 
-\paragraph{Names and numbers.} Entity recall, the share of the named entities of the true prompt that appear in the output, rises from \vf{0.50} to \vf{0.71} on Corpus NQ, and from \vf{0.21} to \vf{0.37} and from \vf{0.44} to \vf{0.57} on legal128w. % src: same files, table."hybrid rung B".entity_recall (0.5000, 0.7116; 0.2106, 0.3743; 0.4399, 0.5735)
+\paragraph{Names and numbers.} Entity recall, the share of the named entities of the true prompt that appear in the output, rises from \vf{0.50} to \vf{0.71} on Corpus A, and from \vf{0.21} to \vf{0.37} and from \vf{0.44} to \vf{0.57} on legal128w. % src: same files, table."hybrid rung B".entity_recall (0.5000, 0.7116; 0.2106, 0.3743; 0.4399, 0.5735)
 After the second round, most names of a legal prompt are still missing at a budget of \vf{10}; a higher word-F1 does not establish that names and facts are recovered.
 
 \paragraph{What the result does not show.} The second condition of H3, dependence on the prompt's own reconstructions, is not tested for this protocol: no mismatched-prompt control was run for the rewriting of three reconstructions by Claude Haiku.

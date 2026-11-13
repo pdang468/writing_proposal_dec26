@@ -49,7 +49,7 @@ The matching term is low when mapped states and hub outputs are close to one ano
 
 \paragraph{Temperature.} The temperature $\tau$ is a multiple of a scale $d$ that comes from the hub alone.
 The scale $d$ is the median gap between the highest and the second-highest score of a hub output against the other hub outputs of its batch, over \vf{100} batches of \vf{512} hub outputs. % src: src/v7_2/gap.py; results/*/v7_2/main/mixed-v7_9-s0.json gap
-It is \vf{0.0576} on Corpus NQ and \vf{0.0648} on legal128w. % src: results/v7_2/main/mixed-v7_9-s0.json gap.sqdist.median (0.05761); results/legal128w/v7_2/main/mixed-v7_9-s0.json (0.06485)
+It is \vf{0.0576} on Corpus A and \vf{0.0648} on legal128w. % src: results/v7_2/main/mixed-v7_9-s0.json gap.sqdist.median (0.05761); results/legal128w/v7_2/main/mixed-v7_9-s0.json (0.06485)
 
 \paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates with a learning rate that rises to $3\times10^{-4}$ over \vf{300} warmup updates and follows a cosine decay to zero, no weight decay, and gradients clipped at norm \vf{1.0}. % src: configs/v7_9_s4.yaml (training); src/v7/training.py (lr_multiplier)
 Each update samples \vf{512} rows of the leak, with replacement, and $B$ rows from each unpaired pool. % src: results/v7_2/main/mixed-v7_9-s5.json setting (paired_batch_rows 512)

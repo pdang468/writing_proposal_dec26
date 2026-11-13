@@ -1,16 +1,16 @@
 \section{Matching Improves Reconstruction from a Small Leak}\label{sec:attack:hybrid}
 
 The matching term raises word-F1 on both corpora, by more than the \vf{0.10} that H2 requires.
-On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit on Corpus NQ, and from \vf{0.102} to \vf{0.321} on legal128w (Table~\ref{tab:attack:main}, Figure~\ref{fig:attack:standard}). % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds)
-The gain is \vf{0.411} on Corpus NQ and \vf{0.219} on legal128w, and in each of the three seeds it is at least \vf{0.402} and \vf{0.201}. % src: same files, hybrid minus supervised per seed (0.4018, 0.4189, 0.4135; 0.2010, 0.2444, 0.2112)
+On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit on Corpus A, and from \vf{0.102} to \vf{0.321} on legal128w (Table~\ref{tab:attack:main}, Figure~\ref{fig:attack:standard}). % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds)
+The gain is \vf{0.411} on Corpus A and \vf{0.219} on legal128w, and in each of the three seeds it is at least \vf{0.402} and \vf{0.201}. % src: same files, hybrid minus supervised per seed (0.4018, 0.4189, 0.4135; 0.2010, 0.2444, 0.2112)
 The same \vf{90} rows thus yield more than twice the word overlap when the map also reads the unpaired pools, which contain no text.
 
 The criterion of H2 also asks for a lower bound above \vf{0.05}.
-On the \vf{500} selection prompts the three-seed gain is \vf{0.410} with an interval of \vf{0.401} to \vf{0.420} on Corpus NQ, and \vf{0.218} with an interval of \vf{0.208} to \vf{0.227} on legal128w, so the criterion is met there. % src: results/v7_2/main/mixed-w46-std.json seed_summary.budgets.90.cell_minus_benchmark (0.4104 [0.4005, 0.4196]); results/legal128w/v7_2/main/mixed-w46-std.json (0.2175 [0.2076, 0.2268])
+On the \vf{500} selection prompts the three-seed gain is \vf{0.410} with an interval of \vf{0.401} to \vf{0.420} on Corpus A, and \vf{0.218} with an interval of \vf{0.208} to \vf{0.227} on legal128w, so the criterion is met there. % src: results/v7_2/main/mixed-w46-std.json seed_summary.budgets.90.cell_minus_benchmark (0.4104 [0.4005, 0.4196]); results/legal128w/v7_2/main/mixed-w46-std.json (0.2175 [0.2076, 0.2268])
 The held-out means agree with the selection prompts within \vf{0.002}, but no held-out interval is available.
 
 \begin{table}[H]
-\caption{With \vf{90} leaked rows, the hybrid fit exceeds the supervised fit by \vf{0.41} word-F1 on Corpus NQ and by \vf{0.22} on legal128w.
+\caption{With \vf{90} leaked rows, the hybrid fit exceeds the supervised fit by \vf{0.41} word-F1 on Corpus A and by \vf{0.22} on legal128w.
 Word-F1 averaged over three decoders and three seeds, Pythia as the target model, $\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$.
 The held-out prompts selected no setting of the attack; the interval is a paired bootstrap over prompts and is stored for the selection prompts only.}
 \label{tab:attack:main}
@@ -20,8 +20,8 @@ The held-out prompts selected no setting of the attack; the interval is a paired
 \toprule
 Corpus & Prompts & Supervised fit & Hybrid fit & Gain \\
 \midrule
-Corpus NQ & \vf{4{,}500} held-out & \vf{0.354} & \vf{0.766} & \vf{$+0.411$} \\ % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.macro_f1 (0.3544, 0.7659)
-Corpus NQ & \vf{500} selection & \vf{0.352} & \vf{0.762} & \vf{$+0.410$} [\vf{0.401}, \vf{0.420}] \\ % src: results/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.3519, 0.7623, 0.4104 [0.4005, 0.4196])
+Corpus A & \vf{4{,}500} held-out & \vf{0.354} & \vf{0.766} & \vf{$+0.411$} \\ % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.macro_f1 (0.3544, 0.7659)
+Corpus A & \vf{500} selection & \vf{0.352} & \vf{0.762} & \vf{$+0.410$} [\vf{0.401}, \vf{0.420}] \\ % src: results/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.3519, 0.7623, 0.4104 [0.4005, 0.4196])
 legal128w & \vf{4{,}500} held-out & \vf{0.102} & \vf{0.321} & \vf{$+0.219$} \\ % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (0.1021, 0.3209)
 legal128w & \vf{500} selection & \vf{0.102} & \vf{0.320} & \vf{$+0.218$} [\vf{0.208}, \vf{0.227}] \\ % src: results/legal128w/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.1021, 0.3196, 0.2175 [0.2076, 0.2268])
 \bottomrule
@@ -36,17 +36,17 @@ Word-F1 averaged over three decoders on the \vf{4{,}500} held-out prompts, with 
 \label{fig:attack:standard}
 \end{figure}
 
-\paragraph{What the scores mean.} On the selection prompts, the mismatched-prompt control of the hybrid fit is \vf{0.110} on Corpus NQ and \vf{0.073} on legal128w, so the hybrid scores depend on the prompt's own hidden states. % src: mixed-w46-std.json seeds.*.cells.*.wrong_memory.macro_f1 (means 0.1104, 0.0733)
+\paragraph{What the scores mean.} On the selection prompts, the mismatched-prompt control of the hybrid fit is \vf{0.110} on Corpus A and \vf{0.073} on legal128w, so the hybrid scores depend on the prompt's own hidden states. % src: mixed-w46-std.json seeds.*.cells.*.wrong_memory.macro_f1 (means 0.1104, 0.0733)
 The supervised fit on legal128w, at \vf{0.102}, is close to its control of \vf{0.070}: \vf{90} rows alone convey little of a legal prompt. % src: same file (0.0698)
-On the selection prompts, the hybrid fit stays below the hub reference on both corpora: a word-F1 of \vf{0.762} against \vf{0.946} on Corpus NQ, and \vf{0.320} against \vf{0.982} on legal128w.
+On the selection prompts, the hybrid fit stays below the hub reference on both corpora: a word-F1 of \vf{0.762} against \vf{0.946} on Corpus A, and \vf{0.320} against \vf{0.982} on legal128w.
 The legal128w score is the lower one; the two corpora differ in domain and in prompt length, and the leak covers a smaller part of a legal prompt, so the comparison does not isolate the cause.
-The decoders also differ: on the held-out prompts the hybrid fit scores \vf{0.886} through SmolLM, \vf{0.762} through OLMo, and \vf{0.650} through Qwen on Corpus NQ, and \vf{0.430}, \vf{0.160}, and \vf{0.372} on legal128w. % src: w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (0.8859, 0.7622, 0.6495; 0.4303, 0.1602, 0.3722)
+The decoders also differ: on the held-out prompts the hybrid fit scores \vf{0.886} through SmolLM, \vf{0.762} through OLMo, and \vf{0.650} through Qwen on Corpus A, and \vf{0.430}, \vf{0.160}, and \vf{0.372} on legal128w. % src: w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (0.8859, 0.7622, 0.6495; 0.4303, 0.1602, 0.3722)
 
 \subsection{Teacher-forced scores differ across corpora}\label{sec:attack:teacher}
 
-The teacher-forced scores agree with word-F1 on Corpus NQ and disagree with it on legal128w.
+The teacher-forced scores agree with word-F1 on Corpus A and disagree with it on legal128w.
 The comparison reads a separate experiment with whole paired sequences (Table~\ref{tab:attack:settings}), on the selection prompts.
-On Corpus NQ the hybrid fit has the lower excess cross-entropy at all three budgets, from \vf{7.61} to \vf{1.76} nats per content word at a budget of \vf{10} (Table~\ref{tab:attack:ce}, Figure~\ref{fig:attack:ce}). % src: results/v7_2/main/framework/teacher_forced/summary.json arms.{b10-a1-r1, b10-a0.95-sq-m0-t0.1152-r1-B8192}.classes.content.excess_per_word (7.6127, 1.7640)
+On Corpus A the hybrid fit has the lower excess cross-entropy at all three budgets, from \vf{7.61} to \vf{1.76} nats per content word at a budget of \vf{10} (Table~\ref{tab:attack:ce}, Figure~\ref{fig:attack:ce}). % src: results/v7_2/main/framework/teacher_forced/summary.json arms.{b10-a1-r1, b10-a0.95-sq-m0-t0.1152-r1-B8192}.classes.content.excess_per_word (7.6127, 1.7640)
 The supervised fit at that budget is worse than a decoder with no memory at all (\vf{6.08}). % src: same file, arms.no_memory (6.0751)
 On legal128w the hybrid fit has the higher excess cross-entropy at every budget: \vf{2.82} against \vf{2.46} at a budget of \vf{10}, where its word-F1 is the higher one, \vf{0.523} against \vf{0.487}. % src: results/legal128w/v7_2/main/framework/teacher_forced/summary.json (2.8195, 2.4597); results/legal128w/v7_2/main/v8_6-summary.json rows (hybrid_B8192 0.5228, supervised 0.4869)
 The KL divergence follows the excess cross-entropy within \vf{0.25} nats in every cell.
@@ -54,9 +54,9 @@ Matching therefore does not always improve the decoder's next-word prediction, a
 The legal128w scores rest on one seed, and no interval is stored for the KL divergence.
 
 \begin{table}[H]
-\caption{The hybrid fit lowers excess cross-entropy and KL divergence on Corpus NQ and raises both on legal128w.
-Nats per content word under teacher forcing, pooled over three decoders, \vf{500} selection prompts; Corpus NQ three seeds, legal128w seed \vf{1}; hybrid fit with $\alpha = 0.95$, $\tau = 2d$, $B = 8{,}192$.
-With no memory, the excess cross-entropy is \vf{6.08} on Corpus NQ and \vf{5.29} on legal128w.}
+\caption{The hybrid fit lowers excess cross-entropy and KL divergence on Corpus A and raises both on legal128w.
+Nats per content word under teacher forcing, pooled over three decoders, \vf{500} selection prompts; Corpus A three seeds, legal128w seed \vf{1}; hybrid fit with $\alpha = 0.95$, $\tau = 2d$, $B = 8{,}192$.
+With no memory, the excess cross-entropy is \vf{6.08} on Corpus A and \vf{5.29} on legal128w.}
 \label{tab:attack:ce}
 \centering
 \small\setlength{\tabcolsep}{5pt}
@@ -65,9 +65,9 @@ With no memory, the excess cross-entropy is \vf{6.08} on Corpus NQ and \vf{5.29}
  & & \multicolumn{2}{c}{Excess cross-entropy} & \multicolumn{2}{c}{KL divergence} \\
 Corpus & Budget & Supervised & Hybrid & Supervised & Hybrid \\
 \midrule
-Corpus NQ & 10 & \vf{7.61} & \vf{1.76} & \vf{7.37} & \vf{1.72} \\ % src: results/v7_2/main/framework/teacher_forced/summary.json arms.*.classes.content (excess 7.6127, 1.7640; kl 7.3674, 1.7241)
-Corpus NQ & 30 & \vf{4.07} & \vf{1.33} & \vf{3.92} & \vf{1.32} \\ % src: same (4.0697, 1.3274; 3.9186, 1.3161)
-Corpus NQ & 100 & \vf{1.56} & \vf{0.96} & \vf{1.53} & \vf{0.98} \\ % src: same (1.5567, 0.9554; 1.5312, 0.9838)
+Corpus A & 10 & \vf{7.61} & \vf{1.76} & \vf{7.37} & \vf{1.72} \\ % src: results/v7_2/main/framework/teacher_forced/summary.json arms.*.classes.content (excess 7.6127, 1.7640; kl 7.3674, 1.7241)
+Corpus A & 30 & \vf{4.07} & \vf{1.33} & \vf{3.92} & \vf{1.32} \\ % src: same (4.0697, 1.3274; 3.9186, 1.3161)
+Corpus A & 100 & \vf{1.56} & \vf{0.96} & \vf{1.53} & \vf{0.98} \\ % src: same (1.5567, 0.9554; 1.5312, 0.9838)
 \midrule
 legal128w & 1 & \vf{5.50} & \vf{7.63} & \vf{5.48} & \vf{7.60} \\ % src: results/legal128w/v7_2/main/framework/teacher_forced/summary.json (5.5008, 7.6332; 5.4834, 7.6024)
 legal128w & 10 & \vf{2.46} & \vf{2.82} & \vf{2.45} & \vf{2.82} \\ % src: same (2.4597, 2.8195; 2.4546, 2.8154)
@@ -80,9 +80,9 @@ legal128w & 100 & \vf{0.91} & \vf{1.22} & \vf{0.93} & \vf{1.23} \\ % src: same (
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.95\textwidth]{ch4/cross_entropy}
-\caption{Under teacher forcing, the hybrid fit is below the supervised fit on Corpus NQ and above it on legal128w.
+\caption{Under teacher forcing, the hybrid fit is below the supervised fit on Corpus A and above it on legal128w.
 Excess cross-entropy in nats per content word against the budget in whole paired sequences, \vf{500} selection prompts; the dotted line is a decoder with no memory.
-A legal128w prompt holds about nine times the rows of a Corpus NQ prompt, so equal budgets are not equal leaks.}
+A legal128w prompt holds about nine times the rows of a Corpus A prompt, so equal budgets are not equal leaks.}
 \label{fig:attack:ce}
 \end{figure}
 

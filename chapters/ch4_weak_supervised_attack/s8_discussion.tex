@@ -1,7 +1,7 @@
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
 The chapter supports two statements, each within the limits of its runs.
-The matching term improves a map fitted on a small leak: with \vf{90} leaked rows, word-F1 on \vf{4{,}500} held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus NQ and from \vf{0.102} to \vf{0.321} on legal128w, as means over three seeds, and every seed shows a gain (H2). % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
+The matching term improves a map fitted on a small leak: with \vf{90} leaked rows, word-F1 on \vf{4{,}500} held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, as means over three seeds, and every seed shows a gain (H2). % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
 A second-round language model raises word-F1 above the mean of the three decoders by \vf{0.12} to \vf{0.26} in three conditions, and above the best decoder by \vf{0.01} to \vf{0.02} (H3; one seed, selection prompts). % src: results/*/v7_2/main/framework/attacker/*-haiku.json
 The ablations bound the first statement: the tested blind maps gain at most \vf{0.025} word-F1 over their controls, the gain of the matching term shrinks as the leak grows, and it depends on the temperature.
 
@@ -22,7 +22,7 @@ A high word-F1 therefore does not establish that the facts of a prompt are recov
 Most other scores come from the \vf{500} selection prompts, which also selected the settings; the second round reads \vf{450} of them, and one blind comparison reads all \vf{5{,}000} validation prompts.
 The held-out prompts are held out from the attack settings, not from the hub checkpoint, which all validation prompts selected.
 The test splits have not been read.
-\item \textbf{Seeds.} The main comparison and the Corpus NQ budget curve rest on three seeds; the second round and the legal128w teacher-forced scores rest on one, and each ablation table states its seeds.
+\item \textbf{Seeds.} The main comparison and the Corpus A budget curve rest on three seeds; the second round and the legal128w teacher-forced scores rest on one, and each ablation table states its seeds.
 The intervals describe variation over prompts, not over seeds.
 \item \textbf{Several settings.} The experiments differ in supervision fraction, temperature, batch size, and form of the leak (Table~\ref{tab:attack:settings}), so their scores do not combine into one curve.
 \item \textbf{Settings chosen with known text.} The supervision fraction and the temperature were selected by word-F1 on prompts whose text is known.

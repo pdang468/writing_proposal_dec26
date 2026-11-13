@@ -7,7 +7,7 @@ Both hypotheses refer to word-F1, the word overlap between a reconstruction and 
 \paragraph{Hypothesis H2: matching improves reconstruction from a small leak.} The supervised fit trains the map on the rows of the leak alone.
 The hybrid fit adds a matching term that reads the two unpaired pools and no text (Section~\ref{sec:attack:method}).
 With a leak of \vf{90} rows, word-F1 is higher under the hybrid fit than under the supervised fit.
-Criterion, written before the run: on Corpus NQ and on legal128w, the gain in word-F1 is at least \vf{0.10}, with the lower bound of its interval above \vf{0.05}. % src: w46/plan.md (prediction P1)
+Criterion, written before the run: on Corpus A and on legal128w, the gain in word-F1 is at least \vf{0.10}, with the lower bound of its interval above \vf{0.05}. % src: w46/plan.md (prediction P1)
 
 \paragraph{Hypothesis H3: a second-round language model improves the reconstruction further.} A language model receives the three decoders' reconstructions of a prompt and rewrites them into one text.
 Word-F1 is higher after the rewriting than before.

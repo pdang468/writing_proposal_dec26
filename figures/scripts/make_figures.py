@@ -79,7 +79,7 @@ def budget():
 budget()
 
 
-CORPORA = [("Corpus NQ", "results/v7_2/main"), ("legal128w", "results/legal128w/v7_2/main")]
+CORPORA = [("Corpus A", "results/v7_2/main"), ("legal128w", "results/legal128w/v7_2/main")]
 
 
 def load(rel):
@@ -163,7 +163,7 @@ def standard():
 def rewriting():
     """Word-F1 before and after the second-round language model, 450 selection prompts, seed 1."""
     files = [
-        ("Corpus NQ\nbudget 10", "results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json"),
+        ("Corpus A\nbudget 10", "results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json"),
         ("legal128w\nbudget 10", "results/legal128w/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
         ("legal128w\nbudget 100", "results/legal128w/v7_2/main/framework/attacker/attacker-b100-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
     ]
@@ -195,7 +195,7 @@ def rewriting():
 def cross_entropy():
     """Excess cross-entropy per content word under teacher forcing, against the budget."""
     panels = [
-        ("Corpus NQ (three seeds)", "results/v7_2/main/framework/teacher_forced/summary.json", [10, 30, 100],
+        ("Corpus A (three seeds)", "results/v7_2/main/framework/teacher_forced/summary.json", [10, 30, 100],
          "b{b}-a0.95-sq-m0-t0.1152-r1-B8192"),
         ("legal128w (seed 1)", "results/legal128w/v7_2/main/framework/teacher_forced/summary.json", [1, 10, 30, 100],
          "b{b}-a0.95-sq-m0-t0.1297-r1-B8192"),
