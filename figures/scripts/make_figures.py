@@ -37,6 +37,13 @@ def save(fig, rel):
     print(path.with_suffix(".pdf"))
 
 
+def gap(ax, x, low, high):
+    """The difference hybrid minus supervised, written beside a bracket at x."""
+    ax.annotate("", (x, high), (x, low), arrowprops=dict(arrowstyle="<->", color=INK2, lw=0.8, shrinkA=0, shrinkB=0))
+    ax.annotate(f"+{high - low:.2f}", (x, (low + high) / 2), xytext=(3, 0), textcoords="offset points",
+                va="center", fontsize=8, color=INK2)
+
+
 def budget():
     d = json.loads((ROOT / "results/v7_2/main/mixed-v7_9-s5.json").read_text())
     reference = json.loads((ROOT / "results/v7_2/main/factorial.json").read_text())
@@ -150,8 +157,11 @@ def standard():
             ax.annotate(f"{mean:.2f}", (x, max(vals)), xytext=(0, 5), textcoords="offset points",
                         ha="center", fontsize=8, color=INK)
             print(name, label, round(mean, 4), [round(v, 4) for v in vals])
+        means = [sum(per[k]) / 3 for k in ("supervised fit", "hybrid fit")]
+        gap(ax, i + width + 0.05, means[0], means[1])
     ax.set_xticks(range(len(CORPORA)))
     ax.set_xticklabels([c[0] for c in CORPORA])
+    ax.set_xlim(-0.5, len(CORPORA) - 0.25)
     ax.set_ylim(0, 1.0)
     ax.set_ylabel("word-F1 (mean of three decoders)")
     ax.grid(axis="y")
@@ -234,13 +244,14 @@ rewriting()
 cross_entropy()
 
 
-def bars(ax, groups, width=0.36):
+def bars(ax, groups, width=0.36, step=1.0):
     """Paired bars, supervised then hybrid, with the value above each bar."""
     for i, (sup, hyb) in enumerate(groups):
         for k, (v, color, label) in enumerate(((sup, SUPERVISED, "supervised fit"), (hyb, HYBRID, "hybrid fit"))):
-            x = i + (k - 0.5) * width
+            x = i * step + (k - 0.5) * width
             ax.bar(x, v, width * 0.92, color=color, label=label if i == 0 else None)
             ax.annotate(f"{v:.2f}", (x, v), xytext=(0, 2), textcoords="offset points", ha="center", fontsize=8, color=INK)
+        gap(ax, i * step + width + 0.05, sup, hyb)
 
 
 def leak_shape():
@@ -262,12 +273,14 @@ def leak_shape():
         assert h["anchor_counts"]["leak_rows" if "leak_rows" in h["anchor_counts"] else "prompts"] > 0
         groups.append((f1(s_), f1(h)))
         print(name.replace("\n", " "), "supervised", round(f1(s_), 4), "hybrid", round(f1(h), 4), "prompts", h["anchor_counts"].get("prompts"))
-    fig, ax = plt.subplots(figsize=(5.6, 2.9))
-    bars(ax, groups)
-    ax.axvline(2.5, color=INK2, lw=0.8, ls=":")
-    ax.annotate("legal128w", (1.0, 0.72), ha="center", fontsize=8.5, color=INK2)
-    ax.set_xticks(range(len(specs)))
+    step = 1.4
+    fig, ax = plt.subplots(figsize=(6.2, 2.9))
+    bars(ax, groups, step=step)
+    ax.axvline(2 * step + 0.95, color=INK2, lw=0.8, ls=":")
+    ax.annotate("legal128w", (1.6 * step, 0.72), ha="center", fontsize=8.5, color=INK2)
+    ax.set_xticks([i * step for i in range(len(specs))])
     ax.set_xticklabels([s_[0] for s_ in specs], fontsize=8)
+    ax.set_xlim(-0.5, 3 * step + 0.95)
     ax.set_ylim(0, 0.8)
     ax.set_ylabel("word-F1 (mean of three decoders)")
     ax.grid(axis="y")
