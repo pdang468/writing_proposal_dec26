@@ -62,22 +62,23 @@ Three selected prompts show the scale of word-F1, not the frequency of each erro
 \begin{table}[H]
 \caption{With the same \vf{90} rows, the hybrid fit reconstructs content words that the supervised fit loses.
 Reconstructions through the SmolLM decoder for three held-out Corpus A prompts, chosen at high, intermediate, and low word-F1 of the hybrid fit (seed \vf{1}).
-Decoded words that match the true prompt are green; the others are red and bold.}
+Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:attack:examples}
 \centering
 \small
-\begin{tabular}{p{0.30\textwidth}lp{0.36\textwidth}c}
+\begin{tabular}{@{}p{0.27\textwidth}p{0.68\textwidth}@{}}
 \toprule
-True prompt & Fit & Decoded & Word-F1 \\
+True prompt & when did kindergarten start in the united states \\
+Hybrid fit, word-F1 \vf{1.00} & \hit{when did kindergarten start in the united states} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a0.9-sq-m0-t0.11522-r1-B8192-L90-span9/decoding.jsonl, nq-00000406, smollm
+Supervised fit, word-F1 \vf{0.47} & \hit{when did} \miss{semay faqum fell} \hit{in the} \miss{nile greece} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a1-r1-L90-span9/decoding.jsonl, nq-00000406, smollm
 \midrule
-when did kindergarten start in the united states & Hybrid & \hit{when did kindergarten start in the united states} & \vf{1.00} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a0.9-sq-m0-t0.11522-r1-B8192-L90-span9/decoding.jsonl, nq-00000406, smollm
- & Supervised & \hit{when did} \miss{semay faqum fell} \hit{in the} \miss{nile greece} & \vf{0.47} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a1-r1-L90-span9/decoding.jsonl, nq-00000406, smollm
+True prompt & who played sweet daddy williams on good times \\
+Hybrid fit, word-F1 \vf{0.80} & \hit{who played} \miss{sweetheart} \hit{williams on good times} \\ % src: same files, nq-00001253
+Supervised fit, word-F1 \vf{0.13} & \hit{who} \miss{sang sing choi will ton ghiam xo} \\
 \midrule
-who played sweet daddy williams on good times & Hybrid & \hit{who played} \miss{sweetheart} \hit{williams on good times} & \vf{0.80} \\ % src: same files, nq-00001253
- & Supervised & \hit{who} \miss{sang sing choi will ton ghiam xo} & \vf{0.13} \\
-\midrule
-who played robin on once upon a time & Hybrid & \hit{who played} \miss{roon} \hit{on} \miss{one after another} & \vf{0.40} \\ % src: same files, nq-00020139
- & Supervised & \hit{who} \miss{won homer in many times until he won} & \vf{0.12} \\
+True prompt & who played robin on once upon a time \\
+Hybrid fit, word-F1 \vf{0.40} & \hit{who played} \miss{roon} \hit{on} \miss{one after another} \\ % src: same files, nq-00020139
+Supervised fit, word-F1 \vf{0.12} & \hit{who} \miss{won homer in many times until he won} \\
 \bottomrule
 \end{tabular}
 \end{table}

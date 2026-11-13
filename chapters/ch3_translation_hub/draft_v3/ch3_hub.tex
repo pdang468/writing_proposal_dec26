@@ -1,6 +1,6 @@
 \providecommand{\vf}[1]{\textcolor{blue}{#1}}
-\providecommand{\hit}[1]{\textcolor{green!45!black}{#1}}
-\providecommand{\miss}[1]{\textcolor{red}{\textbf{#1}}}
+\providecommand{\hit}[1]{\textcolor[RGB]{0,115,90}{#1}}
+\providecommand{\miss}[1]{\textcolor[RGB]{196,78,0}{\textbf{#1}}}
 
 \chapter{Translation Hub}\label{ch:hub}
 
@@ -238,18 +238,23 @@ Three selected prompts show the scale of word-F1, not the frequency of each erro
 \begin{table}[H]
 \caption{At an intermediate score one word changes; at a low score the names are lost.
 Reconstructions from OLMo $\to$ Qwen on Corpus A validation prompts, selected at high, intermediate, and low word-F1; the final row is generated under mismatched memory and scored against the original prompt.
-Decoded words that match the true prompt are green; the others are red and bold.}
+Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:hub:examples}
 \centering
-\begin{tabular}{p{0.36\textwidth}p{0.36\textwidth}c}
+\small
+\begin{tabular}{@{}p{0.27\textwidth}p{0.68\textwidth}@{}}
 \toprule
-True prompt & Decoded & Word-F1 \\
+True prompt & who played uncle in only fools and horses \\
+Decoded, word-F1 \vf{1.00} & \hit{who played uncle in only fools and horses} \\
 \midrule
-who played uncle in only fools and horses & \hit{who played uncle in only fools and horses} & \vf{1.00} \\
-who has sang most songs in the world & \hit{who has} \miss{sung} \hit{most songs in the world} & \vf{0.88} \\
-is floral park in queens or long island & \hit{is} \miss{flower} \hit{park in} \miss{king} \hit{or} \miss{queen parks} & \vf{0.50} \\
+True prompt & who has sang most songs in the world \\
+Decoded, word-F1 \vf{0.88} & \hit{who has} \miss{sung} \hit{most songs in the world} \\
 \midrule
-who played uncle in only fools and horses & \hit{who} \miss{plays the girl jinx} \hit{in} \miss{suicide squad} \emph{(mismatched prompt)} & \vf{0.25} \\
+True prompt & is floral park in queens or long island \\
+Decoded, word-F1 \vf{0.50} & \hit{is} \miss{flower} \hit{park in} \miss{king} \hit{or} \miss{queen parks} \\
+\midrule
+True prompt & who played uncle in only fools and horses \\
+Mismatched prompt, word-F1 \vf{0.25} & \hit{who} \miss{plays the girl jinx} \hit{in} \miss{suicide squad} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -317,18 +322,23 @@ At \vf{0.90} the decoder replaces one word (``timely'' with ``promptly''); at \v
 \begin{table}[H]
 \caption{Selected legal10w reconstructions illustrate word, name, and number errors.
 Reconstructions from Qwen $\to$ OLMo on legal10w validation prompts, selected at high, intermediate, and low word-F1; the final row is generated under mismatched memory and scored against the original prompt.
-Decoded words that match the true prompt are green; the others are red and bold.}
+Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:hub:legal-examples}
 \centering
-\begin{tabular}{p{0.36\textwidth}p{0.36\textwidth}c}
+\small
+\begin{tabular}{@{}p{0.27\textwidth}p{0.68\textwidth}@{}}
 \toprule
-True prompt & Decoded & Word-F1 \\
+True prompt & Certification in the form attached hereto as Exhibit C; and \\
+Decoded, word-F1 \vf{1.00} & \hit{Certification in the form attached hereto as Exhibit C; and} \\
 \midrule
-Certification in the form attached hereto as Exhibit C; and & \hit{Certification in the form attached hereto as Exhibit C; and} & \vf{1.00} \\
-be counted unless the holder of such Claim timely filed & \hit{be counted unless the holder of such Claim} \miss{promptly} \hit{filed} & \vf{0.90} \\
-Rock BioEnergy Partners, LLC 324 North Buckeye North Little Rock, & \hit{Rock} \miss{Bio Energy} \hit{Partners, LLC} \miss{342} \hit{North} \miss{Ave} \hit{Little Rock,} & \vf{0.60} \\
+True prompt & be counted unless the holder of such Claim timely filed \\
+Decoded, word-F1 \vf{0.90} & \hit{be counted unless the holder of such Claim} \miss{promptly} \hit{filed} \\
 \midrule
-Certification in the form attached hereto as Exhibit C; and & \miss{leave} \hit{the} \miss{Premises} \hit{and} \miss{the Building. (b) ``Landlord Delays'' shall} \emph{(mismatched prompt)} & \vf{0.20} \\
+True prompt & Rock BioEnergy Partners, LLC 324 North Buckeye North Little Rock, \\
+Decoded, word-F1 \vf{0.60} & \hit{Rock} \miss{Bio Energy} \hit{Partners, LLC} \miss{342} \hit{North} \miss{Ave} \hit{Little Rock,} \\
+\midrule
+True prompt & Certification in the form attached hereto as Exhibit C; and \\
+Mismatched prompt, word-F1 \vf{0.20} & \miss{leave} \hit{the} \miss{Premises} \hit{and} \miss{the Building. (b) ``Landlord Delays'' shall} \\
 \bottomrule
 \end{tabular}
 \end{table}
