@@ -1,35 +1,3 @@
-\providecommand{\vf}[1]{\textcolor{blue}{#1}}
-\providecommand{\hit}[1]{\textcolor[RGB]{0,115,90}{#1}}
-\providecommand{\miss}[1]{\textcolor[RGB]{196,78,0}{\textbf{#1}}}
-
-\chapter{Weakly Supervised Attack with a Small Leak}\label{ch:attack}
-
-%% BIG CHANGE: polish; restructure the argument and pacing, retaining the stated scope.
-The frozen translation hub of Chapter~\ref{ch:hub} reconstructs prompts from the hidden states of its training models.
-This chapter asks whether a model excluded from that training can be connected to the same hub with limited paired data.
-An affine map sends the target model's hidden states into the hub, after which the frozen projectors and decoders reconstruct the prompt.
-
-The paired data come from a small leak: prompts for which both text and target hidden states are available.
-A supervised term fits the map to these correspondences, while a matching term compares mapped states with unpaired hub outputs.
-The main hypothesis is that adding this matching term improves reconstruction over fitting the map on the leak alone.
-With a leak of \vf{90} rows, mean word-F1 over three seeds on \vf{4{,}500} held-out Natural Questions prompts rises from \vf{0.35} to \vf{0.77}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
-%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-Word-F1 measures word overlap; this gain does not establish exact or factual recovery.
-
-%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-Separate experiments examine a second round in which a language model rewrites the three decoders' reconstructions into one text.
-The rewritten text exceeds their mean word-F1, but the evidence remains exploratory.
-
-Sections~\ref{sec:attack:threat} and~\ref{sec:attack:hypotheses} define the attacker's resources and the main hypothesis.
-Sections~\ref{sec:attack:method} and~\ref{sec:attack:experiments} describe the method and experimental design.
-Section~\ref{sec:attack:hybrid} reports the matching result, Section~\ref{sec:attack:rewriting} examines rewriting, and Section~\ref{sec:attack:ablations} tests how the matching result varies with the attack conditions.
-Section~\ref{sec:attack:discussion} draws together the findings and their limits.
-
-\input{chapters/ch4_weak_supervised_attack/s1_threat}
-\input{chapters/ch4_weak_supervised_attack/s2_hypotheses}
-\input{chapters/ch4_weak_supervised_attack/s3_method}
-\input{chapters/ch4_weak_supervised_attack/s4_experiments}
-\input{chapters/ch4_weak_supervised_attack/s5_matching}
-\input{chapters/ch4_weak_supervised_attack/s6_rewriting}
-\input{chapters/ch4_weak_supervised_attack/s7_ablations}
-\input{chapters/ch4_weak_supervised_attack/s8_discussion}
+% Chapter body: draft v2 (2026-11-15): threat model, method and H2, setup, main result with the grid, where the gain holds, teacher-forced scores, second-round rewriting, discussion.
+% The s1--s8 files in this folder are the superseded v1 draft; they stay in place and are no longer input.
+\input{chapters/ch4_weak_supervised_attack/draft_v2/ch4_attack}
