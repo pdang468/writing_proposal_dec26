@@ -37,7 +37,7 @@ Shaded boxes are trainable modules, dashed boxes are frozen models, and the colu
 \label{fig:hub:arch}
 \end{figure}
 
-A hidden state enters the hub through its model's source adapter and a shared backbone.
+A hidden state enters the hub through its model's source adapter, and transformed via a shared backbone. <2 different actions>
 The adapter maps the hidden state $s_t$ of model $a$ to a common width of \vf{1024}; the backbone then produces the hub output $m_t$ of \vf{512} dimensions:
 \begin{equation}
 m_t = W_h\, R_0\big(R_a(W_a s_t + b_a)\big) + b_h,
@@ -78,7 +78,8 @@ Each prompt passes through all three frozen source models, and every update incl
 %% BIG CHANGE: polish; reorganize explanation without changing the reported evidence.
 The reconstruction loss trains the hub to retain the input information needed by the frozen decoders.
 The contrastive loss encourages corresponding text spans to align across models, while the geometry loss penalizes changes in similarities among spans.
-These alignment losses require a common unit of text despite differences between the models' tokenizers.
+These alignment losses require a common unit of text despite differences between the models' tokenizers. <what is a common unit of text, maybe representation of a same text unit>?
+
 
 \paragraph{Token groups.} The two auxiliary losses compare models at corresponding positions of a prompt, but the three tokenizers segment a prompt differently.
 %% BIG CHANGE: token group defined by shared token boundaries, with a two-group example
