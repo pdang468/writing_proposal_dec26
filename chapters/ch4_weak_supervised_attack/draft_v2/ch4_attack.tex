@@ -11,9 +11,8 @@
 
 \chapter{Weakly Supervised Attack with a Small Leak}\label{ch:attack}
 
-Chapter~\ref{ch:hub} trained the translation hub with full supervision: the hidden states of its three models were available for every training prompt.
-This chapter removes that supervision.
-A target model that took no part in hub training is connected to the frozen hub by one affine map, and the frozen projectors and decoders then reconstruct the target model's prompts.
+Chapter~\ref{ch:hub} trained the translation hub with full information on the the hidden states of its three models.
+This chapter adds a target model that took no part in hub training, and connects to the frozen hub by one affine map, and the frozen projectors and decoders then reconstruct the target model's prompts.
 
 Two sources of information fit the map.
 A small leak, prompts for which both the text and the target model's hidden states are available, anchors the map through a supervised term.
@@ -29,10 +28,10 @@ Section~\ref{sec:attack:teacher} reads teacher-forced scores as a training signa
 \section{Threat Model}\label{sec:attack:threat}
 
 %% BIG CHANGE: the attacker is named as the server of a split inference system, following Chapter 1.
-The attacker is the honest-but-curious server of a split inference system: it receives the hidden states that a client transmits and follows the protocol.
-The attack aims to reconstruct a prompt from its observed sequence of hidden states.
+The attacker is the honest-but-curious server of a split inference system receiving the hidden states that a client transmits to the cloud.
+The attack goal is prompt reconstruct from its observed sequence of hidden states.
 For that prompt the attacker holds neither the text nor the token identities, and the attacker cannot query the target model.
-The target model is Pythia-1B, observed at block \vf{12} (width \vf{2048}), one vector per token. % src: configs/v7.yaml (unknowns.pythia: d3_block 12, width 2048)
+In this work experiment, the target model is Pythia-1B, observed at block \vf{12} (width \vf{2048}), one vector per token. % src: configs/v7.yaml (unknowns.pythia: d3_block 12, width 2048)
 
 The attacker holds four resources.
 \begin{itemize}

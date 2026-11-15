@@ -1,7 +1,7 @@
 %% Chapter 3, draft v4 (2026-11-15): full rewrite of draft_v3 at the author's request.
 %% Story: the Platonic Representation Hypothesis predicts a shared space; the hub builds it; cross-model reconstruction tests it; Chapter 4 extends it to a target model.
 %% Every number and its `% src:` comment is carried over from draft_v3 unchanged. No new measurement is reported.
-%% `%% BIG CHANGE` marks a sentence that states a reading or a framing draft_v3 did not contain; accept or reject each.
+
 \providecommand{\vf}[1]{\textcolor{blue}{#1}}
 \providecommand{\hit}[1]{\textcolor[RGB]{0,115,90}{#1}}
 \providecommand{\miss}[1]{\textcolor[RGB]{196,78,0}{\textbf{#1}}}
@@ -65,7 +65,8 @@ The cross-model directions test H1, because in them the decoder reconstructs fro
 Only the adapters, the backbone, and the projectors are trainable; the three language models remain frozen as both sources and decoders.
 
 \paragraph{Token-wise mapping.} The hub maps each token independently.
-Equation~\ref{eq:hub:map} has no positional input and no attention across tokens, so each hub output depends on one source hidden state, although that state may already encode prompt context.
+Equation
+~\ref{eq:hub:map} has no positional input and no attention across tokens, so each hub output depends on one source hidden state, although that state may already encode prompt context.
 The token-wise design lets the target-model alignment of Chapter~\ref{ch:attack} be fitted on individual paired rows.
 %% BIG CHANGE: restored from a commented-out paragraph of draft_v3; the design choice now carries its measured cost.
 The design has a cost: a variant with a two-layer transformer inside each adapter, trained on the same prompts with the same objective, reaches \vf{0.987} on the selection score of Section~\ref{sec:hub:training}, against \vf{0.954} for the token-wise hub. % src: results/v6_2/hpc-final/{a,b}/report.json cross_mean (variant B 0.9870, variant A 0.9536)
@@ -177,11 +178,9 @@ One hub seed.}
 
 The mean hides one weaker decoder (Figure~\ref{fig:hub:directions}).
 The four cross-model directions into OLMo and SmolLM score \vf{0.966} to \vf{0.990}; the two into Qwen score \vf{0.881} and \vf{0.874}, below the \vf{0.90} required of the mean. % src: results/v6_3/hpc-final/inversion.json directions
-%% BIG CHANGE: new sentence at the author's instruction (2026-11-15): the lower Qwen scores are noted, with model size named as a possibility, and not investigated.
-Qwen is the smallest of the three models, which may account for its lower scores as a decoder; the cause is not investigated here.
 
 Table~\ref{tab:hub:examples} shows reconstructions from OLMo $\to$ Qwen, one of the two lowest cross-model directions, where the median prompt scores \vf{0.93}. % src: results/v6_3/hpc-final/inversion-records.jsonl, olmo->qwen hub arm (median 0.933)
-At \vf{0.88} the decoder changes one inflected form (``sang'' to ``sung''); at \vf{0.50} it keeps the question frame and loses the place names; under the control it generates a different, fluent question.
+
 
 \begin{table}[H]
 \caption{At an intermediate score one word changes; at a low score the names are lost.
