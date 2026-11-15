@@ -370,7 +370,7 @@ The steps follow one order; another order was not run.
 The gain recurs for a second target model in the one available comparison.
 Llama-3.2-1B, observed at block \vf{12} (width \vf{2048}), replaces Pythia on Corpus A with a leak of \vf{90} rows from ten prompts. % src: configs/v7.yaml (unknowns.llama: d3_block 12, width 2048)
 Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} under the supervised fit; Pythia, under the same setting, reaches \vf{0.604} against \vf{0.352}. % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json cells *L90-prefix (0.6324, 0.3696, +0.2628 [0.2514, 0.2742]); results/v7_2/main/mixed-oct_w5b-A-prefix.json (0.6042, 0.3516, +0.2526 [0.2426, 0.2640])
-The comparison covers one seed, one block of each model, and two models of about one billion parameters.
+
 
 %% ------------------------------------------------------------------
 \section{Teacher-Forced Scores as a Training Signal}\label{sec:attack:teacher}
@@ -482,7 +482,6 @@ A confirmatory test requires a paired interval for the gain over the best decode
 %% ------------------------------------------------------------------
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
-%% BIG CHANGE: reworded in review round 1; the draft said matching supplies most of what a small leak lacks, which the legal128w score does not support.
 A target model outside hub training joins the hub through one affine map, and unpaired matching adds to what a small leak supplies.
 With \vf{90} leaked rows, word-F1 on held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, and both gains meet H2. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
 %% BIG CHANGE: ties the result back to the hypothesis of Chapter 3.
