@@ -1,6 +1,7 @@
 %% Chapter 3, draft v4 (2026-11-15): full rewrite of draft_v3 at the author's request.
 %% Story: the Platonic Representation Hypothesis predicts a shared space; the hub builds it; cross-model reconstruction tests it; Chapter 4 extends it to a target model.
-%% Every number and its `% src:` comment is carried over from draft_v3 unchanged. No new measurement is reported.
+%% Every number and its `% src:` comment is carried over from draft_v3. No new measurement is reported.
+%% Revision of 2026-11-15: shorter opening and discussion; legal results for legal128w and legal10w only (legal10s held back), so two ranges are restated for two corpora from the same source files; figure direction_recovery_legal redrawn with two panels.
 
 \providecommand{\vf}[1]{\textcolor{blue}{#1}}
 \providecommand{\hit}[1]{\textcolor[RGB]{0,115,90}{#1}}
@@ -8,24 +9,13 @@
 
 \chapter{Translation Hub}\label{ch:hub}
 
-%% BIG CHANGE: the chapter now opens on the Platonic Representation Hypothesis and derives the hub from it.
+%% BIG CHANGE: the chapter opens on the Platonic Representation Hypothesis and derives the hub from it (shortened 2026-11-15).
 The Platonic Representation Hypothesis holds that models trained on similar data converge toward similar representations~\cite{huh2024platonic}.
-For language models the hypothesis has a testable consequence.
-If two models represent a prompt in similar ways, then a decoder that reconstructs the prompt from one model's hidden states should also reconstruct it from the other's, once both sets of states are mapped into a common space.
-This chapter builds that common space, the translation hub, and tests the consequence on three open-weight language models.
-
-The hub maps the hidden states of each model into one shared space of \vf{512} dimensions.
-Each of the three models, frozen and run as a decoder, then reconstructs the source prompt from the hub outputs.
-The test is cross-model reconstruction: one model reconstructs a prompt from the hidden states of another.
-On Corpus A, the query strings of Natural Questions, mean cross-model word-F1 reaches \vf{0.945}, against \vf{0.120} when the decoder receives the hub outputs of a different prompt. % src: results/v6_3/hpc-final/inversion.json
-On three corpora of legal text it lies between \vf{0.970} and \vf{0.977}, against \vf{0.044} to \vf{0.152} under the same control. % src: results/legal{128w,10s,10w}/v6_3/inversion.json cross_mean (hub 0.9769, 0.9705, 0.9767; shuffled 0.1519, 0.0441, 0.0706)
+If the hypothesis holds for language models, a decoder that reconstructs a prompt from one model's hidden states should also reconstruct it from another's, once both are mapped into a common space.
+This chapter builds that space, the translation hub, from three open-weight language models and tests cross-model reconstruction.
 
 \paragraph{Hypothesis H1: shared representations support cross-model inversion.} A token-wise hub trained on three open-weight models preserves enough input information for each frozen model to reconstruct the prompt from any other model's hub outputs.
 Section~\ref{sec:hub:eval} states the criteria that test H1.
-
-The hub is the foundation of the attack.
-Chapter~\ref{ch:attack} freezes it and asks the harder question: whether a target model that took no part in hub training joins the same space through one affine map fitted on a small leak.
-Sections~\ref{sec:hub:design} and~\ref{sec:hub:training} describe the hub and its training, Section~\ref{sec:hub:eval} the evaluation, Sections~\ref{sec:hub:results} and~\ref{sec:hub:legal} the results, and Section~\ref{sec:hub:discussion} what the results establish.
 
 %% ------------------------------------------------------------------
 \section{Hub Design}\label{sec:hub:design}
@@ -41,8 +31,7 @@ Shaded boxes are trainable modules, dashed boxes are frozen models, and the colu
 \label{fig:hub:arch}
 \end{figure}
 
-\paragraph{Into the hub.} A hidden state enters the hub through its model's source adapter and a shared backbone.
-The adapter maps the hidden state $s_t$ of model $a$ to a common width of \vf{1024}; the backbone then produces the hub output $m_t$ of \vf{512} dimensions:
+\paragraph{Into the hub.} The source adapter of model $a$ maps its hidden state $s_t$ to a common width of \vf{1024}; a shared backbone then produces the hub output $m_t$ of \vf{512} dimensions:
 \begin{equation}
 m_t = W_h\, R_0\big(R_a(W_a s_t + b_a)\big) + b_h,
 \qquad
@@ -65,11 +54,8 @@ The cross-model directions test H1, because in them the decoder reconstructs fro
 Only the adapters, the backbone, and the projectors are trainable; the three language models remain frozen as both sources and decoders.
 
 \paragraph{Token-wise mapping.} The hub maps each token independently.
-Equation
-~\ref{eq:hub:map} has no positional input and no attention across tokens, so each hub output depends on one source hidden state, although that state may already encode prompt context.
-The token-wise design lets the target-model alignment of Chapter~\ref{ch:attack} be fitted on individual paired rows.
-%% BIG CHANGE: restored from a commented-out paragraph of draft_v3; the design choice now carries its measured cost.
-The design has a cost: a variant with a two-layer transformer inside each adapter, trained on the same prompts with the same objective, reaches \vf{0.987} on the selection score of Section~\ref{sec:hub:training}, against \vf{0.954} for the token-wise hub. % src: results/v6_2/hpc-final/{a,b}/report.json cross_mean (variant B 0.9870, variant A 0.9536)
+Equation~\ref{eq:hub:map} has no positional input and no attention across tokens, so each hub output depends on one source hidden state, although that state may already encode prompt context.
+Chapter~\ref{ch:attack} depends on the token-wise design.
 
 %% ------------------------------------------------------------------
 \section{Training}\label{sec:hub:training}
@@ -129,7 +115,7 @@ The second term compares two models: the similarities among the hub outputs of m
 The learning rate rises to $3\times10^{-4}$ over \vf{250} warmup updates and follows a cosine decay to zero; weight decay is \vf{0.01} on the linear weights, and gradients are clipped at norm \vf{1.0}. % src: configs/v6_3.yaml (training)
 Teacher-forced Acc@1 selects the checkpoint.
 Acc@1 is the fraction of prompt tokens that the decoder ranks first given the ground-truth prefix, averaged over the \vf{5{,}000} validation prompts and the six cross-model directions.
-A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained: on Corpus A, update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
+A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained: on Corpus A (Natural Questions queries), update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
 
 %% ------------------------------------------------------------------
 \section{Evaluation}\label{sec:hub:eval}
@@ -137,7 +123,6 @@ A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002
 \paragraph{Free-running decoding.} H1 is evaluated under free-running decoding, because under teacher forcing the ground-truth prefix carries information about the next token.
 Each decoder conditions on the soft prompt and on its own generated prefix; greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap.
 The cap is the length of the soft prompt plus \vf{32} tokens on the legal corpora. % TODO(author): state the cap on Corpus A
-The reconstruction therefore comes from the hub outputs and the decoder's own outputs alone.
 
 \paragraph{Metrics.} Two metrics compare the reconstruction with the source prompt.
 Word-F1 is the harmonic mean of word precision and recall over word multisets, averaged over prompts.
@@ -163,8 +148,7 @@ Both thresholds come from the evaluation plan of the legal hubs and were applied
 
 Cross-model reconstruction on Corpus A meets both criteria for H1.
 On the \vf{5{,}000} validation prompts, cross-model word-F1 averages \vf{0.945}, against \vf{0.120} under the mismatched-prompt control; exact match averages \vf{0.71} and is zero under the control. % src: results/v6_3/hpc-final/inversion.json cross_mean (hub 0.9445, exact 0.7116; shuffled 0.1203, exact 0.0)
-The gap of \vf{0.82} shows that the reconstruction depends on the prompt's own hub outputs, and the exact match shows that \vf{71} percent of reconstructions reproduce the full prompt.
-Self-reconstruction averages \vf{0.935} over its three directions, against \vf{0.945} for cross-model reconstruction. % src: v6_3 inversion.json, mean of the diagonal (0.8411, 0.9691, 0.9933; shuffled 0.1210, 0.1199, 0.1203)
+The gap above the mismatched-prompt control shows that the reconstruction depends on the prompt's own hub outputs.
 
 \begin{figure}[ht]
 \centering
@@ -179,8 +163,7 @@ One hub seed.}
 The mean hides one weaker decoder (Figure~\ref{fig:hub:directions}).
 The four cross-model directions into OLMo and SmolLM score \vf{0.966} to \vf{0.990}; the two into Qwen score \vf{0.881} and \vf{0.874}, below the \vf{0.90} required of the mean. % src: results/v6_3/hpc-final/inversion.json directions
 
-Table~\ref{tab:hub:examples} shows reconstructions from OLMo $\to$ Qwen, one of the two lowest cross-model directions, where the median prompt scores \vf{0.93}. % src: results/v6_3/hpc-final/inversion-records.jsonl, olmo->qwen hub arm (median 0.933)
-
+Table~\ref{tab:hub:examples} shows reconstructions from OLMo $\to$ Qwen. % src: results/v6_3/hpc-final/inversion-records.jsonl, olmo->qwen hub arm
 
 \begin{table}[H]
 \caption{At an intermediate score one word changes; at a low score the names are lost.
@@ -209,18 +192,18 @@ Mismatched prompt, word-F1 \vf{0.25} & \hit{who} \miss{plays the girl jinx} \hit
 %% ------------------------------------------------------------------
 \section{Results on Legal Text}\label{sec:hub:legal}
 
-The legal corpora test H1 on text that differs from question prompts in vocabulary and in length.
+Two legal corpora test H1 on text that differs from question prompts in vocabulary and in length.
 A separate hub is trained per corpus, with the architecture and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training}.
 
-\paragraph{Corpora.} The window corpus legal128w cuts one contiguous window per legal document, with the start word drawn uniformly over the document; its validation prompts average \vf{61} words. % src: references in results/legal128w/v6_3/inversion-records.jsonl, first 5,000 records (mean 61.2, range 8 to 90)
-The two segment corpora cut the same source documents into ten-word segments: legal10s takes the first ten words of a sentence from the opening sentences of a document, and legal10w takes ten consecutive words from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
-Each corpus has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10s,10w}.yaml (n_train, n_validation)
+\paragraph{Corpora.} The corpus legal128w cuts one contiguous window per legal document, with the start word drawn uniformly over the document; its validation prompts average \vf{61} words. % src: references in results/legal128w/v6_3/inversion-records.jsonl, first 5,000 records (mean 61.2, range 8 to 90)
+The corpus legal10w cuts ten consecutive words from the same source documents, from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
+Each corpus has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
 
-\paragraph{Results.} All three legal hubs meet both criteria for H1 (Table~\ref{tab:hub:legal}).
-Mean cross-model word-F1 lies between \vf{0.970} and \vf{0.977}, against \vf{0.044} to \vf{0.152} under the mismatched-prompt control. % src: results/legal{128w,10s,10w}/v6_3/inversion.json cross_mean (hub 0.9769, 0.9705, 0.9767; shuffled 0.1519, 0.0441, 0.0706)
-Every cross-model direction exceeds \vf{0.90}; the lowest is Qwen $\to$ OLMo on legal128w, at \vf{0.955} (Figure~\ref{fig:hub:legal-directions}). % src: same files, directions (cross minima 0.9552, 0.9634, 0.9670)
-The lower scores into Qwen on Corpus A do not recur: the cross-model directions into Qwen score \vf{0.973} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9829, 0.9730; 0.9858, 0.9752)
-Exact match is lower on the long prompts of legal128w, at \vf{0.58}, than on the ten-word segments, at \vf{0.78} and \vf{0.83}; the comparison does not isolate length from content.
+\paragraph{Results.} Both legal hubs meet both criteria for H1 (Table~\ref{tab:hub:legal}).
+Mean cross-model word-F1 is \vf{0.977} on each corpus, against mismatched-prompt controls of \vf{0.152} on legal128w and \vf{0.071} on legal10w. % src: results/legal{128w,10w}/v6_3/inversion.json cross_mean (hub 0.9769, 0.9767; shuffled 0.1519, 0.0706)
+Every cross-model direction exceeds \vf{0.90}; the lowest is Qwen $\to$ OLMo on legal128w, at \vf{0.955} (Figure~\ref{fig:hub:legal-directions}). % src: same files, directions (cross minima 0.9552, 0.9670)
+The lower scores into Qwen on Corpus A do not recur: the cross-model directions into Qwen score \vf{0.975} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9858, 0.9752)
+Exact match is lower on the long prompts of legal128w, at \vf{0.58}, than on the ten-word prompts of legal10w, at \vf{0.83}; the comparison does not isolate length from content.
 
 \begin{table}[H]
 \caption{Each legal hub exceeds a mean cross-model word-F1 of \vf{0.90} with a control below \vf{0.20}.
@@ -232,7 +215,6 @@ Free-running word-F1 and exact match averaged over the six cross-model direction
 Corpus & Word-F1 & Exact match & Control word-F1 \\
 \midrule
 legal128w & \vf{0.977} & \vf{0.58} & \vf{0.152} \\ % src: results/legal128w/v6_3/inversion.json cross_mean (0.9769, 0.5814, 0.1519)
-legal10s & \vf{0.970} & \vf{0.78} & \vf{0.044} \\ % src: results/legal10s/v6_3/inversion.json cross_mean (0.9705, 0.7835, 0.0441)
 legal10w & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % src: results/legal10w/v6_3/inversion.json cross_mean (0.9767, 0.8291, 0.0706)
 \bottomrule
 \end{tabular}
@@ -241,7 +223,7 @@ legal10w & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % src: results/legal10w/v6_3/i
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch3/direction_recovery_legal}
-\caption{Every direction of the three legal hubs reaches a word-F1 of at least 0.95.
+\caption{Every direction of the two legal hubs reaches a word-F1 of at least 0.95.
 Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} validation prompts of each legal corpus; diagonal cells are self-reconstruction.
 One hub seed per corpus.}
 \label{fig:hub:legal-directions}
@@ -250,19 +232,15 @@ One hub seed per corpus.}
 %% ------------------------------------------------------------------
 \section{Discussion}\label{sec:hub:discussion}
 
-The results support H1 on four corpora.
-One space of \vf{512} dimensions lets each of three frozen models reconstruct a prompt from the hidden states of the other two, at a mean word-F1 of \vf{0.945} on Corpus A and \vf{0.970} to \vf{0.977} on legal text, with every mismatched-prompt control below \vf{0.20}.
-%% BIG CHANGE: states what the result means for the hypothesis that motivates the chapter.
-The three models differ in depth, width, and tokenizer, yet their hidden states at three quarters of depth carry the prompt in a form that one shared space preserves.
-That outcome is what the Platonic Representation Hypothesis predicts.
+The results support H1 on three corpora.
+Each of three frozen models reconstructs a prompt from the hidden states of the other two, at a mean word-F1 of \vf{0.945} on Corpus A and \vf{0.977} on the two legal corpora, with every mismatched-prompt control below \vf{0.20}.
+%% BIG CHANGE: states what the result means for the hypothesis that motivates the chapter (shortened 2026-11-15).
+The three models were trained separately, yet one shared space preserves the prompt from each, which is what the Platonic Representation Hypothesis predicts.
 
-%% BIG CHANGE: limitations restored from the commented-out list of draft_v3 and stated once, here.
-Four limits bound the claim.
-The hub is trained with full supervision and with cross-model reconstruction in its objective, so the result shows that a shared space can be learned for these models, not that their hidden states align without training.
-No run removes the two alignment losses, so their contribution to the scores is not measured.
+%% BIG CHANGE: limitations restored from the commented-out list of draft_v3 and stated once, here (shortened 2026-11-15).
+Three limits bound the claim.
+The hub is trained with full supervision, so the result shows that a shared space can be learned for these models, not that their hidden states align without training.
 Each corpus has its own hub, one seed, and scores on the validation split that selected the checkpoint.
 No pairwise baseline is reported, so no advantage of a hub over model-to-model maps is established.
 
-The first limit sets the question of Chapter~\ref{ch:attack}.
-There the hub is frozen, and a target model outside its training must reach the same space through one affine map fitted on a small leak.
-The token-wise design permits that map to be fitted on individual paired rows, and the three frozen decoders reconstruct the prompt from its output.
+The first limit sets the question of Chapter~\ref{ch:attack}: whether a target model outside hub training reaches the same space through one affine map fitted on a small leak.
