@@ -58,13 +58,6 @@ The map sends each hidden state $s$ of the target model to a point $\hat m$ of t
 where $\mu$ is the mean hidden state of the unpaired pool, $W$ is a matrix from \vf{2048} to \vf{512} dimensions, and $b$ is a bias. % src: src/v7/adapter.py; src/v7_2/preprocess.py (centering on pool U); configs/v7.yaml (width 2048, hub_dim 512)
 The map acts on one hidden state at a time, as the hub does (Section~\ref{sec:hub:design}).
 
-%% BIG CHANGE: new paragraph; it states why a matching term is added. The last sentence is a mechanism no run tests.
-\paragraph{Why the leak alone falls short.} A leak of \vf{90} rows leaves the map underdetermined.
-Each row is one constraint on a matrix with \vf{2048} input dimensions, so the leak constrains the map along at most \vf{90} of them and says nothing about the rest.
-The unpaired pools hold what the leak lacks: thousands of hidden states and hub outputs from the same domain of text.
-The matching term asks that the mapped hidden states, as a set, resemble the hub outputs, as a set.
-If the target model organizes the domain as the hub models do, which the Platonic Representation Hypothesis suggests, matching may constrain the map where the leak leaves it free.
-
 \paragraph{Loss.} The objective is a weighted sum of a supervised term on the leak and a matching term on the unpaired pools:
 \begin{equation}
 \mathcal{L}(\alpha) = \alpha\,\big(\mathcal{L}_{\text{sup}} + \lambda\,\mathcal{R}\big) + (1-\alpha)\,\mathcal{L}_{\text{match}} .
@@ -373,20 +366,22 @@ Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} un
 
 
 %% ------------------------------------------------------------------
-\section{Teacher-Forced Scores as a Training Signal}\label{sec:attack:teacher}
+\section{The Training Objective and the Decoder's Predictions}\label{sec:attack:teacher}
 
-%% BIG CHANGE: the two teacher-forced experiments are joined into one argument: the scores measure the decoder directly, and they can train the map.
-Word-F1 scores the text a decoder generates and cannot be differentiated.
-Two teacher-forced scores measure the decoder directly, and a map can be trained on them.
+%% BIG CHANGE: the section now turns on the objective of Equation~\ref{eq:attack:loss} (author's direction, 2026-11-15): a low loss in the hub does not translate directly into the decoder's predictions or into word-F1, and the two teacher-forced scores show the difference.
+The objective of Equation~\ref{eq:attack:loss} fits the map inside the hub, where both of its terms compare mapped states with hub outputs.
+Reconstruction depends on a quantity that the objective never reads, the next-token predictions of the frozen decoder under the mapped states.
+Two teacher-forced scores measure those predictions.
 The excess cross-entropy of a fit is the decoder's cross-entropy on the true next tokens under the mapped states, minus its cross-entropy under the hub outputs of OLMo.
 The KL divergence compares the decoder's next-token distributions under the hub outputs of OLMo and under the mapped states.
 Both are reported in nats per content word, pooled over the three decoders, on the selection prompts. % src: teacher_forced_run.py; teacher_forced_summary.py; results/v7_2/main/framework/teacher_forced/summary.json (definition)
 
-\paragraph{The scores separate the two fits.} On Corpus A the hybrid fit has the lower excess cross-entropy at every budget: \vf{1.76} against \vf{7.61} nats at a budget of \vf{10} (Table~\ref{tab:attack:ce}, Figure~\ref{fig:attack:ce}). % src: results/v7_2/main/framework/teacher_forced/summary.json arms.{b10-a1-r1, b10-a0.95-sq-m0-t0.1152-r1-B8192}.classes.content.excess_per_word (7.6127, 1.7640)
+\paragraph{The matching term and the decoder.} On Corpus A the hybrid fit has the lower excess cross-entropy at every budget, \vf{1.76} against \vf{7.61} nats at a budget of \vf{10} (Table~\ref{tab:attack:ce}, Figure~\ref{fig:attack:ce}). % src: results/v7_2/main/framework/teacher_forced/summary.json arms.{b10-a1-r1, b10-a0.95-sq-m0-t0.1152-r1-B8192}.classes.content.excess_per_word (7.6127, 1.7640)
 At that budget the supervised fit, at \vf{7.61}, is worse than a decoder with no soft prompt at all, at \vf{6.08}. % src: same file, arms.no_memory (6.0751)
-On legal128w the order reverses: the hybrid fit has the higher excess cross-entropy at every budget, \vf{2.82} against \vf{2.46} at a budget of \vf{10}, although its word-F1 there is the higher one, \vf{0.523} against \vf{0.487}. % src: results/legal128w/v7_2/main/framework/teacher_forced/summary.json (2.8195, 2.4597); results/legal128w/v7_2/main/v8_6-summary.json rows (hybrid_B8192 0.5228, supervised 0.4869)
+On legal128w the order reverses, and the hybrid fit has the higher excess cross-entropy at every budget, \vf{2.82} against \vf{2.46} at a budget of \vf{10}. % src: results/legal128w/v7_2/main/framework/teacher_forced/summary.json (2.8195, 2.4597)
+Its word-F1 at that budget is nevertheless the higher one, \vf{0.523} against \vf{0.487}. % src: results/legal128w/v7_2/main/v8_6-summary.json rows (hybrid_B8192 0.5228, supervised 0.4869)
 The KL divergence follows the excess cross-entropy within \vf{0.25} nats in every cell.
-Matching therefore does not always improve the decoder's next-token prediction, and teacher-forced cross-entropy and free-running word-F1 need not move together.
+The matching term therefore does not consistently improve the decoder's next-token predictions, which the objective does not measure, even where it raises word-F1.
 
 \begin{table}[H]
 \caption{The hybrid fit lowers excess cross-entropy and KL divergence on Corpus A and raises both on legal128w.
@@ -421,12 +416,12 @@ A legal128w prompt holds about nine times the rows of a Corpus A prompt, so equa
 \label{fig:attack:ce}
 \end{figure}
 
-\paragraph{Training the map on the signal.}\label{sec:attack:decoderkl} A further step trains the affine map through the frozen SmolLM decoder, on the prompts of the leak.
-The step starts from a hybrid fit on legal128w and minimizes the KL divergence defined above; a cross-entropy loss was also tried, and the selection scores favored the KL loss at every budget. % src: oct_w4/plan.md; results/legal128w/v7_2/main/oct_w4-summary.json budgets.*.selected (kl/beta0)
-On the \vf{4{,}500} held-out prompts, the step lowers the cross-entropy of SmolLM by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at budgets of \vf{10}, \vf{30}, and \vf{100}.
-At the same budgets its word-F1 rises by \vf{0.009}, \vf{0.011}, and \vf{0.023}; every interval excludes zero. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce; confirmation.f1_gain_vs_start.kl/beta0.f1 (+0.0092 [0.0062, 0.0123]; +0.0111 [0.0090, 0.0134]; +0.0233 [0.0212, 0.0254])
-The signal is therefore trainable, and its effect on word-F1 is small so far.
-The comparison covers one decoder, one seed, and one corpus.
+\paragraph{Training the map on the decoder's predictions.}\label{sec:attack:decoderkl} A further step places the decoder inside the objective.
+Starting from a hybrid fit on legal128w, the step trains the affine map through the frozen SmolLM decoder, on the prompts of the leak, and minimizes the KL divergence defined above. % src: oct_w4/plan.md; results/legal128w/v7_2/main/oct_w4-summary.json budgets.*.selected (kl/beta0)
+On the \vf{4{,}500} held-out prompts, with one seed, the step lowers the cross-entropy of SmolLM by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at budgets of \vf{10}, \vf{30}, and \vf{100}.
+Word-F1 rises by at most \vf{0.023} at the same budgets; every interval excludes zero. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce; confirmation.f1_gain_vs_start.kl/beta0.f1 (+0.0092 [0.0062, 0.0123]; +0.0111 [0.0090, 0.0134]; +0.0233 [0.0212, 0.0254])
+%% BIG CHANGE: the author's reading (2026-11-15): the training loss falls, cross-entropy and KL divergence fall with it, and word-F1 gains little.
+A lower training loss, and with it a lower cross-entropy and KL divergence, therefore translates into little word-F1.
 
 %% ------------------------------------------------------------------
 \section{Second-Round Rewriting}\label{sec:attack:rewriting}
@@ -492,7 +487,8 @@ It holds only within a range of temperatures.
 Without a leak, the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
 Two further steps act on the reconstruction itself.
-Teacher-forced cross-entropy and KL divergence expose where a fit falls short of the hub reference, and training the map on the KL divergence raises word-F1 by \vf{0.009} to \vf{0.023}.
+Teacher-forced cross-entropy and KL divergence evaluate the decoder's predictions, which the objective does not measure.
+Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts, with one seed. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
 A second-round language model merges the three decoders' reconstructions into one text at the level of the best decoder, \vf{0.12} to \vf{0.26} word-F1 above their mean.
 
 \paragraph{What the reconstructions contain.} The results establish a gain in word overlap; they do not establish exact recovery, recovery of the facts of a prompt, or an amount of leaked information.

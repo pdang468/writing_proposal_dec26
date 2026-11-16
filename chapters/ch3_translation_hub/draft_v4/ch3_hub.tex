@@ -9,9 +9,8 @@
 
 \chapter{Translation Hub}\label{ch:hub}
 
-%% BIG CHANGE: the chapter opens on the Platonic Representation Hypothesis and derives the hub from it (shortened 2026-11-15).
-The Platonic Representation Hypothesis introduced that models trained on similar data converge toward similar representations~\cite{huh2024platonic}.
-The hypothesis motivates this work in investigating whether a decoder that reconstructs a prompt from one model's hidden states should also reconstruct it from another's, once both are mapped into a common space.
+The Platonic Representation Hypothesis states that models trained on similar data converge toward similar representations~\cite{huh2024platonic}.
+The hypothesis motivates this work to investigate whether a decoder that reconstructs a prompt from one model's hidden states also reconstructs it from another's, once both are mapped into a shared space.
 This chapter builds that shared space, the translation hub, from three open-weight language models and tests cross-model reconstruction.
 
 \paragraph{Hypothesis H1: shared representations support cross-model inversion.} A token-wise hub trained on three open-weight models preserves enough input information for each frozen model to reconstruct the prompt from any other model's hub outputs.
@@ -42,14 +41,14 @@ Here $W_a$ is the linear layer of model $a$'s adapter, $R_a$ its residual block,
 Each residual block $R$ applies layer normalization (LN) and a SiLU activation, widens to \vf{2048}, and returns to \vf{1024}. % src: src/v3/bridge.py (SourceAdapter, ResidualMLP); src/v6_2/bridge.py (H3BridgeBundle); configs/v6_3.yaml (architecture)
 
 \paragraph{Out of the hub.} A hub output goes through a model-specific affine projector, which maps $m_t$ to the input width of a frozen language model, the decoder.
-The projected vectors form a soft prompt input, and the decoder generates the reconstructed prompt after its start token.
+The projected vectors form a soft prompt, and the decoder generates the reconstructed prompt after its start token.
 
 \paragraph{Models and directions.} The three models are Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B.
 Each contributes hidden states from the block at three quarters of its depth: block \vf{18} of \vf{24} in Qwen (width \vf{1024}), block \vf{12} of \vf{16} in OLMo (width \vf{2048}), and block \vf{18} of \vf{24} in SmolLM (width \vf{2048}). % src: configs/v6_3.yaml (d3_block, width); configs/v3.yaml (blocks, depth_fractions)
-% \todo{One sentence on why this depth, with i ts source.}
+% \todo{One sentence on why this depth, with its source.}
 A direction pairs a source model with a decoder, e.g., Qwen $\to$ hub $\to$ OLMo.
 Three models define nine directions: six cross-model directions and three self-reconstruction directions.
-As a decoder reconstruct the prompt in the cross-model direction, the reconstruction results test H1.
+In a cross-model direction the decoder reconstructs the prompt from another model's hidden states, so the cross-model results test H1.
 In this setting, only the adapters, the backbone, and the projectors are trainable; the three language models remain frozen as both sources and decoders.
 
 \paragraph{Token-wise mapping.} The hub maps each token independently.
@@ -69,8 +68,9 @@ The decoding loss $\mathcal{L}_{\text{dec}}$ trains the hub to retain the input 
 The contrastive loss $\mathcal{L}_{\text{InfoNCE}}$ encourages the three models to place the same text span at the same point of the hub.
 The geometry loss $\mathcal{L}_{\text{geom}}$ encourages the hub to keep the similarities among spans that each model's hidden states already hold.
 
-\paragraph{Decoding loss.} For each direction, the decoder receives the soft prompt and its start token. The ground-truth prompt tokens, $x_1 \ldots x_T$, is additional input in teacher-force tests.
-Under teacher forcing the decoder makes $T+1$ predictions: the $T$ prompt tokens and then the end-of-sequence token.
+\paragraph{Decoding loss.} For each direction, the decoder receives the soft prompt and its start token.
+Under teacher forcing it also receives the ground-truth prompt tokens $x_1 \ldots x_T$.
+The decoder then makes $T+1$ predictions: the $T$ prompt tokens and then the end-of-sequence token.
 The target is the prompt itself, not its continuation.
 The loss of direction $d$, $\text{CE}_d$, averages cross-entropy over the $T+1$ predictions and then over prompts. % src: v6_3/plan.md section 4; src/v3/evaluate.py (teacher_forced_batch)
 The decoding loss is a weighted mean over the nine directions:
@@ -233,13 +233,6 @@ One hub seed per corpus.}
 
 The results support H1 on three corpora.
 Each of three frozen models reconstructs a prompt from the hidden states of the other two, at a mean word-F1 of \vf{0.945} on Corpus A and \vf{0.977} on the two legal corpora, with every mismatched-prompt control below \vf{0.20}.
+These results demonstrate that one shared representation space holds the prompt information carried by the hidden states of all three models.
 
-This results demonstrated that a shared representation space holds the embedding information of three inputs models.
-
-%% BIG CHANGE: limitations restored from the commented-out list of draft_v3 and stated once, here (shortened 2026-11-15).
-Three limits bound the claim.
-The hub is trained with full supervision, so the result shows that a shared space can be learned for these models, not that their hidden states align without training.
-Each corpus has its own hub, one seed, and scores on the validation split that selected the checkpoint.
-No pairwise baseline is reported, so no advantage of a hub over model-to-model maps is established.
-
-The first limit sets the question of Chapter~\ref{ch:attack}: whether a target model outside hub training reaches the same space through one affine map fitted on a small leak.
+Chapter~\ref{ch:attack} asks whether a target model outside hub training reaches the same space through one affine map fitted on a small leak.
