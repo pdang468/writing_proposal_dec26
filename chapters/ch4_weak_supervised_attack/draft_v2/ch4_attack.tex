@@ -109,28 +109,24 @@ Exact match and decoded examples are reported beside it to separate word overlap
 
 \paragraph{Corpora and pools.} The experiments run on Corpus A and legal128w of Chapter~\ref{ch:hub}, each with its own frozen hub.
 The \vf{40{,}000} training prompts of a corpus are divided once, at random, into two halves of \vf{20{,}000}.
-One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. % src: results/v7_2/main/manifest.json (training_pools); results/v7_2/main/anchors-linear.json (pool_size 40000)
-A leak draws its prompts at random from all \vf{40{,}000} training prompts. % src: src/v7_2/anchors_linear.py
+One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. 
+A leak draws its prompts at random from all \vf{40{,}000} training prompts. 
 
-\paragraph{The 90-row leak.} The main experiment gives the attacker \vf{90} rows, the first nine rows of each of ten prompts. % src: w46/plan.md (leak span9); src/v7_2/anchors_linear.py (span_start_pairs); mixed-w46-std.json anchor_counts (prompts 10, leak_rows 90)
-The same nine rows cover the two corpora unequally.
+\paragraph{The 90-row leak.} The main experiment gives the attacker \vf{90} rows, the first nine rows of each of ten prompts.
+Nine rows cover a different share of a prompt on each corpus.
 A Corpus A prompt averages nine words, so nine rows hold almost the whole prompt.
-A legal128w prompt averages \vf{61} words, so nine rows hold only its opening words.
+A legal128w prompt averages \vf{61} words, so the same nine rows hold only its opening words.
+The leak is therefore equal in rows on the two corpora and unequal in the share of each prompt it reveals.
 
 \paragraph{Score.} Evaluation follows Section~\ref{sec:hub:eval}.
-Each of the three decoders generates greedily from the projected output of the map, up to the length of the soft prompt plus \vf{32} tokens (plus \vf{8} in the Corpus A experiments other than the main comparison). % src: configs/v7_cap32.yaml; configs/v7_legal128w.yaml (cap_margin 32); configs/v7.yaml (cap_margin 8)
-The score is word-F1, averaged over prompts and over the three decoders, and word-F1 without a decoder's name denotes that three-decoder mean. % src: src/v7_2/f1.py; src/v7_2/factorial.py
+Each of the three decoders generates greedily from the projected output of the map, up to the length of the soft prompt plus \vf{32} tokens (plus \vf{8} in the Corpus A experiments other than the main comparison).
+The score is word-F1, averaged over prompts and over the three decoders, and word-F1 without a decoder's name denotes that three-decoder mean. 
 
-\paragraph{Control and hub reference.} The mismatched-prompt control gives each decoder the mapped states of another prompt, the nearest in number of rows, and scores the output against the original prompt. % src: src/v6_4/controls.py (length_matched)
-The hub reference is the word-F1 of the three decoders on the hub outputs of OLMo, with no map involved, \vf{0.946} on Corpus A and \vf{0.982} on legal128w. % src: results/v7_2/main/factorial.json controls.true_olmo_code.macro_f1 (0.9459); results/legal128w/v7_2/main/mixed-v7_9-s0.json setting.corpus.g2.macro_f1 (0.9824)
-The hub reference is not an upper bound, because the target model and OLMo tokenize a prompt differently.
-
-\paragraph{Prompt sets.} The \vf{5{,}000} validation prompts of a corpus are divided into two disjoint sets.
-The \vf{500} selection prompts, drawn at random, selected every setting of the attack. % src: v7_run.py (subset_seed 20260903, dev_prompts 500)
-The other \vf{4{,}500}, the held-out prompts, selected no setting of the attack, although all \vf{5{,}000} validation prompts selected the hub checkpoint in Chapter~\ref{ch:hub}. % src: src/v7_2/context.py; results/v7_2/main/eval/confirmation/prompt_ids.json
-The test split of each corpus has not been evaluated.
+\paragraph{Control and hub reference.} The mismatched-prompt control gives each decoder the mapped states of another prompt and scores the output against the original prompt.
+The hub reference is the word-F1 of the three decoders on the hub outputs of OLMo, with no map involved, \vf{0.946} on Corpus A and \vf{0.982} on legal128w. 
 
 \paragraph{Settings.} The hybrid fit has three settings, the supervision fraction $\alpha$, the temperature $\tau$, and the batch size $B$ of the matching term.
+The settings are chosen on \vf{500} validation prompts, the selection prompts, and the main comparison is scored on the other \vf{4{,}500}, the held-out prompts. % src: v7_run.py (subset_seed 20260903, dev_prompts 500); src/v7_2/context.py; results/v7_2/main/eval/confirmation/prompt_ids.json
 The main comparison fixes $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$ on both corpora, as selected by the grid search of Section~\ref{sec:attack:hybrid}.
 The supporting experiments keep the settings selected at their stage of development, and most of them leak whole prompts, with the leak size reported in rows.
 Table~\ref{tab:attack:settings} lists these settings, and a comparison outside the table states its setting in its own section.
