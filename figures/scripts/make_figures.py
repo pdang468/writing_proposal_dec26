@@ -377,3 +377,39 @@ leak_shape()
 grid_leak_size()
 budget_legal()
 budget_legal("legal10w", "ch4/budget_curve_legal10w")
+
+
+def leak_size_three():
+    """One design on three datasets: hybrid (alpha 0.95, tau 2d, B 8,192) against the supervised fit by leaked rows, seed 1,
+    500 selection prompts, leaks of 1, 3, 5, 10, 30 and 100 whole prompts, shown up to 1,500 rows."""
+    panels = []
+    d = load("results/v7_2/main/mixed-v8_5-s1.json")["seeds"]["1"]
+    xs, sup, hyb, wrong = [], [], [], []
+    for b in (1, 3, 5, 10, 30, 100):
+        h, s_ = d["cells"][f"b{b}/a0.95/sq/m0/t0.1152/r1/B8192"], d["cells"][f"b{b}/a1/r1"]
+        xs.append(d["budgets"][str(b)]["anchor_counts"]["valid_aligned_pairs"])
+        sup.append(s_["final"]["macro_f1"]); hyb.append(h["final"]["macro_f1"]); wrong.append(h["wrong_memory"]["macro_f1"])
+    g2 = json.loads((ROOT / "results/v7_2/main/factorial.json").read_text())["controls"]["true_olmo_code"]["macro_f1"]
+    panels.append(("NQ", xs, sup, hyb, wrong, g2))
+    for corpus in ("legal128w", "legal10w"):
+        rows = [r for r in load(f"results/{corpus}/v7_2/main/v8_6-summary.json")["rows"] if r["pairs"] <= 1500]
+        g2 = load(f"results/{corpus}/v7_2/main/mixed-v7_9-s0.json")["setting"]["corpus"]["g2"]["macro_f1"]
+        panels.append((corpus, [r["pairs"] for r in rows], [r["supervised"] for r in rows], [r["hybrid_B8192"] for r in rows],
+                       [r["wrong_memory_large"] for r in rows], g2))
+    fig, axes = plt.subplots(1, 3, figsize=(9.6, 3.0), sharey=True)
+    for ax, (name, xs, sup, hyb, wrong, g2) in zip(axes, panels):
+        ax.plot(xs, sup, color=SUPERVISED, marker="o", ls=(0, (5, 2)), lw=1.6, ms=4.5, markeredgecolor="white", markeredgewidth=0.6, label="supervised fit")
+        ax.plot(xs, hyb, color=HYBRID, marker="s", lw=1.6, ms=4.5, markeredgecolor="white", markeredgewidth=0.6, label="hybrid fit")
+        ax.axhline(g2, color=INK2, lw=0.8, ls=":")
+        ax.annotate(f"hub reference {g2:.3f}", (xs[0], g2), xytext=(0, 3), textcoords="offset points", fontsize=7.5, color=INK2)
+        ax.set_xscale("log"); ax.set_xticks(xs); ax.set_xticklabels([f"{x:,}" for x in xs], fontsize=7.5); ax.minorticks_off()
+        ax.set_ylim(0, 1.05); ax.set_xlabel("leaked rows"); ax.set_title(name, fontsize=9); ax.grid(axis="y")
+        print(name, xs, "sup", [round(v, 3) for v in sup], "hyb", [round(v, 3) for v in hyb], "gain", [round(h - s_, 3) for h, s_ in zip(hyb, sup)])
+    axes[0].set_ylabel("word-F1 (mean of three decoders)")
+    axes[0].legend(loc="center right", fontsize=8, handlelength=2.6)
+    fig.tight_layout()
+    save(fig, "ch4/leak_size_three")
+
+
+leak_size_three()
+
