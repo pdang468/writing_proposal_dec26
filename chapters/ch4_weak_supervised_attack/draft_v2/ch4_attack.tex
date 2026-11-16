@@ -380,12 +380,13 @@ Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} un
 %% ------------------------------------------------------------------
 \section{The Training Objective and the Decoder's Predictions}\label{sec:attack:teacher}
 
-The objective of Equation~\ref{eq:attack:loss} fits the map inside the hub, where both of its terms compare mapped states with hub outputs.
-Reconstruction depends on a quantity that the objective never reads, the next-token predictions of the frozen decoder under the mapped states.
-Two teacher-forced scores measure those predictions.
-The excess cross-entropy of a fit is the decoder's cross-entropy on the true next tokens under the mapped states, minus its cross-entropy under the hub outputs of OLMo.
-The KL divergence compares the decoder's next-token distributions under the hub outputs of OLMo and under the mapped states.
-Both are reported in nats per content word, pooled over the three decoders, on the selection prompts. % src: teacher_forced_run.py; teacher_forced_summary.py; results/v7_2/main/framework/teacher_forced/summary.json (definition)
+Both terms of the objective in Equation~\ref{eq:attack:loss} compare mapped states with hub outputs, so the objective measures how close the map lands in the hub.
+Reconstruction, however, is decided by the frozen decoder, whose next-token predictions the objective never reads.
+A map can therefore lower its loss without improving those predictions.
+Two teacher-forced scores measure the predictions directly.
+The first, the excess cross-entropy, is the decoder's cross-entropy on the true next tokens under the mapped states, minus its cross-entropy under the hub outputs of OLMo.
+The second, the KL divergence, compares the decoder's next-token distributions under the hub outputs of OLMo and under the mapped states.
+Both scores are reported in nats per content word, pooled over the three decoders, on the selection prompts. % src: teacher_forced_run.py; teacher_forced_summary.py; results/v7_2/main/framework/teacher_forced/summary.json (definition)
 
 \paragraph{The matching term and the decoder.} On Corpus A the hybrid fit has the lower excess cross-entropy at every budget, \vf{1.76} against \vf{7.61} nats at a budget of \vf{10} (Table~\ref{tab:attack:ce}, Figure~\ref{fig:attack:ce}). % src: results/v7_2/main/framework/teacher_forced/summary.json arms.{b10-a1-r1, b10-a0.95-sq-m0-t0.1152-r1-B8192}.classes.content.excess_per_word (7.6127, 1.7640)
 At that budget the supervised fit, at \vf{7.61}, is worse than a decoder with no soft prompt at all, at \vf{6.08}. % src: same file, arms.no_memory (6.0751)
@@ -428,11 +429,12 @@ A legal128w prompt holds about nine times the rows of a Corpus A prompt, so equa
 \end{figure}
 
 \paragraph{Training the map on the decoder's predictions.}\label{sec:attack:decoderkl} A further step places the decoder inside the objective.
-Starting from a hybrid fit on legal128w, the step trains the affine map through the frozen SmolLM decoder, on the prompts of the leak, and minimizes the KL divergence defined above. % src: oct_w4/plan.md; results/legal128w/v7_2/main/oct_w4-summary.json budgets.*.selected (kl/beta0)
-On the \vf{4{,}500} held-out prompts, with one seed, the cross-entropy and the KL divergence of SmolLM both fall at every budget, the cross-entropy by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at budgets of \vf{10}, \vf{30}, and \vf{100} (Table~\ref{tab:attack:decoderkl}).
+Starting from a hybrid fit on legal128w, the step trains the affine map through the frozen SmolLM decoder on the prompts of the leak, with the KL divergence defined above as its training loss. % src: oct_w4/plan.md; results/legal128w/v7_2/main/oct_w4-summary.json budgets.*.selected (kl/beta0)
+On the \vf{4{,}500} held-out prompts, with one seed, the KL divergence and the cross-entropy of SmolLM both fall at every budget (Table~\ref{tab:attack:decoderkl}).
+The cross-entropy falls by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at budgets of \vf{10}, \vf{30}, and \vf{100}.
 Word-F1 rises by at most \vf{0.023} at the same budgets. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce; confirmation.f1_gain_vs_start.kl/beta0.f1 (+0.0092 [0.0062, 0.0123]; +0.0111 [0.0090, 0.0134]; +0.0233 [0.0212, 0.0254])
 %% BIG CHANGE: the author's reading (2026-11-15): the training loss falls, cross-entropy and KL divergence fall with it, and word-F1 gains little.
-A lower training loss, and with it a lower cross-entropy and KL divergence, therefore translates into little word-F1.
+A lower training loss thus lowers the cross-entropy and the KL divergence but adds little word-F1.
 
 \begin{table}[H]
 \caption{Training the map through the decoder with the KL loss lowers cross-entropy and KL divergence by \vf{0.15} to \vf{0.26} nats and raises word-F1 by \vf{0.01} to \vf{0.02}.
@@ -511,8 +513,10 @@ A confirmatory test requires a paired interval for the gain over the best decode
 A target model outside hub training connects to the hub through one affine map, and unpaired matching improves the reconstruction obtained from a small supervised leak.
 With \vf{90} leaked rows, word-F1 on held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, and both gains meet H2. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
 
-Because the map is affine and the hub is frozen, the gain indicates structure that the hidden states of the target model already share with the hub.
-Such shared structure is what the Platonic Representation Hypothesis predicts, here for a model outside hub training.
+The attack trains only an affine map, and the hub and its decoders stay frozen.
+An affine map preserves the linear structure of the hidden states it receives.
+The gain from matching therefore suggests that the hidden states of the target model and the hub outputs share that structure up to an affine transformation.
+The Platonic Representation Hypothesis predicts this similarity between models, here for a target model that took no part in hub training.
 
 Three findings delimit the result.
 The gain shrinks as the leak grows and is gone at \vf{1{,}000} leaked prompts on Corpus A.
