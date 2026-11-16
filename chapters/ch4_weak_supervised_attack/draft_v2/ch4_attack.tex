@@ -1,10 +1,3 @@
-%% Chapter 4, draft v2 (2026-11-15): full rewrite of the s1--s8 files at the author's request; prose rewritten 2026-11-16 for length, clarity, and coherence.
-%% Story: the frozen hub of Chapter 3; a target model joins it through one affine map; a small leak supervises the map and unpaired matching improves it;
-%% the grid over supervision fraction and temperature; where the gain holds; the training objective against the decoder's predictions; second-round rewriting.
-%% Every number and its `% src:` comment is carried over from the s1--s8 files unchanged. No new measurement is reported.
-%% Dropped from the body (kept in the s1--s8 files and in git): the stepwise table of loss components, the leak-composition and word-class tables,
-%% the legal examples table, and the second-target-model table. Their main numbers remain in the prose. The decoder-training table is restored from s7.
-%% `%% BIG CHANGE` marks a sentence that states a reading or a framing the s1--s8 files did not contain; accept or reject each.
 \providecommand{\vf}[1]{\textcolor{blue}{#1}}
 \providecommand{\hit}[1]{\textcolor[RGB]{0,115,90}{#1}}
 \providecommand{\miss}[1]{\textcolor[RGB]{196,78,0}{\textbf{#1}}}
@@ -12,11 +5,11 @@
 \chapter{Weakly Supervised Attack with a Small Leak}\label{ch:attack}
 
 Chapter~\ref{ch:hub} trained the translation hub with full access to the hidden states of its three models.
-This chapter adds a target model, which an affine map connects to the frozen hub.
-The output of the map passes through the frozen projectors, and the frozen decoders then reconstruct the prompts of the target model.
+This chapter adds a target model, which connects to the frozen hub through an affine map.
+The output of the map passes through the frozen projectors and the frozen decoders to reconstruct the prompts of the target model.
 
-Two sources of information fit the map.
-The first is a small leak, a set of prompts for which both the text and the target model's hidden states are available, which supervises the map directly.
+The map is trained under two source of information.
+The first one is a small leak, a set of prompts for which both the text and the target model's hidden states are available, which supervises the map directly.
 The second is a matching term, which aligns hidden states of the target model with hub outputs that are not paired with them.
 The chapter tests whether the matching term improves reconstruction over the leak alone.
 With a leak of \vf{90} rows, about ninety words, mean word-F1 on \vf{4{,}500} held-out Corpus A prompts rises from \vf{0.35} to \vf{0.77} over three seeds. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
