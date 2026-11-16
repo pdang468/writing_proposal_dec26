@@ -477,7 +477,7 @@ A confirmatory test requires a paired interval for the gain over the best decode
 %% ------------------------------------------------------------------
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
-A target model outside hub training joins the hub through one affine map, and unpaired matching adds to what a small leak supplies.
+A target model outside hub training connects the hub through one affine map, and unpaired matching enhance the result from supervised small leak.
 With \vf{90} leaked rows, word-F1 on held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, and both gains meet H2. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
 %% BIG CHANGE: ties the result back to the hypothesis of Chapter 3.
 The map is affine and the hub is frozen, so the gain draws on structure that the target model shares with the hub models: the outcome that the Platonic Representation Hypothesis predicts, here for a model the hub never saw.
