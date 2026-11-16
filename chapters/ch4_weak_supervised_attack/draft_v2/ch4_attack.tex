@@ -105,16 +105,17 @@ Exact match and decoded examples are reported beside it to separate word overlap
 %% ------------------------------------------------------------------
 \section{Experimental Setup}\label{sec:attack:experiments}
 
-\paragraph{Datasets and pools.} The experiments run on NQ and legal128w of Chapter~\ref{ch:hub}, each with its own frozen hub.
+\paragraph{Datasets and pools.} The experiments run on NQ and legal128w of Chapter~\ref{ch:hub}, each with its own frozen hub, and the main comparison and the leak-size comparison also run on legal10w.
 The \vf{40{,}000} training prompts of a dataset are divided once, at random, into two halves of \vf{20{,}000}.
 One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. 
 A leak draws its prompts at random from all \vf{40{,}000} training prompts. 
 
 \paragraph{The 90-row leak.} In the main experiment, the attacker obtains a leak of \vf{90} rows, the first nine rows of each of ten prompts.
-The leak exposes the two datasets to different degrees.
+The leak exposes the datasets to different degrees.
 On NQ, a prompt averages nine words, so nine rows expose almost the entire prompt.
 On legal128w, a prompt is a window of about \vf{68} words, or \vf{86} rows, cut from a longer document, so the same nine rows expose only its opening words. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6); results/legal128w/v7_2/main/v8_6-summary.json rows[*].pairs (8612 rows for 100 prompts)
-The attacker's knowledge is therefore fixed at \vf{90} rows on both datasets, while the exposed fraction of each leaked prompt differs.
+On legal10w, a prompt holds about \vf{13} rows, so nine rows expose most of it. % src: results/legal10w/v7_2/main/v8_6-summary.json rows[*] (1, 3, 5, 10, 30, 100 prompts: 12, 34, 55, 125, 390, 1305 rows; E +0.0055, +0.2723, +0.300, +0.332, +0.220, +0.051; job 1595870, seed 1)
+The attacker's knowledge is therefore fixed at \vf{90} rows on every dataset, while the exposed fraction of each leaked prompt differs.
 
 \paragraph{Score.} Evaluation follows Section~\ref{sec:hub:eval}.
 Each of the three decoders generates greedily from the projected output of the map, up to the length of the soft prompt plus \vf{32} tokens in the main comparison.
@@ -161,10 +162,11 @@ On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 rises
 The gain is \vf{0.411} on NQ, with an interval of \vf{0.408} to \vf{0.415}, and \vf{0.219} on legal128w, with an interval of \vf{0.215} to \vf{0.222}. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113)
 Both gains exceed the required \vf{0.10}, and both lower bounds exceed the required \vf{0.05}.
 The gain appears in every seed, at no less than \vf{0.402} on NQ and \vf{0.201} on legal128w. % src: same files, hybrid minus supervised per seed (0.4018, 0.4189, 0.4135; 0.2010, 0.2444, 0.2112)
+On legal10w, a dataset added after the criterion was written, word-F1 rises from \vf{0.192} to \vf{0.599}, a gain of \vf{0.407} with an interval of \vf{0.403} to \vf{0.412}. % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
 Both fits receive the same leak, so the gain comes from the two unpaired pools.
 
 \begin{table}[H]
-\caption{With \vf{90} leaked rows, the hybrid fit exceeds the supervised fit by \vf{0.41} word-F1 on NQ and by \vf{0.22} on legal128w.
+\caption{With \vf{90} leaked rows, the hybrid fit exceeds the supervised fit by \vf{0.41} word-F1 on NQ, by \vf{0.22} on legal128w, and by \vf{0.41} on legal10w.
 Word-F1 averaged over three decoders and three seeds, Pythia as the target model, $\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$.
 The held-out prompts selected no setting of the attack; each interval is a \vf{95} percent interval from a paired bootstrap over prompts.}
 \label{tab:attack:main}
@@ -178,14 +180,15 @@ NQ & \vf{4{,}500} held-out & \vf{0.354} & \vf{0.766} & \vf{$+0.411$} [\vf{0.408}
 NQ & \vf{500} selection & \vf{0.352} & \vf{0.762} & \vf{$+0.410$} [\vf{0.401}, \vf{0.420}] \\ % src: results/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.3519, 0.7623, 0.4104 [0.4005, 0.4196])
 legal128w & \vf{4{,}500} held-out & \vf{0.102} & \vf{0.321} & \vf{$+0.219$} [\vf{0.215}, \vf{0.222}] \\ % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (0.1021, 0.3209)
 legal128w & \vf{500} selection & \vf{0.102} & \vf{0.320} & \vf{$+0.218$} [\vf{0.208}, \vf{0.227}] \\ % src: results/legal128w/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.1021, 0.3196, 0.2175 [0.2076, 0.2268])
+legal10w & \vf{4{,}500} held-out & \vf{0.192} & \vf{0.599} & \vf{$+0.407$} [\vf{0.403}, \vf{0.412}] \\ % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.6\textwidth]{ch4/standard_cell}
-\caption{The hybrid fit exceeds the supervised fit in every seed on both datasets.
+\includegraphics[width=0.75\textwidth]{ch4/standard_cell}
+\caption{The hybrid fit exceeds the supervised fit in every seed on all three datasets.
 Word-F1 averaged over three decoders on the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows; bars are means over three seeds, dots the seeds, and each bracket the gain of the hybrid fit.}
 \label{fig:attack:standard}
 \end{figure}
@@ -244,29 +247,30 @@ The result covers \vf{22} blind maps from two objectives, one target model, and 
 
 \subsection{Size of the leak}\label{sec:attack:budget}
 
-On NQ, the gain from matching is largest at the smallest tested leak and vanishes as the leak grows (Figure~\ref{fig:attack:budget}).
-The hybrid fit exceeds the supervised fit by \vf{0.309} word-F1 at a leak of \vf{92} rows and by \vf{0.002} at \vf{9{,}982} rows, where the supervised fit reaches \vf{0.876} against a hub reference of \vf{0.946}. % src: results/v7_2/main/mixed-v7_9-s5.json seed_summary.budgets.*; factorial.json controls.true_olmo_code (0.9459)
-The leaks hold \vf{10} to \vf{1{,}000} whole prompts, and each size is the mean number of rows over the three seeds. % src: results/v7_2/main/mixed-v7_9-s5.json seeds.{1,2,3}.budgets.*.anchor_counts.valid_aligned_pairs (10 prompts: 92, 96, 89; 30: 289, 288, 289; 100: 986, 1023, 972; 300: 2992, 3041, 3005; 1000: 10009, 10079, 9859; means 92, 289, 994, 3013, 9982)
+Matching helps most where the leak is small (Figures~\ref{fig:attack:budget} and~\ref{fig:attack:budget-legal}).
+On NQ, the hybrid fit exceeds the supervised fit by \vf{0.309} word-F1 at a leak of \vf{92} rows, by \vf{0.197} at \vf{289} rows, and by \vf{0.051} at \vf{994} rows. % src: results/v7_2/main/mixed-v7_9-s5.json seed_summary.budgets.{10,30,100}.cell_minus_benchmark (+0.3087, +0.1969, +0.0513); anchor_counts.valid_aligned_pairs seeds 1 to 3 (92, 96, 89; 289, 288, 289; 986, 1023, 972; means 92, 289, 994)
+The leaks hold \vf{10}, \vf{30}, and \vf{100} whole prompts, and each size is the mean number of rows over the three seeds.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.75\textwidth]{ch4/budget_curve}
-\caption{The hybrid fit exceeds the supervised fit by \vf{0.31} word-F1 at a leak of \vf{92} rows and by \vf{0.01} at \vf{3{,}013} rows.
+\caption{On NQ the hybrid fit exceeds the supervised fit by \vf{0.31} word-F1 at a leak of \vf{92} rows and by \vf{0.05} at \vf{994} rows.
 Word-F1 averaged over three decoders on the \vf{500} selection prompts of NQ; lines are means over three seeds and bands the range over seeds, for a hybrid fit with $\alpha = 0.95$, $\tau = 2d$, $B = 2{,}048$.
 The dotted line is the hub reference, and the gray band is the mismatched-prompt control of the plotted fits.}
 \label{fig:attack:budget}
 \end{figure}
 
-On legal128w a fixed matching weight lowers word-F1 once the leak is large (Figure~\ref{fig:attack:budget-legal}).
-With one seed, the hybrid fit exceeds the supervised fit by \vf{0.090} to \vf{0.147} word-F1 at leaks of \vf{78} to \vf{447} rows and by \vf{0.036} at \vf{856} rows, and falls below it by \vf{0.064} and \vf{0.048} at \vf{2{,}569} and \vf{8{,}612} rows. % src: results/legal128w/v7_2/main/v8_6-summary.json rows[*].E (0.0898, 0.1474, 0.1042, 0.0359, -0.0640, -0.0478; every interval excludes zero); results/legal128w/v7_2/main/v8_6-summary.json rows[*].pairs (1, 3, 5, 10, 30, 100 prompts: 78, 259, 447, 856, 2569, 8612 rows)
-These leaks hold \vf{1} to \vf{100} whole prompts of about \vf{86} rows each. % src: same file, rows[*].pairs (78, 259, 447, 856, 2569, 8612)
-A smaller matching weight, $\alpha = 0.99$ with $\tau = d$, removes most of that loss. % src: results/legal128w/v7_2/main/mixed-v8_7-s2.json seeds.1.budgets.*.cell_minus_benchmark (+0.0899, +0.0064, -0.0066 at 856, 2569, 8612 rows)
+The two legal datasets show the same pattern (Figure~\ref{fig:attack:budget-legal}).
+On legal128w, with one seed, the hybrid fit exceeds the supervised fit by \vf{0.090} to \vf{0.147} word-F1 at leaks of \vf{78} to \vf{447} rows and by \vf{0.036} at \vf{856} rows. % src: results/legal128w/v7_2/main/v8_6-summary.json rows[*].E (0.0898, 0.1474, 0.1042, 0.0359 at 78, 259, 447, 856 rows; every interval excludes zero)
+On legal10w, the gain is \vf{0.272} to \vf{0.332} at leaks of \vf{34} to \vf{125} rows and falls to \vf{0.051} at \vf{1{,}305} rows. % src: results/legal10w/v7_2/main/v8_6-summary.json rows[*] (1, 3, 5, 10, 30, 100 prompts: 12, 34, 55, 125, 390, 1305 rows; E +0.0055, +0.2723, +0.300, +0.332, +0.220, +0.051; job 1595870, seed 1)
+At larger leaks the supervised fit closes the gap, and on legal128w it overtakes the hybrid fit unless the matching weight is reduced. % src: results/legal128w/v7_2/main/v8_6-summary.json rows[*].E (-0.0640, -0.0478 at 2569, 8612 rows); mixed-v8_7-s2.json (alpha 0.99, tau d: +0.0064, -0.0066)
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.75\textwidth]{ch4/budget_curve_legal}
-\caption{On legal128w the hybrid fit exceeds the supervised fit at leaks of \vf{78} to \vf{856} rows and falls below it at \vf{2{,}569} and \vf{8{,}612} rows.
-Word-F1 averaged over three decoders on the \vf{500} selection prompts, seed \vf{1}, hybrid fit with $\alpha = 0.95$, $\tau = 2d$, $B = 8{,}192$.
+\includegraphics[width=0.49\textwidth]{ch4/budget_curve_legal}\hfill
+\includegraphics[width=0.49\textwidth]{ch4/budget_curve_legal10w}
+\caption{On both legal datasets the hybrid fit exceeds the supervised fit at every leak up to \vf{1{,}500} rows.
+Word-F1 averaged over three decoders on the \vf{500} selection prompts of legal128w (left) and legal10w (right), seed \vf{1}, hybrid fit with $\alpha = 0.95$, $\tau = 2d$, $B = 8{,}192$.
 The dotted line is the hub reference, and the gray band is the mismatched-prompt control of the hybrid fits.}
 \label{fig:attack:budget-legal}
 \end{figure}
@@ -317,13 +321,27 @@ Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} un
 %% ------------------------------------------------------------------
 \section{The Training Objective and the Decoder's Predictions}\label{sec:attack:teacher}
 
-Both terms of the objective in Equation~\ref{eq:attack:loss} compare mapped states with hub outputs, so the objective measures how close the map lands in the hub.
-The frozen decoder decides the reconstruction, however, and the objective never reads its next-token predictions.
-A map can therefore lower its loss without improving those predictions.
-Two teacher-forced scores measure the predictions directly.
-The first, the excess cross-entropy, is the decoder's cross-entropy on the true next tokens under the mapped states, minus its cross-entropy under the hub outputs of OLMo.
-The second, the KL divergence, compares the decoder's next-token distributions under the hub outputs of OLMo and under the mapped states.
-Both scores are reported in nats per content word, pooled over the three decoders, on the selection prompts. % src: teacher_forced_run.py; teacher_forced_summary.py; results/v7_2/main/framework/teacher_forced/summary.json (definition)
+Both terms of the objective in Equation~\ref{eq:attack:loss} pull mapped states toward hub outputs.
+The mapped states then form the soft prompt of a frozen decoder, and the decoder reconstructs the prompt one token at a time.
+The objective therefore measures agreement with hub outputs, while reconstruction depends on the decoder's predictions.
+
+To examine how the decoder's predictions relate to the reconstruction score, the same decoder runs twice on each prompt.
+The reference run receives a soft prompt from the hub outputs of OLMo, and the mapped-state run receives a soft prompt from the mapped states of the target model.
+Both runs see the true previous tokens, a setting called teacher forcing, and give a probability to every possible next token.
+A change in the predictions between the two runs therefore comes from replacing hub outputs with mapped states.
+Both runs receive the true previous tokens, a setting called teacher forcing, and assign a probability to every candidate next token.
+The comparison therefore shows how the decoder's predictions change when mapped states replace hub outputs.
+
+Cross-entropy is the decoder's surprise at the true next token, the negative logarithm of the probability it assigns to that token.
+A higher probability gives a lower cross-entropy.
+The excess cross-entropy subtracts the cross-entropy of the reference run from that of the mapped-state run, so a positive excess means that the mapped states leave the decoder more surprised at the true tokens.
+
+The KL divergence compares the two runs over all candidate tokens, not only the true one.
+It measures how far the next-token distribution of the mapped-state run departs from that of the reference run, and it is zero when the two distributions match.
+The excess cross-entropy thus measures the change in surprise at the true tokens, and the KL divergence measures the departure from the reference predictions over all tokens.
+
+Both scores are summed over the tokens of each word and averaged over content words, across the selection prompts, the three decoders, and the seeds of the map.
+The averages are reported in nats per content word. % src: teacher_forced_run.py (lines 62-68: -logp at the true token; KL(reference || mapped) = sum q (log q - log p)); teacher_forced_summary.py (lines 82-136: per-word sums, content words, pooling over prompts, decoders, seeds)
 
 \paragraph{The matching term and the decoder.} On NQ the hybrid fit has the lower excess cross-entropy at every leak size, \vf{1.76} against \vf{7.61} nats at \vf{92} rows (Figure~\ref{fig:attack:ce}). % src: results/v7_2/main/framework/teacher_forced/summary.json arms.{b10-a1-r1, b10-a0.95-sq-m0-t0.1152-r1-B8192}.classes.content.excess_per_word (7.6127, 1.7640)
 At that leak size the supervised fit, at \vf{7.61}, is worse than a decoder with no soft prompt at all, at \vf{6.08}. % src: same file, arms.no_memory (6.0751)
@@ -422,7 +440,7 @@ The gain from matching therefore suggests that the hidden states of the target m
 The Platonic Representation Hypothesis predicts this similarity between models, here for a target model that took no part in hub training.
 
 Three findings delimit the result.
-The gain shrinks as the leak grows and is gone at a leak of \vf{9{,}982} rows on NQ.
+The gain is largest at small leaks and shrinks as the leak grows, to \vf{0.051} at \vf{994} rows on NQ.
 The gain holds only within a range of temperatures.
 Without a leak, the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 

@@ -48,7 +48,7 @@ def budget():
     d = json.loads((ROOT / "results/v7_2/main/mixed-v7_9-s5.json").read_text())
     reference = json.loads((ROOT / "results/v7_2/main/factorial.json").read_text())
     g2 = reference["controls"]["true_olmo_code"]["macro_f1"]
-    budgets = [10, 30, 100, 300, 1000]
+    budgets = [10, 30, 100]  # leaks up to 1,500 rows (2026-11-16); 300 and 1,000 prompts hold 3,013 and 9,982 rows
     series = {
         "supervised fit": (lambda b: f"b{b}/a1/r1", SUPERVISED, "o", (0, (5, 2))),
         "hybrid fit": (lambda b: f"b{b}/a0.95/sq/m0/t0.1152/r1/B2048", HYBRID, "s", "-"),
@@ -91,6 +91,8 @@ budget()
 
 
 CORPORA = [("NQ", "results/v7_2/main"), ("legal128w", "results/legal128w/v7_2/main")]
+# the main comparison also runs on legal10w (w46b); the grid search of legal10w is drawn once its job has finished
+MAIN = CORPORA + [("legal10w", "results/legal10w/v7_2/main")]
 
 
 def load(rel):
@@ -141,9 +143,9 @@ def grid():
 
 def standard():
     """Hybrid against supervised fit at the selected setting, 4,500 held-out prompts, three seeds."""
-    fig, ax = plt.subplots(figsize=(4.4, 2.9))
+    fig, ax = plt.subplots(figsize=(5.6, 2.9))
     width = 0.34
-    for i, (name, root) in enumerate(CORPORA):
+    for i, (name, root) in enumerate(MAIN):
         per = {"supervised fit": [], "hybrid fit": []}
         for s in "123":
             d = load(f"{root}/w46-confirmation-s{s}.json")
@@ -162,9 +164,9 @@ def standard():
             print(name, label, round(mean, 4), [round(v, 4) for v in vals])
         means = [sum(per[k]) / 3 for k in ("supervised fit", "hybrid fit")]
         gap(ax, i + width + 0.05, means[0], means[1])
-    ax.set_xticks(range(len(CORPORA)))
-    ax.set_xticklabels([c[0] for c in CORPORA])
-    ax.set_xlim(-0.5, len(CORPORA) - 0.25)
+    ax.set_xticks(range(len(MAIN)))
+    ax.set_xticklabels([c[0] for c in MAIN])
+    ax.set_xlim(-0.5, len(MAIN) - 0.25)
     ax.set_ylim(0, 1.0)
     ax.set_ylabel("word-F1 (mean of three decoders)")
     ax.grid(axis="y")
@@ -338,14 +340,14 @@ def grid_leak_size():
     save(fig, "ch4/grid_leak_size")
 
 
-def budget_legal():
+def budget_legal(corpus="legal128w", out="ch4/budget_curve_legal"):
     """legal128w: hybrid against supervised fit by budget of whole prompts, seed 1, 500 selection prompts."""
-    rows = load("results/legal128w/v7_2/main/v8_6-summary.json")["rows"]
+    rows = [r for r in load(f"results/{corpus}/v7_2/main/v8_6-summary.json")["rows"] if r["pairs"] <= 1500]  # leaks up to 1,500 rows
     budgets = [r["pairs"] for r in rows]  # leak size in rows (aligned pairs of the whole leaked prompts)
     sup = [r["supervised"] for r in rows]
     hyb = [r["hybrid_B8192"] for r in rows]
     wrong = [r["wrong_memory_large"] for r in rows]
-    g2 = load("results/legal128w/v7_2/main/mixed-v7_9-s0.json")["setting"]["corpus"]["g2"]["macro_f1"]
+    g2 = load(f"results/{corpus}/v7_2/main/mixed-v7_9-s0.json")["setting"]["corpus"]["g2"]["macro_f1"]
     fig, ax = plt.subplots(figsize=(4.6, 3.1))
     ax.plot(budgets, sup, color=SUPERVISED, marker="o", ls=(0, (5, 2)), lw=1.6, ms=4.5,
             markeredgecolor="white", markeredgewidth=0.6, label="supervised fit")
@@ -366,7 +368,7 @@ def budget_legal():
     ax.grid(axis="y")
     ax.legend(loc="center right", fontsize=8, handlelength=2.6)
     fig.tight_layout()
-    save(fig, "ch4/budget_curve_legal")
+    save(fig, out)
     print("legal budgets", budgets, "sup", [round(v, 4) for v in sup], "hyb", [round(v, 4) for v in hyb],
           "E", [(round(r["E"]["mean_diff"], 4), round(r["E"]["ci_low"], 4), round(r["E"]["ci_high"], 4)) for r in rows])
 
@@ -374,3 +376,4 @@ def budget_legal():
 leak_shape()
 grid_leak_size()
 budget_legal()
+budget_legal("legal10w", "ch4/budget_curve_legal10w")
