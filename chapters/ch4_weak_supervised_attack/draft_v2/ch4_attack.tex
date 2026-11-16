@@ -260,6 +260,7 @@ The dotted line is the hub reference, and the gray band is the mismatched-prompt
 On legal128w a fixed matching weight lowers word-F1 once the leak is large (Figure~\ref{fig:attack:budget-legal}).
 With one seed, the hybrid fit exceeds the supervised fit by \vf{0.090} to \vf{0.147} word-F1 at leaks of \vf{78} to \vf{447} rows and by \vf{0.036} at \vf{856} rows, and falls below it by \vf{0.064} and \vf{0.048} at \vf{2{,}569} and \vf{8{,}612} rows. % src: results/legal128w/v7_2/main/v8_6-summary.json rows[*].E (0.0898, 0.1474, 0.1042, 0.0359, -0.0640, -0.0478; every interval excludes zero); results/legal128w/v7_2/main/v8_6-summary.json rows[*].pairs (1, 3, 5, 10, 30, 100 prompts: 78, 259, 447, 856, 2569, 8612 rows)
 These leaks hold \vf{1} to \vf{100} whole prompts of about \vf{86} rows each. % src: same file, rows[*].pairs (78, 259, 447, 856, 2569, 8612)
+A smaller matching weight, $\alpha = 0.99$ with $\tau = d$, removes most of that loss. % src: results/legal128w/v7_2/main/mixed-v8_7-s2.json seeds.1.budgets.*.cell_minus_benchmark (+0.0899, +0.0064, -0.0066 at 856, 2569, 8612 rows)
 
 \begin{figure}[ht]
 \centering
