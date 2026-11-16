@@ -113,7 +113,9 @@ One half supplies the target model's unpaired pool as hidden states, and the oth
 A leak draws its prompts at random from all \vf{40{,}000} training prompts. % src: src/v7_2/anchors_linear.py
 
 \paragraph{The 90-row leak.} The main experiment gives the attacker \vf{90} rows, the first nine rows of each of ten prompts. % src: w46/plan.md (leak span9); src/v7_2/anchors_linear.py (span_start_pairs); mixed-w46-std.json anchor_counts (prompts 10, leak_rows 90)
-A Corpus A prompt averages nine words and a legal128w prompt \vf{61}, so the leak covers ten Corpus A prompts almost whole and only the opening words of ten legal128w prompts.
+The same nine rows cover the two corpora unequally.
+A Corpus A prompt averages nine words, so nine rows hold almost the whole prompt.
+A legal128w prompt averages \vf{61} words, so nine rows hold only its opening words.
 
 \paragraph{Score.} Evaluation follows Section~\ref{sec:hub:eval}.
 Each of the three decoders generates greedily from the projected output of the map, up to the length of the soft prompt plus \vf{32} tokens (plus \vf{8} in the Corpus A experiments other than the main comparison). % src: configs/v7_cap32.yaml; configs/v7_legal128w.yaml (cap_margin 32); configs/v7.yaml (cap_margin 8)
