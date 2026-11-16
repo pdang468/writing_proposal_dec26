@@ -16,8 +16,8 @@ This chapter adds a target model, which an affine map connects to the frozen hub
 The output of the map passes through the frozen projectors, and the frozen decoders then reconstruct the prompts of the target model.
 
 Two sources of information fit the map.
-A small leak, a set of prompts for which both the text and the target model's hidden states are available, supervises the map directly.
-A matching term then aligns hidden states of the target model with hub outputs that are not paired with them.
+The first is a small leak, a set of prompts for which both the text and the target model's hidden states are available, which supervises the map directly.
+The second is a matching term, which aligns hidden states of the target model with hub outputs that are not paired with them.
 The chapter tests whether the matching term improves reconstruction over the leak alone.
 With a leak of \vf{90} rows, about ninety words, mean word-F1 on \vf{4{,}500} held-out Corpus A prompts rises from \vf{0.35} to \vf{0.77} over three seeds. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
 
