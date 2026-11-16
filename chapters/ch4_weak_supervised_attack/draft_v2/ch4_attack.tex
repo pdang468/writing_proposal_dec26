@@ -18,25 +18,25 @@ With a leak of \vf{90} rows, about ninety words, the matching term raises mean w
 \section{Threat Model}\label{sec:attack:threat}
 
 The attacker is the honest-but-curious server of a split inference system and receives the hidden states that a client transmits to the cloud.
-The attack goal is to reconstruct a prompt from its observed sequence of hidden states.
-For that prompt the attacker holds neither the text nor the token identities, and the attacker cannot query the target model.
+The attacker aims to reconstruct a prompt from its sequence of hidden states.
+For that prompt the attacker holds neither the text nor the token identities and cannot query the target model.
 In the experiments, the target model is Pythia-1B, observed at block \vf{12} (width \vf{2048}) with one vector per token. % src: configs/v7.yaml (unknowns.pythia: d3_block 12, width 2048)
 
 The attacker holds four resources.
 \begin{itemize}
 \item \textbf{The hub.} The frozen hub of Chapter~\ref{ch:hub} with its source adapters, its projectors, and its three decoders (Qwen, OLMo, SmolLM).
 \item \textbf{Two unpaired pools.} The first pool holds hidden states of the target model for prompts of the domain under attack, without their text.
-The second pool holds hub outputs, which the attacker obtains by passing text of the same domain through OLMo and its source adapter.
+The second pool holds hub outputs of text from the same domain, computed by OLMo and its source adapter.
 No prompt of one pool is matched to a prompt of the other.
 \item \textbf{A leak.} A small set of prompts for which the attacker holds both the text and the target model's hidden states.
 \item \textbf{The tokenizer of the target model}, applied to the leaked prompts only.
 \end{itemize}
 
-\paragraph{Rows.} The leak becomes paired data through OLMo.
+\paragraph{Rows.} OLMo turns the leak into paired data.
 For each leaked prompt, the attacker runs OLMo on the text and obtains the hub outputs of that prompt. % src: src/v6_4/pairs.py (build_pairs)
 The target model and OLMo split the text into different tokens, so the attacker groups their tokens by shared character boundaries, as in the token groups of Section~\ref{sec:hub:training}.
-Each group forms a row, which pairs two vectors for one short span of text, the average of the target model's hidden states and the average of the hub outputs.
-Both averages are weighted by character coverage and are not normalized to unit length. % src: src/v6_4/pairs.py
+Each group forms a row, a pair of vectors for one short span of text.
+The pair holds the average of the target model's hidden states and the average of the hub outputs, both weighted by character coverage and not normalized to unit length. % src: src/v6_4/pairs.py
 A row covers about one word, so a Corpus A prompt of nine words yields about nine rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
 The affine map is fitted on rows, so the size of a leak is counted in rows.
 
@@ -64,7 +64,7 @@ At $0 < \alpha < 1$ both terms act, and the result is the hybrid fit.
 At $\alpha = 0$ only the matching term remains, and the result is a blind map.
 
 \paragraph{Supervised term.} $\mathcal{L}_{\text{sup}}$ is the mean squared distance between the mapped hidden state and the hub output of the same row, divided by $\rho_H^2$.
-The constant $\rho_H$ is the root-mean-square distance of the pooled hub outputs from their mean, which makes the term independent of the scale of the hub. % src: src/v7_2/context.py (rho_H); src/v7/loss.py
+The constant $\rho_H$ is the root-mean-square distance of the pooled hub outputs from their mean, and the division makes the term independent of the scale of the hub. % src: src/v7_2/context.py (rho_H); src/v7/loss.py
 The ridge penalty $\mathcal{R}$ is the squared Frobenius norm of $W$ divided by $\rho_H^2$, with $\lambda = 1$. % src: configs/v7_9_s4.yaml (mixed.ridge_lambdas); src/v7_2/mixed.py
 
 \paragraph{Matching term.} $\mathcal{L}_{\text{match}}$ aligns a batch of $B$ mapped hidden states $\hat m_1 \ldots \hat m_B$ from the target model's pool with a batch of $B$ hub outputs $h_1 \ldots h_B$ from the hub's pool.
@@ -109,7 +109,7 @@ Exact match and decoded examples are reported beside it to separate word overlap
 
 \paragraph{Corpora and pools.} The experiments run on Corpus A and legal128w of Chapter~\ref{ch:hub}, each with its own frozen hub.
 The \vf{40{,}000} training prompts of a corpus are divided once, at random, into two halves of \vf{20{,}000}.
-One half supplies the unpaired pool of the target model, as hidden states, and the other half supplies the unpaired pool of the hub, as hub outputs of OLMo. % src: results/v7_2/main/manifest.json (training_pools); results/v7_2/main/anchors-linear.json (pool_size 40000)
+One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. % src: results/v7_2/main/manifest.json (training_pools); results/v7_2/main/anchors-linear.json (pool_size 40000)
 A leak draws its prompts at random from all \vf{40{,}000} training prompts. % src: src/v7_2/anchors_linear.py
 
 \paragraph{The 90-row leak.} The main experiment gives the attacker \vf{90} rows, the first nine rows of each of ten prompts. % src: w46/plan.md (leak span9); src/v7_2/anchors_linear.py (span_start_pairs); mixed-w46-std.json anchor_counts (prompts 10, leak_rows 90)
@@ -119,18 +119,18 @@ A Corpus A prompt averages nine words and a legal128w prompt \vf{61}, so the lea
 Each of the three decoders generates greedily from the projected output of the map, up to the length of the soft prompt plus \vf{32} tokens (plus \vf{8} in the Corpus A experiments other than the main comparison). % src: configs/v7_cap32.yaml; configs/v7_legal128w.yaml (cap_margin 32); configs/v7.yaml (cap_margin 8)
 The score is word-F1, averaged over prompts and over the three decoders, and word-F1 without a decoder's name denotes that three-decoder mean. % src: src/v7_2/f1.py; src/v7_2/factorial.py
 
-\paragraph{Control and hub reference.} The mismatched-prompt control gives each decoder the mapped states of another prompt, the one whose number of rows is nearest, and scores the output against the original prompt. % src: src/v6_4/controls.py (length_matched)
-The hub reference is the word-F1 that the three decoders reach from the hub outputs of OLMo, without any map, \vf{0.946} on Corpus A and \vf{0.982} on legal128w. % src: results/v7_2/main/factorial.json controls.true_olmo_code.macro_f1 (0.9459); results/legal128w/v7_2/main/mixed-v7_9-s0.json setting.corpus.g2.macro_f1 (0.9824)
+\paragraph{Control and hub reference.} The mismatched-prompt control gives each decoder the mapped states of another prompt, the nearest in number of rows, and scores the output against the original prompt. % src: src/v6_4/controls.py (length_matched)
+The hub reference is the word-F1 of the three decoders on the hub outputs of OLMo, with no map involved, \vf{0.946} on Corpus A and \vf{0.982} on legal128w. % src: results/v7_2/main/factorial.json controls.true_olmo_code.macro_f1 (0.9459); results/legal128w/v7_2/main/mixed-v7_9-s0.json setting.corpus.g2.macro_f1 (0.9824)
 The hub reference is not an upper bound, because the target model and OLMo tokenize a prompt differently.
 
 \paragraph{Prompt sets.} The \vf{5{,}000} validation prompts of a corpus are divided into two disjoint sets.
-The selection prompts are \vf{500} prompts drawn at random, and they selected every setting of the attack. % src: v7_run.py (subset_seed 20260903, dev_prompts 500)
-The held-out prompts are the other \vf{4{,}500}, and they selected no setting of the attack, although all \vf{5{,}000} validation prompts selected the hub checkpoint in Chapter~\ref{ch:hub}. % src: src/v7_2/context.py; results/v7_2/main/eval/confirmation/prompt_ids.json
+The \vf{500} selection prompts, drawn at random, selected every setting of the attack. % src: v7_run.py (subset_seed 20260903, dev_prompts 500)
+The other \vf{4{,}500}, the held-out prompts, selected no setting of the attack, although all \vf{5{,}000} validation prompts selected the hub checkpoint in Chapter~\ref{ch:hub}. % src: src/v7_2/context.py; results/v7_2/main/eval/confirmation/prompt_ids.json
 The test split of each corpus has not been evaluated.
 
 \paragraph{Settings.} The hybrid fit has three settings, the supervision fraction $\alpha$, the temperature $\tau$, and the batch size $B$ of the matching term.
 The main comparison fixes $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$ on both corpora, as selected by the grid search of Section~\ref{sec:attack:hybrid}.
-The supporting experiments keep the settings selected at their stage of development, and most of them leak whole prompts, whose size is reported in rows.
+The supporting experiments keep the settings selected at their stage of development, and most of them leak whole prompts, with the leak size reported in rows.
 Table~\ref{tab:attack:settings} lists these settings, and a comparison outside the table states its setting in its own section.
 
 \begin{table}[H]
@@ -163,7 +163,7 @@ Training through the decoder & whole prompts & \vf{0.99} & $d$ & \vf{8{,}192} & 
 %% ------------------------------------------------------------------
 \section{Matching Improves Reconstruction from a Small Leak}\label{sec:attack:hybrid}
 
-One setting of the hybrid fit is selected for both corpora, and at that setting matching improves word-F1 over the supervised fit on the same leak.
+One setting of the hybrid fit serves both corpora, and at that setting matching improves word-F1 over the supervised fit on the same leak.
 
 \subsection{Supervision fraction and temperature}\label{sec:attack:grid}
 
@@ -171,7 +171,7 @@ The gain from matching depends on the supervision fraction and the temperature, 
 The grid runs on the \vf{90}-row leak, with seed \vf{1} and the \vf{500} selection prompts of each corpus. % src: results/v7_2/main/mixed-w46-grid.json; results/legal128w/v7_2/main/mixed-w46-grid.json; w46-selection.json
 The selection rule, written before the grid was run, takes the cell with the highest mean word-F1 over the two corpora. % src: w46/plan.md; w46-selection.json rule
 That cell is $\alpha = 0.9$, $\tau = 2d$, with a two-corpus mean of \vf{0.534}. % src: w46-selection.json best (0.5336)
-It is the best cell on Corpus A (\vf{0.768}) and close to the best on legal128w, where it scores \vf{0.299} against \vf{0.314} at $\alpha = 0.8$, $\tau = 2d$. % src: mixed-w46-grid.json seeds.1.cells (0.7679; legal128w 0.2993, 0.3144)
+The cell is the best on Corpus A (\vf{0.768}) and close to the best on legal128w, \vf{0.299} against \vf{0.314} at $\alpha = 0.8$, $\tau = 2d$. % src: mixed-w46-grid.json seeds.1.cells (0.7679; legal128w 0.2993, 0.3144)
 
 Both corpora show the same dependence on temperature.
 For $\alpha \le 0.95$, word-F1 peaks at $\tau = 2d$ and falls on either side, and several cells at a low temperature score below the supervised fit.
@@ -267,8 +267,15 @@ Supervised fit, word-F1 \vf{0.12} & \hit{who} \miss{won homer in many times unti
 \section{Where the Gain Holds}\label{sec:attack:ablations}\label{sec:attack:negative}
 
 Five comparisons delimit the main result.
-They vary the size of the leak, its composition, its presence, the components of the matching term, and the target model.
+They vary the presence of the leak, its size, its composition, the components of the matching term, and the target model.
 Each comparison follows its row of Table~\ref{tab:attack:settings} or states its setting.
+
+\subsection{Matching without a leak}\label{sec:attack:blind}
+
+Matching alone, without any leaked row, yields little word-F1 beyond the mismatched-prompt controls.
+On Corpus A, the blind maps tested score at most \vf{0.153} word-F1, against a hub reference of \vf{0.946}, and none exceeds its mismatched-prompt control by more than \vf{0.025} (interval \vf{0.019} to \vf{0.030}). % src: results/v7_2/main/gw.json (highest blind word-F1 0.1528, control 0.1414); results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304]); also results/v7/main-different_text-pythia/results.json and results/v7_2/main/mixed-v7_9-s1.json (alpha 0 cells)
+The blind-map gains remain small compared with the gains from matching on a small leak.
+The result covers \vf{22} blind maps from two objectives, one target model, and one corpus, and it does not show that no unpaired method can connect a target model. % src: 9 + 1 + 6 + 6 maps in the four files above
 
 \subsection{Size of the leak}\label{sec:attack:budget}
 
@@ -352,13 +359,6 @@ The Corpus A leak takes whole prompts, so the two corpora differ in more than th
 \label{fig:attack:shape}
 \end{figure}
 
-\subsection{Matching without a leak}\label{sec:attack:blind}
-
-Matching alone, without any leaked row, yields little word-F1 beyond the mismatched-prompt controls.
-On Corpus A, the blind maps tested score at most \vf{0.153} word-F1, against a hub reference of \vf{0.946}, and none exceeds its mismatched-prompt control by more than \vf{0.025} (interval \vf{0.019} to \vf{0.030}). % src: results/v7_2/main/gw.json (highest blind word-F1 0.1528, control 0.1414); results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304]); also results/v7/main-different_text-pythia/results.json and results/v7_2/main/mixed-v7_9-s1.json (alpha 0 cells)
-The blind-map gains remain small compared with the gains from matching on a small leak.
-The result covers \vf{22} blind maps from two objectives, one target model, and one corpus, and it does not show that no unpaired method can connect a target model. % src: 9 + 1 + 6 + 6 maps in the four files above
-
 \subsection{Components of the matching term}\label{sec:attack:components}
 
 The matching term was selected in sequential steps on Corpus A, and four steps each raise word-F1 at a leak of ten whole prompts, about \vf{92} rows.
@@ -376,7 +376,7 @@ Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} un
 \section{The Training Objective and the Decoder's Predictions}\label{sec:attack:teacher}
 
 Both terms of the objective in Equation~\ref{eq:attack:loss} compare mapped states with hub outputs, so the objective measures how close the map lands in the hub.
-Reconstruction, however, is decided by the frozen decoder, whose next-token predictions the objective never reads.
+The frozen decoder decides the reconstruction, however, and the objective never reads its next-token predictions.
 A map can therefore lower its loss without improving those predictions.
 Two teacher-forced scores measure the predictions directly.
 The first, the excess cross-entropy, is the decoder's cross-entropy on the true next tokens under the mapped states, minus its cross-entropy under the hub outputs of OLMo.
@@ -388,7 +388,7 @@ At that leak size the supervised fit, at \vf{7.61}, is worse than a decoder with
 On legal128w the order reverses, and the hybrid fit has the higher excess cross-entropy at every leak size, \vf{2.82} against \vf{2.46} at \vf{856} rows. % src: results/legal128w/v7_2/main/framework/teacher_forced/summary.json (2.8195, 2.4597)
 Its word-F1 at that leak size is nevertheless the higher one, \vf{0.523} against \vf{0.487}. % src: results/legal128w/v7_2/main/v8_6-summary.json rows (hybrid_B8192 0.5228, supervised 0.4869)
 The KL divergence follows the excess cross-entropy within \vf{0.25} nats in every cell.
-The matching term therefore does not consistently improve the decoder's next-token predictions, which the objective does not measure, even where it raises word-F1.
+The matching term therefore raises word-F1 without consistently improving the decoder's next-token predictions.
 
 \begin{table}[H]
 \caption{The hybrid fit lowers excess cross-entropy and KL divergence on Corpus A and raises both on legal128w.
@@ -498,7 +498,7 @@ Word-F1 on \vf{450} selection prompts, seed \vf{1}: the mean of the three decode
 \paragraph{What the result does not show.} The comparison does not separate the contribution of the two further reconstructions from the instruction that names SmolLM as the most reliable copy.
 The rewriting by Claude Haiku also lacks a mismatched-prompt control.
 In a separate experiment with an open model, Qwen3-8B, on the legal128w hybrid fit of the leak-composition experiment (Table~\ref{tab:attack:settings}), the rewriting gains \vf{0.165} against \vf{0.025} for its mismatched-prompt control. % src: results/legal128w/v7_2/main/framework/attacker/attacker-b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random-s1-stock.json table."hybrid rung B" (+0.1652), "wrong memory rung B" (+0.0253)
-The second round can also lower word-F1, which falls from \vf{0.984} to \vf{0.969} on legal128w when it rewrites reconstructions from the hub's own outputs. % src: results/legal128w/v7_2/main/framework/attacker/attacker-b{10,100}-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json, table."G2 rung B".word_f1 (0.9838, 0.9691)
+The second round can also lower word-F1, from \vf{0.984} to \vf{0.969} on legal128w when it rewrites reconstructions of the hub's own outputs. % src: results/legal128w/v7_2/main/framework/attacker/attacker-b{10,100}-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json, table."G2 rung B".word_f1 (0.9838, 0.9691)
 A confirmatory test requires a paired interval for the gain over the best decoder and a mismatched-prompt control for the same protocol.
 
 %% ------------------------------------------------------------------
@@ -518,7 +518,7 @@ The gain holds only within a range of temperatures.
 Without a leak, the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
 A lower decoder loss and a higher word-F1 do not improve together consistently.
-Teacher-forced cross-entropy and KL divergence evaluate the decoder's predictions, which the objective does not measure.
+The objective does not measure the decoder's predictions, and teacher-forced cross-entropy and KL divergence do.
 Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts, with one seed, and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
 A second-round language model merges the three decoders' reconstructions into one text at the level of the best decoder, \vf{0.12} to \vf{0.26} word-F1 above their mean.
 
@@ -526,7 +526,7 @@ A second-round language model merges the three decoders' reconstructions into on
 Exact match under the hybrid fit is \vf{0.21} on Corpus A and rounds to zero on legal128w.
 In legal128w reconstructions from the leak-composition experiment (Section~\ref{sec:attack:leak}), the errors are fluent substitutions, e.g., ``registrant'' becomes ``insurer'', and dates, section numbers, and a company name are replaced by others of the same kind. % src: results/legal128w/v7_2/main/mixed-v7_9/runs/b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random-s1/endpoint/decoding.jsonl, SmolLM records
 A reconstruction does not mark which of its words match the source.
-At a leak of \vf{856} rows on legal128w, rewriting raises entity recall from \vf{0.21} to \vf{0.37}, which leaves most named entities unrecovered.
+At a leak of \vf{856} rows on legal128w, rewriting raises entity recall from \vf{0.21} to \vf{0.37}, and most named entities remain unrecovered.
 
 \paragraph{Limitations.} Five limitations bound the claims.
 \begin{itemize}
