@@ -55,28 +55,31 @@ def budget():
     }
     seeds = sorted(d["seeds"])
     assert seeds == ["1", "2", "3"]
+    # leak size in rows: the aligned pairs of each budget's whole prompts, mean over the three seeds
+    rows = [round(sum(d["seeds"][s]["budgets"][str(b)]["anchor_counts"]["valid_aligned_pairs"] for s in seeds) / 3) for b in budgets]
+    print("Corpus A rows per budget", dict(zip(budgets, rows)))
     fig, ax = plt.subplots(figsize=(4.6, 3.1))
     wrong = []
     for label, (cell, color, marker, ls) in series.items():
         per = [[d["seeds"][s]["cells"][cell(b)]["final"]["macro_f1"] for s in seeds] for b in budgets]
         wrong += [d["seeds"][s]["cells"][cell(b)]["wrong_memory"]["macro_f1"] for s in seeds for b in budgets]
         mean = [sum(p) / len(p) for p in per]
-        ax.fill_between(budgets, [min(p) for p in per], [max(p) for p in per], color=color, alpha=0.18, lw=0)
-        ax.plot(budgets, mean, color=color, marker=marker, ls=ls, lw=1.6, ms=4.5,
+        ax.fill_between(rows, [min(p) for p in per], [max(p) for p in per], color=color, alpha=0.18, lw=0)
+        ax.plot(rows, mean, color=color, marker=marker, ls=ls, lw=1.6, ms=4.5,
                 markeredgecolor="white", markeredgewidth=0.6, label=label)
         print(label, [round(m, 3) for m in mean])
     ax.axhline(g2, color=INK2, lw=0.8, ls=":")
-    ax.annotate(f"hub reference {g2:.3f}", (10, g2), xytext=(0, 3), textcoords="offset points", fontsize=8, color=INK2)
+    ax.annotate(f"hub reference {g2:.3f}", (rows[0], g2), xytext=(0, 3), textcoords="offset points", fontsize=8, color=INK2)
     ax.axhspan(min(wrong), max(wrong), color=INK2, alpha=0.15, lw=0)
-    ax.annotate(f"mismatched-prompt control {min(wrong):.2f} to {max(wrong):.2f}", (10, max(wrong)), xytext=(0, 3),
+    ax.annotate(f"mismatched-prompt control {min(wrong):.2f} to {max(wrong):.2f}", (rows[0], max(wrong)), xytext=(0, 3),
                 textcoords="offset points", fontsize=8, color=INK2)
     print("wrong memory range", min(wrong), max(wrong))
     ax.set_xscale("log")
-    ax.set_xticks(budgets)
-    ax.set_xticklabels([str(b) for b in budgets])
+    ax.set_xticks(rows)
+    ax.set_xticklabels([f"{r:,}" for r in rows])
     ax.minorticks_off()
     ax.set_ylim(0, 1.02)
-    ax.set_xlabel("budget (paired sequences)")
+    ax.set_xlabel("leaked rows")
     ax.set_ylabel("word-F1 (mean of three decoders)")
     ax.grid(axis="y")
     ax.legend(loc="center right", fontsize=8, handlelength=2.6)
@@ -174,9 +177,9 @@ def standard():
 def rewriting():
     """Word-F1 before and after the second-round language model, 450 selection prompts, seed 1."""
     files = [
-        ("Corpus A\nbudget 10", "results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json"),
-        ("legal128w\nbudget 10", "results/legal128w/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
-        ("legal128w\nbudget 100", "results/legal128w/v7_2/main/framework/attacker/attacker-b100-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
+        ("Corpus A\n92 rows", "results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json"),
+        ("legal128w\n856 rows", "results/legal128w/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
+        ("legal128w\n8,612 rows", "results/legal128w/v7_2/main/framework/attacker/attacker-b100-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
     ]
     series = [("decoders, mean of three", INK2), ("rewrite of one reconstruction", BLUE), ("rewrite of three reconstructions", ORANGE)]
     fig, ax = plt.subplots(figsize=(5.2, 2.9))
@@ -211,23 +214,28 @@ def cross_entropy():
         ("legal128w (seed 1)", "results/legal128w/v7_2/main/framework/teacher_forced/summary.json", [1, 10, 30, 100],
          "b{b}-a0.95-sq-m0-t0.1297-r1-B8192"),
     ]
+    # leak size in rows: Corpus A the mean over three seeds (mixed-v7_9-s5.json anchor_counts), legal128w seed 1
+    a = load("results/v7_2/main/mixed-v7_9-s5.json")["seeds"]
+    rows_a = {b: round(sum(a[s]["budgets"][str(b)]["anchor_counts"]["valid_aligned_pairs"] for s in a) / len(a)) for b in (10, 30, 100)}
+    rows_l = {r["budget"]: r["pairs"] for r in load("results/legal128w/v7_2/main/v8_6-summary.json")["rows"]}
     fig, axes = plt.subplots(1, 2, figsize=(6.6, 2.8), sharey=True)
     for ax, (name, rel, budgets, hybrid) in zip(axes, panels):
+        xs = [(rows_a if name.startswith("Corpus A") else rows_l)[b] for b in budgets]
         arms = load(rel)["arms"]
         get = lambda key: arms[key]["classes"]["content"]["excess_per_word"]
         sup = [get(f"b{b}-a1-r1") for b in budgets]
         hyb = [get(hybrid.format(b=b)) for b in budgets]
-        ax.plot(budgets, sup, color=SUPERVISED, marker="o", ls=(0, (5, 2)), lw=1.6, ms=4.5, label="supervised fit")
-        ax.plot(budgets, hyb, color=HYBRID, marker="s", lw=1.6, ms=4.5, label="hybrid fit")
+        ax.plot(xs, sup, color=SUPERVISED, marker="o", ls=(0, (5, 2)), lw=1.6, ms=4.5, label="supervised fit")
+        ax.plot(xs, hyb, color=HYBRID, marker="s", lw=1.6, ms=4.5, label="hybrid fit")
         none = get("no_memory")
         ax.axhline(none, color=INK2, lw=0.8, ls=":")
-        ax.annotate(f"no memory {none:.2f}", (budgets[0], none), xytext=(0, 3), textcoords="offset points",
+        ax.annotate(f"no memory {none:.2f}", (xs[0], none), xytext=(0, 3), textcoords="offset points",
                     fontsize=8, color=INK2)
         ax.set_xscale("log")
-        ax.set_xticks(budgets)
-        ax.set_xticklabels([str(b) for b in budgets])
+        ax.set_xticks(xs)
+        ax.set_xticklabels([f"{x:,}" for x in xs])
         ax.minorticks_off()
-        ax.set_xlabel("budget (paired sequences)")
+        ax.set_xlabel("leaked rows")
         ax.set_title(name, fontsize=9)
         ax.grid(axis="y")
         print(name, "supervised", [round(v, 4) for v in sup], "hybrid", [round(v, 4) for v in hyb], "none", round(none, 4))
@@ -333,7 +341,7 @@ def grid_leak_size():
 def budget_legal():
     """legal128w: hybrid against supervised fit by budget of whole prompts, seed 1, 500 selection prompts."""
     rows = load("results/legal128w/v7_2/main/v8_6-summary.json")["rows"]
-    budgets = [r["budget"] for r in rows]
+    budgets = [r["pairs"] for r in rows]  # leak size in rows (aligned pairs of the whole leaked prompts)
     sup = [r["supervised"] for r in rows]
     hyb = [r["hybrid_B8192"] for r in rows]
     wrong = [r["wrong_memory_large"] for r in rows]
@@ -350,10 +358,10 @@ def budget_legal():
                 textcoords="offset points", fontsize=8, color=INK2)
     ax.set_xscale("log")
     ax.set_xticks(budgets)
-    ax.set_xticklabels([str(b) for b in budgets])
+    ax.set_xticklabels([f"{b:,}" for b in budgets], fontsize=7.5)
     ax.minorticks_off()
     ax.set_ylim(0, 1.05)
-    ax.set_xlabel("budget (paired sequences)")
+    ax.set_xlabel("leaked rows")
     ax.set_ylabel("word-F1 (mean of three decoders)")
     ax.grid(axis="y")
     ax.legend(loc="center right", fontsize=8, handlelength=2.6)
