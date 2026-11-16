@@ -194,7 +194,10 @@ Mismatched prompt, word-F1 \vf{0.25} & \hit{who} \miss{plays the girl jinx} \hit
 Two legal corpora test H1 on text that differs from question prompts in vocabulary and in length.
 A separate hub is trained per corpus, with the architecture and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training}.
 
-\paragraph{Corpora.} The corpus legal128w cuts one contiguous window per legal document, with the start word drawn uniformly over the document; its validation prompts average \vf{61} words. % src: references in results/legal128w/v6_3/inversion-records.jsonl, first 5,000 records (mean 61.2, range 8 to 90)
+\paragraph{Corpora.} The corpus legal128w cuts one contiguous window from each legal document, starting at a word drawn uniformly over the document.
+The window grows word by word and stops at \vf{100} tokens under the tokenizer that yields the most tokens for it. % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
+A window of that length averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
+The name records a looser ceiling, \vf{128} tokens under every tokenizer, which the \vf{100}-token stop keeps out of reach. % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
 The corpus legal10w cuts ten consecutive words from the same source documents, from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
 Each corpus has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
 

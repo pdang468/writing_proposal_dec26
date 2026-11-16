@@ -110,11 +110,11 @@ The \vf{40{,}000} training prompts of a corpus are divided once, at random, into
 One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. 
 A leak draws its prompts at random from all \vf{40{,}000} training prompts. 
 
-\paragraph{The 90-row leak.} The main experiment gives the attacker \vf{90} rows, the first nine rows of each of ten prompts.
-Nine rows cover a different share of a prompt on each corpus.
-A Corpus A prompt averages nine words, so nine rows hold almost the whole prompt.
-A legal128w prompt averages \vf{61} words, so the same nine rows hold only its opening words.
-The leak is therefore equal in rows on the two corpora and unequal in the share of each prompt it reveals.
+\paragraph{The 90-row leak.} In the main experiment, the attacker obtains a leak of \vf{90} rows, the first nine rows of each of ten prompts.
+The leak exposes the two corpora to different degrees.
+On Corpus A, a prompt averages nine words, so nine rows expose almost the entire prompt.
+On legal128w, a prompt is a window of about \vf{68} words, or \vf{86} rows, cut from a longer document, so the same nine rows expose only its opening words. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6); results/legal128w/v7_2/main/v8_6-summary.json rows[*].pairs (8612 rows for 100 prompts)
+The attacker's knowledge is therefore fixed at \vf{90} rows on both corpora, while the exposed fraction of each leaked prompt differs.
 
 \paragraph{Score.} Evaluation follows Section~\ref{sec:hub:eval}.
 Each of the three decoders generates greedily from the projected output of the map, up to the length of the soft prompt plus \vf{32} tokens in the main comparison.
