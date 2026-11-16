@@ -5,14 +5,14 @@
 \chapter{Weakly Supervised Attack with a Small Leak}\label{ch:attack}
 
 Chapter~\ref{ch:hub} trained the translation hub with full access to the hidden states of its three models.
-This chapter adds a target model, which connects to the frozen hub through an affine map.
-The output of the map passes through the frozen projectors and the frozen decoders to reconstruct the prompts of the target model.
+This chapter adds a target model and connects it to the frozen hub through an affine map.
+The frozen projectors and decoders then reconstruct the target model's prompts from the output of the map.
 
-The map is trained under two source of information.
-The first one is a small leak, a set of prompts for which both the text and the target model's hidden states are available, which supervises the map directly.
-The second is a matching term, which aligns hidden states of the target model with hub outputs that are not paired with them.
+Two sources of information train the map.
+First, a small leak, a set of prompts with both their text and the target model's hidden states, supervises the map directly.
+Second, a matching term aligns unpaired data, hidden states of the target model and hub outputs with no correspondence between them.
 The chapter tests whether the matching term improves reconstruction over the leak alone.
-With a leak of \vf{90} rows, about ninety words, mean word-F1 on \vf{4{,}500} held-out Corpus A prompts rises from \vf{0.35} to \vf{0.77} over three seeds. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
+With a leak of \vf{90} rows, about ninety words, the matching term raises mean word-F1 on \vf{4{,}500} held-out Corpus A prompts from \vf{0.35} to \vf{0.77} over three seeds. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
 
 %% ------------------------------------------------------------------
 \section{Threat Model}\label{sec:attack:threat}
