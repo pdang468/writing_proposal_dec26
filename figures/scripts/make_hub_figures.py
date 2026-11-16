@@ -94,7 +94,7 @@ def architecture():
 
 
 def directions(files=None, out="direction_recovery", figsize=(6.4, 2.75), control="shuffled"):
-    files = files or {"Corpus A": "results/v6_3/hpc-final/inversion.json",
+    files = files or {"NQ": "results/v6_3/hpc-final/inversion.json",
                       "legal128w": "results/legal128w/v6_3/inversion.json"}
     cmap = LinearSegmentedColormap.from_list("blue", RAMP)
     fig, axes = plt.subplots(1, len(files), figsize=figsize, squeeze=False)
@@ -148,7 +148,7 @@ def translation():
     a, l128 = load("results/v6_3/hpc-final/inversion.json"), load("results/legal128w/v6_3/inversion.json")
     l256 = load("results/legal256w/v7_2/main/v8_6-readiness.json")["g1"]
     rows = [  # corpus, cross mean, shuffled control (cross mean; legal256w: largest cross direction)
-        ("Corpus A", a["cross_mean"]["hub"]["word_f1"], a["cross_mean"]["shuffled"]["word_f1"]),
+        ("NQ", a["cross_mean"]["hub"]["word_f1"], a["cross_mean"]["shuffled"]["word_f1"]),
         ("legal128w", l128["cross_mean"]["hub"]["word_f1"], l128["cross_mean"]["shuffled"]["word_f1"]),
         ("legal256w", l256["cross_mean"], l256["shuffled_max"]),
     ]
@@ -179,7 +179,7 @@ def ceiling():
         return g2["per_decoder"]
 
     rows = [
-        ("Corpus A", from_noise("results/v7_2/main/oct_w5c-noise.json")),
+        ("NQ", from_noise("results/v7_2/main/oct_w5c-noise.json")),
         ("legal128w", from_setting("results/legal128w/v7_2/main/mixed-oct_w5b-L.json")),
         ("legal256w", from_setting("results/legal256w/v7_2/main/mixed-v8_6-s1.json")),
     ]
@@ -204,7 +204,7 @@ def ceiling():
 architecture()
 directions()
 # Corpus A alone, for the chapter while the legal results are held back (2026-11-09).
-directions({"Corpus A": "results/v6_3/hpc-final/inversion.json"}, "direction_recovery_nq", (3.9, 2.9),
+directions({"NQ": "results/v6_3/hpc-final/inversion.json"}, "direction_recovery_nq", (3.9, 2.9),
            control="mismatched prompt")  # the records' "shuffled" arm is another prompt's memory
 # The two legal hubs of the chapter (2026-11-15); legal10s is held back.
 directions({c: f"results/{c}/v6_3/inversion.json" for c in ("legal128w", "legal10w")},

@@ -114,38 +114,38 @@ The second term compares two models: the similarities among the hub outputs of m
 The learning rate rises to $3\times10^{-4}$ over \vf{250} warmup updates and follows a cosine decay to zero; weight decay is \vf{0.01} on the linear weights, and gradients are clipped at norm \vf{1.0}. % src: configs/v6_3.yaml (training)
 Teacher-forced Acc@1 selects the checkpoint.
 Acc@1 is the fraction of prompt tokens that the decoder ranks first given the ground-truth prefix, averaged over the \vf{5{,}000} validation prompts and the six cross-model directions.
-A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained: on Corpus A (Natural Questions queries), update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
+A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained: on NQ (Natural Questions queries), update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
 
 %% ------------------------------------------------------------------
 \section{Evaluation}\label{sec:hub:eval}
 
 \paragraph{Free-running decoding.} H1 is evaluated under free-running decoding, because under teacher forcing the ground-truth prefix carries information about the next token.
 Each decoder conditions on the soft prompt and on its own generated prefix; greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap.
-The cap is the length of the soft prompt plus \vf{32} tokens on the legal corpora. % TODO(author): state the cap on Corpus A
+The cap is the length of the soft prompt plus \vf{32} tokens on the legal datasets. % TODO(author): state the cap on Corpus A
 
 \paragraph{Metrics.} Two metrics compare the reconstruction with the source prompt.
 Word-F1 is the harmonic mean of word precision and recall over word multisets, averaged over prompts.
 Exact match is the fraction of reconstructions equal to their source prompt after Unicode and whitespace normalization.
 Word-F1 ignores word order, so exact match is reported beside it as the order-sensitive metric.
 
-\paragraph{Mismatched-prompt control.} A fluent decoder may score above zero without reading its soft prompt, because prompts of one corpus share common words.
+\paragraph{Mismatched-prompt control.} A fluent decoder may score above zero without reading its soft prompt, because prompts of one dataset share common words.
 The mismatched-prompt control measures that floor: the decoder receives the hub outputs of another prompt, and its output is scored against the original prompt.
 Prompt $i$ receives the hub outputs of prompt $i+1$, and the last prompt those of the first. % src: src/v6_3/inversion.py (shuffled_indices: (i + 1) mod n); src/v8/projectors.py (wrong_partner: same rule)
 A score above its control shows that the reconstruction depends on the prompt's own hub outputs.
 
-\paragraph{Corpus A.} Corpus A contains query strings from Natural Questions, split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts.
+\paragraph{NQ.} The NQ dataset contains query strings from Natural Questions, split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts.
 Near-duplicate questions never cross a split. % src: configs/v3.yaml (split_schema_version v2-stage2-textcluster-v1); src/v3/splits.py
 The validation prompts average \vf{9} words and range from \vf{6} to \vf{19}. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
 All scores in this chapter are computed on the validation split, which also selects the checkpoint, so no score is held out; the test split has not been evaluated.
 
 \paragraph{Criteria for H1.} One score summarizes a hub: mean cross-model word-F1, the free-running word-F1 averaged over the six cross-model directions on the validation split.
-A corpus fails H1 if that mean falls below \vf{0.90} or if the mismatched-prompt control on the same prompts reaches \vf{0.20}.
-Both thresholds come from the evaluation plan of the legal hubs and were applied to Corpus A retrospectively. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); no threshold precedes the Corpus A run
+A dataset fails H1 if that mean falls below \vf{0.90} or if the mismatched-prompt control on the same prompts reaches \vf{0.20}.
+Both thresholds come from the evaluation plan of the legal hubs and were applied to NQ retrospectively. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); no threshold precedes the Corpus A run
 
 %% ------------------------------------------------------------------
 \section{Results on Question Prompts}\label{sec:hub:results}\label{sec:hub:translation}
 
-Cross-model reconstruction on Corpus A meets both criteria for H1.
+Cross-model reconstruction on NQ meets both criteria for H1.
 On the \vf{5{,}000} validation prompts, cross-model word-F1 averages \vf{0.945}, against \vf{0.120} under the mismatched-prompt control; exact match averages \vf{0.71} and is zero under the control. % src: results/v6_3/hpc-final/inversion.json cross_mean (hub 0.9445, exact 0.7116; shuffled 0.1203, exact 0.0)
 The gap above the mismatched-prompt control shows that the reconstruction depends on the prompt's own hub outputs.
 
@@ -153,7 +153,7 @@ The gap above the mismatched-prompt control shows that the reconstruction depend
 \centering
 \includegraphics[width=0.62\textwidth]{ch3/direction_recovery_nq}
 \caption{The OLMo and SmolLM decoders reconstruct every source above 0.96 word-F1; the Qwen decoder reaches 0.84 to 0.88.
-Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} Corpus A validation prompts; diagonal cells are self-reconstruction.
+Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} NQ validation prompts; diagonal cells are self-reconstruction.
 The mismatched-prompt control scores \vf{0.120} to \vf{0.121} in every direction.
 One hub seed.}
 \label{fig:hub:directions}
@@ -166,7 +166,7 @@ Table~\ref{tab:hub:examples} shows reconstructions from OLMo $\to$ Qwen. % src: 
 
 \begin{table}[H]
 \caption{At an intermediate score one word changes; at a low score the names are lost.
-Reconstructions from OLMo $\to$ Qwen on Corpus A validation prompts, selected at high, intermediate, and low word-F1; the final row is generated under the mismatched-prompt control and scored against the original prompt.
+Reconstructions from OLMo $\to$ Qwen on NQ validation prompts, selected at high, intermediate, and low word-F1; the final row is generated under the mismatched-prompt control and scored against the original prompt.
 Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:hub:examples}
 \centering
@@ -191,30 +191,30 @@ Mismatched prompt, word-F1 \vf{0.25} & \hit{who} \miss{plays the girl jinx} \hit
 %% ------------------------------------------------------------------
 \section{Results on Legal Text}\label{sec:hub:legal}
 
-Two legal corpora test H1 on text that differs from question prompts in vocabulary and in length.
-A separate hub is trained per corpus, with the architecture and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training}.
+Two legal datasets test H1 on text that differs from question prompts in vocabulary and in length.
+A separate hub is trained per dataset, with the architecture and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training}.
 
-\paragraph{Corpora.} The corpus legal128w cuts one contiguous window from each legal document, starting at a word drawn uniformly over the document.
+\paragraph{Datasets.} The legal128w dataset cuts one contiguous window from each legal document, starting at a word drawn uniformly over the document.
 The window grows word by word and stops at \vf{100} tokens under the tokenizer that yields the most tokens for it. % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
 A window of that length averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
 The name records a looser ceiling, \vf{128} tokens under every tokenizer, which the \vf{100}-token stop keeps out of reach. % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
-The corpus legal10w cuts ten consecutive words from the same source documents, from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
-Each corpus has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
+The legal10w dataset cuts ten consecutive words from the same source documents, from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
+Each dataset has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
 
 \paragraph{Results.} Both legal hubs meet both criteria for H1 (Table~\ref{tab:hub:legal}).
-Mean cross-model word-F1 is \vf{0.977} on each corpus, against mismatched-prompt controls of \vf{0.152} on legal128w and \vf{0.071} on legal10w. % src: results/legal{128w,10w}/v6_3/inversion.json cross_mean (hub 0.9769, 0.9767; shuffled 0.1519, 0.0706)
+Mean cross-model word-F1 is \vf{0.977} on each dataset, against mismatched-prompt controls of \vf{0.152} on legal128w and \vf{0.071} on legal10w. % src: results/legal{128w,10w}/v6_3/inversion.json cross_mean (hub 0.9769, 0.9767; shuffled 0.1519, 0.0706)
 Every cross-model direction exceeds \vf{0.90}; the lowest is Qwen $\to$ OLMo on legal128w, at \vf{0.955} (Figure~\ref{fig:hub:legal-directions}). % src: same files, directions (cross minima 0.9552, 0.9670)
-The lower scores into Qwen on Corpus A do not recur: the cross-model directions into Qwen score \vf{0.975} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9858, 0.9752)
+The lower scores into Qwen on NQ do not recur: the cross-model directions into Qwen score \vf{0.975} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9858, 0.9752)
 Exact match is lower on the long prompts of legal128w, at \vf{0.58}, than on the ten-word prompts of legal10w, at \vf{0.83}; the comparison does not isolate length from content.
 
 \begin{table}[H]
 \caption{Each legal hub exceeds a mean cross-model word-F1 of \vf{0.90} with a control below \vf{0.20}.
-Free-running word-F1 and exact match averaged over the six cross-model directions on the \vf{5{,}000} validation prompts of each corpus, one hub seed per corpus; each control is evaluated on the same prompts and directions as its score.}
+Free-running word-F1 and exact match averaged over the six cross-model directions on the \vf{5{,}000} validation prompts of each dataset, one hub seed per dataset; each control is evaluated on the same prompts and directions as its score.}
 \label{tab:hub:legal}
 \centering
 \begin{tabular}{lccc}
 \toprule
-Corpus & Word-F1 & Exact match & Control word-F1 \\
+Dataset & Word-F1 & Exact match & Control word-F1 \\
 \midrule
 legal128w & \vf{0.977} & \vf{0.58} & \vf{0.152} \\ % src: results/legal128w/v6_3/inversion.json cross_mean (0.9769, 0.5814, 0.1519)
 legal10w & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % src: results/legal10w/v6_3/inversion.json cross_mean (0.9767, 0.8291, 0.0706)
@@ -226,16 +226,16 @@ legal10w & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % src: results/legal10w/v6_3/i
 \centering
 \includegraphics[width=\textwidth]{ch3/direction_recovery_legal}
 \caption{Every direction of the two legal hubs reaches a word-F1 of at least 0.95.
-Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} validation prompts of each legal corpus; diagonal cells are self-reconstruction.
-One hub seed per corpus.}
+Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} validation prompts of each legal dataset; diagonal cells are self-reconstruction.
+One hub seed per dataset.}
 \label{fig:hub:legal-directions}
 \end{figure}
 
 %% ------------------------------------------------------------------
 \section{Discussion}\label{sec:hub:discussion}
 
-The results support H1 on three corpora.
-Each of three frozen models reconstructs a prompt from the hidden states of the other two, at a mean word-F1 of \vf{0.945} on Corpus A and \vf{0.977} on the two legal corpora, with every mismatched-prompt control below \vf{0.20}.
+The results support H1 on three datasets.
+Each of three frozen models reconstructs a prompt from the hidden states of the other two, at a mean word-F1 of \vf{0.945} on NQ and \vf{0.977} on the two legal datasets, with every mismatched-prompt control below \vf{0.20}.
 These results demonstrate that one shared representation space holds the prompt information carried by the hidden states of all three models.
 
 Chapter~\ref{ch:attack} asks whether a target model outside hub training reaches the same space through one affine map fitted on a small leak.

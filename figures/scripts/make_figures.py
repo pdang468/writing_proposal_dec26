@@ -90,7 +90,7 @@ def budget():
 budget()
 
 
-CORPORA = [("Corpus A", "results/v7_2/main"), ("legal128w", "results/legal128w/v7_2/main")]
+CORPORA = [("NQ", "results/v7_2/main"), ("legal128w", "results/legal128w/v7_2/main")]
 
 
 def load(rel):
@@ -177,7 +177,7 @@ def standard():
 def rewriting():
     """Word-F1 before and after the second-round language model, 450 selection prompts, seed 1."""
     files = [
-        ("Corpus A\n92 rows", "results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json"),
+        ("NQ\n92 rows", "results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json"),
         ("legal128w\n856 rows", "results/legal128w/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
         ("legal128w\n8,612 rows", "results/legal128w/v7_2/main/framework/attacker/attacker-b100-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
     ]
@@ -209,7 +209,7 @@ def rewriting():
 def cross_entropy():
     """Excess cross-entropy per content word under teacher forcing, against the budget."""
     panels = [
-        ("Corpus A (three seeds)", "results/v7_2/main/framework/teacher_forced/summary.json", [10, 30, 100],
+        ("NQ (three seeds)", "results/v7_2/main/framework/teacher_forced/summary.json", [10, 30, 100],
          "b{b}-a0.95-sq-m0-t0.1152-r1-B8192"),
         ("legal128w (seed 1)", "results/legal128w/v7_2/main/framework/teacher_forced/summary.json", [1, 10, 30, 100],
          "b{b}-a0.95-sq-m0-t0.1297-r1-B8192"),
@@ -220,7 +220,7 @@ def cross_entropy():
     rows_l = {r["budget"]: r["pairs"] for r in load("results/legal128w/v7_2/main/v8_6-summary.json")["rows"]}
     fig, axes = plt.subplots(1, 2, figsize=(6.6, 2.8), sharey=True)
     for ax, (name, rel, budgets, hybrid) in zip(axes, panels):
-        xs = [(rows_a if name.startswith("Corpus A") else rows_l)[b] for b in budgets]
+        xs = [(rows_a if name.startswith("NQ") else rows_l)[b] for b in budgets]
         arms = load(rel)["arms"]
         get = lambda key: arms[key]["classes"]["content"]["excess_per_word"]
         sup = [get(f"b{b}-a1-r1") for b in budgets]
@@ -272,7 +272,7 @@ def leak_shape():
         ("2 prompts\n90 rows", f"{L}/mixed-oct_w5b-L-prefix.json", f"b90/{H}/L90-prefix", "b90/a1/r1/L90-prefix"),
         ("10 prompts\n9 rows each", f"{L}/mixed-oct_w5-s1-L90-ext2.json", f"b90/{H}/L90-span9", "b90/a1/r1/L90-span9"),
         ("90 prompts\n1 row each", f"{L}/mixed-oct_w5-s1-L90.json", f"b90/{H}/L90-random", "b90/a1/r1/L90-random"),
-        ("Corpus A\n10 prompts, 90 rows", "results/v7_2/main/mixed-oct_w5b-A-prefix.json",
+        ("NQ\n10 prompts, 90 rows", "results/v7_2/main/mixed-oct_w5b-A-prefix.json",
          "b90/a0.99/sq/m0/t0.05761/r1/B8192/L90-prefix", "b90/a1/r1/L90-prefix"),
     ]
     groups = []
