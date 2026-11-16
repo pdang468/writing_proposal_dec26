@@ -24,7 +24,6 @@ With a leak of \vf{90} rows, about ninety words, mean word-F1 on \vf{4{,}500} he
 %% ------------------------------------------------------------------
 \section{Threat Model}\label{sec:attack:threat}
 
-%% BIG CHANGE: the attacker is named as the server of a split inference system, following Chapter 1.
 The attacker is the honest-but-curious server of a split inference system and receives the hidden states that a client transmits to the cloud.
 The attack goal is to reconstruct a prompt from its observed sequence of hidden states.
 For that prompt the attacker holds neither the text nor the token identities, and the attacker cannot query the target model.
@@ -381,7 +380,6 @@ Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} un
 %% ------------------------------------------------------------------
 \section{The Training Objective and the Decoder's Predictions}\label{sec:attack:teacher}
 
-%% BIG CHANGE: the section now turns on the objective of Equation~\ref{eq:attack:loss} (author's direction, 2026-11-15): a low loss in the hub does not translate directly into the decoder's predictions or into word-F1, and the two teacher-forced scores show the difference.
 The objective of Equation~\ref{eq:attack:loss} fits the map inside the hub, where both of its terms compare mapped states with hub outputs.
 Reconstruction depends on a quantity that the objective never reads, the next-token predictions of the frozen decoder under the mapped states.
 Two teacher-forced scores measure those predictions.
@@ -512,7 +510,7 @@ A confirmatory test requires a paired interval for the gain over the best decode
 
 A target model outside hub training connects to the hub through one affine map, and unpaired matching improves the reconstruction obtained from a small supervised leak.
 With \vf{90} leaked rows, word-F1 on held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, and both gains meet H2. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
-%% BIG CHANGE: ties the result back to the hypothesis of Chapter 3 (reworded 2026-11-16 for clarity).
+
 Because the map is affine and the hub is frozen, the gain indicates structure that the hidden states of the target model already share with the hub.
 Such shared structure is what the Platonic Representation Hypothesis predicts, here for a model outside hub training.
 
