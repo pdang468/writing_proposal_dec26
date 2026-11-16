@@ -12,7 +12,8 @@
 \chapter{Weakly Supervised Attack with a Small Leak}\label{ch:attack}
 
 Chapter~\ref{ch:hub} trained the translation hub with full access to the hidden states of its three models.
-This chapter adds a target model employing an affine map to connect to the frozen hub, and the frozen projectors and decoders then reconstruct its prompts.
+This chapter adds a target model employing an affine map to connect to the frozen hub.
+The map results is sent through the frozen projectors and decoders then reconstruct its prompts.
 
 Two sources of information fit the map.
 A small leak, a set of prompts for which both the text and the target model's hidden states are available, supervises the map directly.
