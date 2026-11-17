@@ -103,8 +103,8 @@ def grid():
     """Hybrid word-F1 over supervision fraction and temperature, seed 1, 500 selection prompts."""
     alphas = [0.8, 0.9, 0.95, 0.99]
     mults = [0.25, 0.5, 1, 2, 4]
-    fig, axes = plt.subplots(1, 2, figsize=(6.6, 2.7))
-    for ax, (name, root) in zip(axes, CORPORA):
+    fig, axes = plt.subplots(1, 3, figsize=(9.6, 2.7))
+    for ax, (name, root) in zip(axes, MAIN):
         d = load(f"{root}/mixed-w46-grid.json")
         cells = d["seeds"]["1"]["cells"]
         taus = d["setting"]["tau_grid"]
