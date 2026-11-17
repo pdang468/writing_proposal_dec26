@@ -126,7 +126,7 @@ The hub reference is the word-F1 of the three decoders on the hub outputs of OLM
 
 \paragraph{Settings.} The hybrid fit has three settings, the supervision fraction $\alpha$, the temperature $\tau$, and the batch size $B$ of the matching term.
 The settings are chosen on \vf{500} validation prompts, the selection prompts, and the main comparison is scored on the other \vf{4{,}500}, the held-out prompts. % src: v7_run.py (subset_seed 20260903, dev_prompts 500); src/v7_2/context.py; results/v7_2/main/eval/confirmation/prompt_ids.json
-The main comparison fixes $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$ on both datasets, and each supporting experiment states its setting with its result.
+The main comparison and the leak-size comparison fix $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$ on every dataset, and each other supporting experiment states its setting with its result.
 
 %% ------------------------------------------------------------------
 \section{Matching Improves Reconstruction from a Small Leak}\label{sec:attack:hybrid}
@@ -248,22 +248,24 @@ The result covers \vf{22} blind maps from two objectives, one target model, and 
 \subsection{Size of the leak}\label{sec:attack:budget}
 
 Matching helps most where the leak is small (Figure~\ref{fig:attack:budget}).
-The comparison runs one design on the three datasets, a hybrid fit with $\alpha = 0.95$, $\tau = 2d$, and $B = 8{,}192$ against the supervised fit on leaks of \vf{1} to \vf{100} whole prompts, with one seed on the selection prompts.
-On NQ, the gain is \vf{0.075} at \vf{9} rows, peaks at \vf{0.378} at \vf{92} rows, and falls to \vf{0.076} at \vf{986} rows. % src: results/v7_2/main/mixed-v8_5-s1.json seeds.1.cells b{1,3,5,10,30,100}/a0.95/sq/m0/t0.1152/r1/B8192 and b*/a1/r1, final.macro_f1 (hybrid 0.2344, 0.5419, 0.6390, 0.7319, 0.7784, 0.8296; supervised 0.1592, 0.2565, 0.2998, 0.3541, 0.5399, 0.7536); budgets.*.anchor_counts.valid_aligned_pairs (9, 28, 48, 92, 289, 986)
-On legal128w, the gain is \vf{0.090} to \vf{0.147} at \vf{78} to \vf{447} rows and \vf{0.036} at \vf{856} rows. % src: results/legal128w/v7_2/main/v8_6-summary.json rows[*].E (0.0898, 0.1474, 0.1042, 0.0359 at 78, 259, 447, 856 rows; every interval excludes zero)
-On legal10w, the gain is \vf{0.272} to \vf{0.332} at \vf{34} to \vf{125} rows and falls to \vf{0.051} at \vf{1{,}305} rows. % src: results/legal10w/v7_2/main/v8_6-summary.json rows[*] (1, 3, 5, 10, 30, 100 prompts: 12, 34, 55, 125, 390, 1305 rows; E +0.0055, +0.2723, +0.300, +0.332, +0.220, +0.051; job 1595870, seed 1)
-At larger leaks the supervised fit closes the gap, and on legal128w it overtakes the hybrid fit unless the matching weight is reduced. % src: results/legal128w/v7_2/main/v8_6-summary.json rows[*].E (-0.0640, -0.0478 at 2569, 8612 rows); mixed-v8_7-s2.json (alpha 0.99, tau d: +0.0064, -0.0066)
+%% PLACEHOLDER: the five new leak sizes run as jobs w46_leak_{nq,legal128w,legal10w}; every \vf{TBD} below is filled from results/<dataset>/v7_2/main/mixed-w46-std-L{9,27,45,270,900}.json
+The comparison repeats the main comparison at six leak sizes, the first nine rows of \vf{1}, \vf{3}, \vf{5}, \vf{10}, \vf{30}, and \vf{100} prompts, or \vf{9} to \vf{900} rows. % src: configs/w46_{nq,legal128w,legal10w}_std_L{9,27,45,270,900}.yaml; src/v7_2/anchors_linear.py span_start_pairs
+The setting stays at $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$, with one seed on the selection prompts.
+At \vf{90} rows the curve passes through the main comparison, where seed \vf{1} gains \vf{0.401} on NQ, \vf{0.206} on legal128w, and \vf{0.379} on legal10w. % src: results/{v7_2,legal128w/v7_2,legal10w/v7_2}/main/mixed-w46-std.json seeds.1.cells (hybrid 0.7679, 0.2993, 0.6040; supervised 0.3671, 0.0938, 0.2251)
+Below \vf{90} rows, the gain is \vf{TBD} at \vf{9} rows and \vf{TBD} at \vf{45} rows on NQ, \vf{TBD} and \vf{TBD} on legal128w, and \vf{TBD} and \vf{TBD} on legal10w. % src: pending
+Above \vf{90} rows, the supervised fit rises with every added row, and the gain at \vf{900} rows is \vf{TBD} on NQ, \vf{TBD} on legal128w, and \vf{TBD} on legal10w. % src: pending
+The setting was selected at \vf{90} rows, so the gain at \vf{900} rows describes that setting and not the best hybrid fit for a leak of that size.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch4/leak_size_three}
-\caption{On all three datasets the gain from matching is largest at leaks of about \vf{90} to \vf{260} rows and small near \vf{1{,}000} rows.
-Word-F1 averaged over three decoders on the \vf{500} selection prompts, seed \vf{1}, for the supervised fit and a hybrid fit with $\alpha = 0.95$, $\tau = 2d$, $B = 8{,}192$; the leaks hold whole prompts and are shown up to \vf{1{,}500} rows.
+\caption{PLACEHOLDER. On all three datasets the gain from matching is largest at leaks of \vf{TBD} rows and smallest at \vf{TBD} rows.
+Word-F1 averaged over three decoders on the \vf{500} selection prompts, seed \vf{1}, for the supervised fit and the hybrid fit of the main comparison ($\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$); each leak holds the first nine rows of \vf{1} to \vf{100} prompts, and the number above each point is the gain.
 The dotted line is the hub reference.}
 \label{fig:attack:budget}
 \end{figure}
 
-The grid of Section~\ref{sec:attack:grid} shifts in the same direction (Figure~\ref{fig:attack:grid-size}).
+A larger leak also moves the best setting of the grid of Section~\ref{sec:attack:grid} (Figure~\ref{fig:attack:grid-size}).
 With one row from each of \vf{90} legal128w prompts, the best cell is $\alpha = 0.8$, $\tau = 2d$, at a word-F1 of \vf{0.341} against \vf{0.108} for the supervised fit. % src: results/legal128w/v7_2/main/mixed-oct_w5-grid-L90.json selection.winners.90 (0.3411); cells b90/a1/r1/L90-random (0.1084)
 With one row from each of \vf{864} prompts, the best cell is $\alpha = 0.95$, $\tau = d$, at \vf{0.659} against \vf{0.548}. % src: results/legal128w/v7_2/main/mixed-oct_w5-grid-L864.json selection.winners.864 (0.6594); cells b864/a1/r1/L864-random (0.5480)
 The larger leak is also less sensitive to the setting, since every cell with $\alpha \ge 0.9$ and $\tau \ge 0.5d$ lies between \vf{0.46} and \vf{0.66}. % src: same file, seeds.1.cells (0.4620 to 0.6594)
@@ -284,6 +286,12 @@ On legal128w, the hybrid fit scores \vf{0.321} with one row from each of \vf{90}
 The content of the rows matters as well.
 A leak of stop words, or of one repeated word, leaves the hybrid fit at the level of the supervised fit, at \vf{0.058} against \vf{0.056} and \vf{0.054} against \vf{0.057}. % src: mixed-oct_w5-s1-L90.json cells *L90-stop (0.0582, 0.0555), *L90-one_word (0.0535, 0.0568)
 The comparison rests on one seed and does not separate the number of prompts from the content of the particular prompts drawn.
+
+The size of the leak in rows therefore does not fix its value, and legal128w shows the difference at larger leaks.
+Ten whole prompts supply \vf{856} rows, and the hybrid fit of the main comparison scores \vf{0.501} against \vf{0.487} for the supervised fit. % src: results/legal128w/v7_2/main/mixed-v8_7-s1.json seeds.1.cells b10/a0.9/sq/m0/t0.1297/r1/B8192 (0.5006), b10/a1/r1 (0.4869); budgets.10.anchor_counts.valid_aligned_pairs (856)
+Nine rows from each of \vf{100} prompts supply \vf{900} rows, and the two fits score \vf{TBD} and \vf{TBD}. % src: pending, results/legal128w/v7_2/main/mixed-w46-std-L900.json
+With \vf{30} and \vf{100} whole prompts, the supervised fit overtakes the hybrid fit, at \vf{0.731} against \vf{0.613} and \vf{0.813} against \vf{0.654}. % src: same file, b30 and b100 cells (0.7307, 0.6131; 0.8133, 0.6544); 2,569 and 8,612 rows
+The two kinds of leak differ in the number of prompts and in the position of the rows within a prompt, so the comparison records the difference and leaves its cause open.
 
 \begin{figure}[ht]
 \centering

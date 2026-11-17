@@ -411,5 +411,43 @@ def leak_size_three():
     save(fig, "ch4/leak_size_three")
 
 
-leak_size_three()
+def leak_size_span9():
+    """The main comparison's leak at six sizes on three datasets: the first nine rows of 1, 3, 5, 10, 30 and 100 prompts
+    (9 to 900 rows), hybrid (alpha 0.9, tau 2d, B 8,192) against the supervised fit, seed 1, 500 selection prompts.
+    The 90-row point is seed 1 of mixed-w46-std. A size whose result file is missing is drawn as a hollow grey marker
+    and the figure carries a placeholder mark until every size is present."""
+    sizes = (9, 27, 45, 90, 270, 900)
+    fig, axes = plt.subplots(1, 3, figsize=(9.6, 3.0), sharey=True)
+    missing = 0
+    for ax, (name, root) in zip(axes, MAIN):
+        xs, sup, hyb = [], [], []
+        for size in sizes:
+            path = ROOT / root / ("mixed-w46-std.json" if size == 90 else f"mixed-w46-std-L{size}.json")
+            if not path.is_file():
+                missing += 1
+                ax.plot([size], [0.03], marker="o", ms=5, mfc="none", mec=INK2, mew=0.8, ls="none")
+                continue
+            cells = json.loads(path.read_text())["seeds"]["1"]["cells"]
+            pick = lambda a: next(c for k, c in cells.items() if k.startswith(f"b{size}/a{a}/") and k.endswith(f"L{size}-span9"))
+            xs.append(size); sup.append(pick("1")["final"]["macro_f1"]); hyb.append(pick("0.9")["final"]["macro_f1"])
+        ax.plot(xs, sup, color=SUPERVISED, marker="o", ls=(0, (5, 2)), lw=1.6, ms=4.5, markeredgecolor="white", markeredgewidth=0.6, label="supervised fit")
+        ax.plot(xs, hyb, color=HYBRID, marker="s", lw=1.6, ms=4.5, markeredgecolor="white", markeredgewidth=0.6, label="hybrid fit")
+        for x, s_, h in zip(xs, sup, hyb):
+            ax.annotate(f"{h - s_:+.2f}", (x, max(h, s_)), xytext=(0, 5), textcoords="offset points", ha="center", fontsize=7.5, color=INK2)
+        g2 = (json.loads((ROOT / "results/v7_2/main/factorial.json").read_text())["controls"]["true_olmo_code"]["macro_f1"] if name == "NQ"
+              else load(f"{root}/mixed-v7_9-s0.json")["setting"]["corpus"]["g2"]["macro_f1"])
+        ax.axhline(g2, color=INK2, lw=0.8, ls=":")
+        ax.annotate(f"hub reference {g2:.3f}", (sizes[0], g2), xytext=(0, 3), textcoords="offset points", fontsize=7.5, color=INK2)
+        ax.set_xscale("log"); ax.set_xticks(sizes); ax.set_xticklabels([str(s) for s in sizes], fontsize=7.5); ax.minorticks_off()
+        ax.set_xlim(6.5, 1250); ax.set_ylim(0, 1.05); ax.set_xlabel("leaked rows"); ax.set_title(name, fontsize=9); ax.grid(axis="y")
+        print(name, xs, "sup", [round(v, 3) for v in sup], "hyb", [round(v, 3) for v in hyb], "gain", [round(h - s_, 3) for h, s_ in zip(hyb, sup)])
+    axes[0].set_ylabel("word-F1 (mean of three decoders)")
+    axes[0].legend(loc="center left", fontsize=8, handlelength=2.6)
+    if missing:
+        fig.text(0.5, 0.5, f"PLACEHOLDER: {missing} of {3 * len(sizes)} points pending", ha="center", va="center", fontsize=18,
+                 color="#c0392b", alpha=0.35, rotation=12)
+    fig.tight_layout()
+    save(fig, "ch4/leak_size_three")
 
+
+leak_size_span9()
