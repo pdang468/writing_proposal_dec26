@@ -258,7 +258,7 @@ The setting stays at $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$, with one se
 At \vf{90} rows the curve passes through the main comparison, where seed \vf{1} gains \vf{0.401} on NQ, \vf{0.206} on legal128w, and \vf{0.379} on legal10w. % src: results/{v7_2,legal128w/v7_2,legal10w/v7_2}/main/mixed-w46-std.json seeds.1.cells (hybrid 0.7679, 0.2993, 0.6040; supervised 0.3671, 0.0938, 0.2251)
 On NQ, the gain is \vf{0.354} at \vf{27} rows, peaks at \vf{0.418} at \vf{45} rows, and falls to \vf{0.270} at \vf{270} rows and \vf{0.089} at \vf{900} rows. % src: results/v7_2/main/mixed-w46-std-L{27,45,270,900}.json seeds.1.cells (hybrid 0.6093, 0.7217, 0.7956, 0.8323; supervised 0.2549, 0.3037, 0.5255, 0.7434); job 1601532
 On legal10w, the gain is \vf{0.243} at \vf{27} rows, peaks at \vf{0.379} at \vf{90} rows, and falls to \vf{0.314} at \vf{270} rows and \vf{0.089} at \vf{900} rows. % src: results/legal10w/v7_2/main/mixed-w46-std-L{27,45,270,900}.json (hybrid 0.3799, 0.5163, 0.6880, 0.7437; supervised 0.1365, 0.1686, 0.3737, 0.6548; gain at 45 rows 0.348); job 1601534
-On legal128w, the gain is \vf{TBD} at \vf{27} rows, \vf{TBD} at \vf{45} rows, \vf{TBD} at \vf{270} rows, and \vf{0.018} at \vf{900} rows. % src: results/legal128w/v7_2/main/mixed-w46-std-L900.json (hybrid 0.4960, supervised 0.4783); L27, L45, L270 pending in job 1601533
+On legal128w, the gain is \vf{0.090} at \vf{27} rows and \vf{0.198} at \vf{45} rows, peaks at \vf{0.206} at \vf{90} rows, and falls to \vf{0.173} at \vf{270} rows and \vf{0.018} at \vf{900} rows. % src: results/legal128w/v7_2/main/mixed-w46-std-L{27,45,270,900}.json seeds.1.cells (hybrid 0.1483, 0.2571, 0.3878, 0.4960; supervised 0.0586, 0.0593, 0.2144, 0.4783); job 1601533
 A leak of one prompt is too small for either fit.
 At \vf{9} rows the hybrid fit scores \vf{0.195} on NQ, a gain of \vf{0.036}, and on the two legal datasets it stays at the level of its mismatched-prompt control, at \vf{0.021} and \vf{0.061}. % src: mixed-w46-std-L9.json of each dataset (NQ hybrid 0.1951, supervised 0.1590; legal128w hybrid 0.0207, supervised 0.0445, control 0.023; legal10w hybrid 0.0613, supervised 0.0814, control 0.027)
 At \vf{900} rows the supervised fit has risen to \vf{0.743} on NQ and \vf{0.655} on legal10w, and little remains for matching to add.
@@ -267,7 +267,7 @@ The setting was selected at \vf{90} rows, so the gain at \vf{900} rows describes
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch4/leak_size_three}
-\caption{PLACEHOLDER (three legal128w points pending). The gain from matching is largest at leaks of \vf{45} to \vf{90} rows and small at \vf{9} and \vf{900} rows.
+\caption{The gain from matching is largest at leaks of \vf{45} to \vf{90} rows and small at \vf{9} and \vf{900} rows.
 Word-F1 averaged over three decoders on the \vf{500} selection prompts, seed \vf{1}, for the supervised fit and the hybrid fit of the main comparison ($\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$); each leak holds the first nine rows of \vf{1} to \vf{100} prompts, and the number above each point is the gain.
 The dotted line is the hub reference.}
 \label{fig:attack:budget}
