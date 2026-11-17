@@ -273,6 +273,7 @@ The dotted line is the hub reference.}
 \label{fig:attack:budget}
 \end{figure}
 
+\todo{Appendix: this part stays in the chapter for now and moves to an appendix.}
 A larger leak also moves the best setting of the grid of Section~\ref{sec:attack:grid} (Figure~\ref{fig:attack:grid-size}).
 With one row from each of \vf{90} legal128w prompts, the best cell is $\alpha = 0.8$, $\tau = 2d$, at a word-F1 of \vf{0.341} against \vf{0.108} for the supervised fit. % src: results/legal128w/v7_2/main/mixed-oct_w5-grid-L90.json selection.winners.90 (0.3411); cells b90/a1/r1/L90-random (0.1084)
 With one row from each of \vf{864} prompts, the best cell is $\alpha = 0.95$, $\tau = d$, at \vf{0.659} against \vf{0.548}. % src: results/legal128w/v7_2/main/mixed-oct_w5-grid-L864.json selection.winners.864 (0.6594); cells b864/a1/r1/L864-random (0.5480)
@@ -313,6 +314,7 @@ The NQ leak takes whole prompts, so the two datasets differ in more than the dom
 
 \subsection{Components of the matching term}\label{sec:attack:components}
 
+\todo{Appendix: this part stays in the chapter for now and moves to an appendix.}
 The matching term was selected in sequential steps on NQ, and four steps each raise word-F1 at a leak of about \vf{92} rows.
 The squared-distance score adds \vf{0.043} over a cosine score, a supervision fraction of \vf{0.95} adds \vf{0.096} over one, a temperature of $2d$ adds \vf{0.110} over $d$, and a batch of \vf{2{,}048} adds \vf{0.092} over \vf{512}. % src: results/v7_2/main/mixed-v7_9-s{1,2,3}.json (score_effect, cell_minus_benchmark, axis_effect at budget 10), three seeds, 500 selection prompts
 
@@ -325,6 +327,7 @@ Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} un
 %% ------------------------------------------------------------------
 \section{The Training Objective and the Decoder's Predictions}\label{sec:attack:teacher}
 
+\todo{Appendix: this part stays in the chapter for now and moves to an appendix.}
 Both terms of the objective in Equation~\ref{eq:attack:loss} pull mapped states toward hub outputs.
 The mapped states then form the soft prompt of a frozen decoder, and the decoder reconstructs the prompt one token at a time.
 The objective therefore measures agreement with hub outputs, while reconstruction depends on the decoder's predictions.
@@ -391,6 +394,7 @@ Leak (rows) & Cross-entropy, before to after & KL divergence, before to after & 
 %% ------------------------------------------------------------------
 \section{Second-Round Rewriting}\label{sec:attack:rewriting}
 
+\todo{Appendix: this part stays in the chapter for now and moves to an appendix.}
 The three decoders yield reconstructions of differing quality (Section~\ref{sec:attack:main}), and a second round tests whether combining them improves word-F1 over their mean and over the best decoder.
 A language model receives the three reconstructions and rewrites them into one text.
 The experiment is exploratory, and no criterion preceded its runs.
