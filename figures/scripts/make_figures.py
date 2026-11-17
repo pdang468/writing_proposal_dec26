@@ -423,7 +423,7 @@ def leak_size_span9():
         xs, sup, hyb = [], [], []
         for size in sizes:
             path = ROOT / root / ("mixed-w46-std.json" if size == 90 else f"mixed-w46-std-L{size}.json")
-            if not path.is_file():
+            if not path.is_file() or json.loads(path.read_text()).get("status") != "complete":
                 missing += 1
                 ax.plot([size], [0.03], marker="o", ms=5, mfc="none", mec=INK2, mew=0.8, ls="none")
                 continue

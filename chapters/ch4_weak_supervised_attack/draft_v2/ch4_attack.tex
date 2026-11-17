@@ -252,19 +252,22 @@ The result covers \vf{22} blind maps from two objectives, one target model, and 
 
 \subsection{Size of the leak}\label{sec:attack:budget}
 
-Matching helps most where the leak is small (Figure~\ref{fig:attack:budget}).
-%% PLACEHOLDER: the five new leak sizes run as jobs w46_leak_{nq,legal128w,legal10w}; every \vf{TBD} below is filled from results/<dataset>/v7_2/main/mixed-w46-std-L{9,27,45,270,900}.json
+Matching helps most on leaks of \vf{27} to \vf{270} rows (Figure~\ref{fig:attack:budget}).
 The comparison repeats the main comparison at six leak sizes, the first nine rows of \vf{1}, \vf{3}, \vf{5}, \vf{10}, \vf{30}, and \vf{100} prompts, or \vf{9} to \vf{900} rows. % src: configs/w46_{nq,legal128w,legal10w}_std_L{9,27,45,270,900}.yaml; src/v7_2/anchors_linear.py span_start_pairs
 The setting stays at $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$, with one seed on the selection prompts.
 At \vf{90} rows the curve passes through the main comparison, where seed \vf{1} gains \vf{0.401} on NQ, \vf{0.206} on legal128w, and \vf{0.379} on legal10w. % src: results/{v7_2,legal128w/v7_2,legal10w/v7_2}/main/mixed-w46-std.json seeds.1.cells (hybrid 0.7679, 0.2993, 0.6040; supervised 0.3671, 0.0938, 0.2251)
-Below \vf{90} rows, the gain is \vf{TBD} at \vf{9} rows and \vf{TBD} at \vf{45} rows on NQ, \vf{TBD} and \vf{TBD} on legal128w, and \vf{TBD} and \vf{TBD} on legal10w. % src: pending
-Above \vf{90} rows, the supervised fit rises with every added row, and the gain at \vf{900} rows is \vf{TBD} on NQ, \vf{TBD} on legal128w, and \vf{TBD} on legal10w. % src: pending
+On NQ, the gain is \vf{0.354} at \vf{27} rows, peaks at \vf{0.418} at \vf{45} rows, and falls to \vf{0.270} at \vf{270} rows and \vf{0.089} at \vf{900} rows. % src: results/v7_2/main/mixed-w46-std-L{27,45,270,900}.json seeds.1.cells (hybrid 0.6093, 0.7217, 0.7956, 0.8323; supervised 0.2549, 0.3037, 0.5255, 0.7434); job 1601532
+On legal10w, the gain is \vf{0.243} at \vf{27} rows, peaks at \vf{0.379} at \vf{90} rows, and falls to \vf{0.314} at \vf{270} rows and \vf{0.089} at \vf{900} rows. % src: results/legal10w/v7_2/main/mixed-w46-std-L{27,45,270,900}.json (hybrid 0.3799, 0.5163, 0.6880, 0.7437; supervised 0.1365, 0.1686, 0.3737, 0.6548; gain at 45 rows 0.348); job 1601534
+On legal128w, the gain is \vf{TBD} at \vf{27} rows, \vf{TBD} at \vf{45} rows, \vf{TBD} at \vf{270} rows, and \vf{0.018} at \vf{900} rows. % src: results/legal128w/v7_2/main/mixed-w46-std-L900.json (hybrid 0.4960, supervised 0.4783); L27, L45, L270 pending in job 1601533
+A leak of one prompt is too small for either fit.
+At \vf{9} rows the hybrid fit scores \vf{0.195} on NQ, a gain of \vf{0.036}, and on the two legal datasets it stays at the level of its mismatched-prompt control, at \vf{0.021} and \vf{0.061}. % src: mixed-w46-std-L9.json of each dataset (NQ hybrid 0.1951, supervised 0.1590; legal128w hybrid 0.0207, supervised 0.0445, control 0.023; legal10w hybrid 0.0613, supervised 0.0814, control 0.027)
+At \vf{900} rows the supervised fit has risen to \vf{0.743} on NQ and \vf{0.655} on legal10w, and little remains for matching to add.
 The setting was selected at \vf{90} rows, so the gain at \vf{900} rows describes that setting and not the best hybrid fit for a leak of that size.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch4/leak_size_three}
-\caption{PLACEHOLDER. On all three datasets the gain from matching is largest at leaks of \vf{TBD} rows and smallest at \vf{TBD} rows.
+\caption{PLACEHOLDER (three legal128w points pending). The gain from matching is largest at leaks of \vf{45} to \vf{90} rows and small at \vf{9} and \vf{900} rows.
 Word-F1 averaged over three decoders on the \vf{500} selection prompts, seed \vf{1}, for the supervised fit and the hybrid fit of the main comparison ($\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$); each leak holds the first nine rows of \vf{1} to \vf{100} prompts, and the number above each point is the gain.
 The dotted line is the hub reference.}
 \label{fig:attack:budget}
@@ -292,11 +295,11 @@ The content of the rows matters as well.
 A leak of stop words, or of one repeated word, leaves the hybrid fit at the level of the supervised fit, at \vf{0.058} against \vf{0.056} and \vf{0.054} against \vf{0.057}. % src: mixed-oct_w5-s1-L90.json cells *L90-stop (0.0582, 0.0555), *L90-one_word (0.0535, 0.0568)
 The comparison rests on one seed and does not separate the number of prompts from the content of the particular prompts drawn.
 
-The size of the leak in rows therefore does not fix its value, and legal128w shows the difference at larger leaks.
+At larger leaks the number of prompts no longer separates the two fits on legal128w.
 Ten whole prompts supply \vf{856} rows, and the hybrid fit of the main comparison scores \vf{0.501} against \vf{0.487} for the supervised fit. % src: results/legal128w/v7_2/main/mixed-v8_7-s1.json seeds.1.cells b10/a0.9/sq/m0/t0.1297/r1/B8192 (0.5006), b10/a1/r1 (0.4869); budgets.10.anchor_counts.valid_aligned_pairs (856)
-Nine rows from each of \vf{100} prompts supply \vf{900} rows, and the two fits score \vf{TBD} and \vf{TBD}. % src: pending, results/legal128w/v7_2/main/mixed-w46-std-L900.json
-With \vf{30} and \vf{100} whole prompts, the supervised fit overtakes the hybrid fit, at \vf{0.731} against \vf{0.613} and \vf{0.813} against \vf{0.654}. % src: same file, b30 and b100 cells (0.7307, 0.6131; 0.8133, 0.6544); 2,569 and 8,612 rows
-The two kinds of leak differ in the number of prompts and in the position of the rows within a prompt, so the comparison records the difference and leaves its cause open.
+Nine rows from each of \vf{100} prompts supply \vf{900} rows, and the two fits score \vf{0.496} and \vf{0.478}. % src: results/legal128w/v7_2/main/mixed-w46-std-L900.json seeds.1.cells (0.4960, 0.4783)
+The gain is below \vf{0.02} under both leaks, so at this size the fixed setting, and not the spread of the rows over prompts, limits the hybrid fit.
+With \vf{30} and \vf{100} whole prompts, the supervised fit overtakes the hybrid fit, at \vf{0.731} against \vf{0.613} and \vf{0.813} against \vf{0.654}. % src: mixed-v8_7-s1.json, b30 and b100 cells (0.7307, 0.6131; 0.8133, 0.6544); 2,569 and 8,612 rows
 
 \begin{figure}[ht]
 \centering
