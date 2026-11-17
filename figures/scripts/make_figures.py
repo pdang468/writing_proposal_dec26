@@ -92,7 +92,7 @@ budget()
 
 CORPORA = [("NQ", "results/v7_2/main"), ("legal128w", "results/legal128w/v7_2/main")]
 # the main comparison also runs on legal10w (w46b); the grid search of legal10w is drawn once its job has finished
-MAIN = CORPORA + [("legal10w", "results/legal10w/v7_2/main")]
+MAIN = [CORPORA[0], ("legal10w", "results/legal10w/v7_2/main"), CORPORA[1]]  # panel order: NQ, legal10w, legal128w
 
 
 def load(rel):
