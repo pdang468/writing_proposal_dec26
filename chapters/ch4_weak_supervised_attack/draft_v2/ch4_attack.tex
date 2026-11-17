@@ -91,7 +91,7 @@ The term requires no correspondence between the hidden states of the target mode
 The temperature is expressed as a multiple of a scale $d$ measured on the hub alone.
 For each hub output, the gap separates its highest and second-highest scores against the other hub outputs of its batch.
 The scale $d$ is the median gap over \vf{100} batches of \vf{512} hub outputs. % src: src/v7_2/gap.py; results/*/v7_2/main/mixed-v7_9-s0.json gap
-The scale is \vf{0.0576} on NQ, \vf{0.0648} on legal128w, and \vf{0.0738} on legal10w. % src: results/v7_2/main/mixed-v7_9-s0.json gap.sqdist.median (0.05761); results/legal128w/v7_2/main/mixed-v7_9-s0.json (0.06485); results/legal10w/v7_2/main/mixed-v7_9-s0.json (0.07380)
+The scale is \vf{0.0576} on NQ, \vf{0.0738} on legal10w, and \vf{0.0648} on legal128w. % src: results/v7_2/main/mixed-v7_9-s0.json gap.sqdist.median (0.05761); results/legal10w/v7_2/main/mixed-v7_9-s0.json (0.07380); results/legal128w/v7_2/main/mixed-v7_9-s0.json (0.06485)
 
 \paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates, each on \vf{512} rows of the leak and $B$ elements from each unpaired pool. % src: configs/v7_9_s4.yaml (training); src/v7/training.py (lr_multiplier); results/v7_2/main/mixed-v7_9-s5.json setting (paired_batch_rows 512)
 The map after the last update is evaluated, without checkpoint selection.
@@ -105,8 +105,8 @@ Exact match and decoded examples are reported beside it to separate word overlap
 %% ------------------------------------------------------------------
 \section{Experimental Setup}\label{sec:attack:experiments}
 
-\paragraph{Datasets and pools.} The experiments run on the three datasets of Chapter~\ref{ch:hub}, NQ, legal128w, and legal10w, each with its own frozen hub.
-The main comparison and the leak-size comparison run on all three datasets, and the grid search and the other supporting experiments run on NQ, on legal128w, or on both.
+\paragraph{Datasets and pools.} The experiments run on the three datasets of Chapter~\ref{ch:hub}, NQ, legal10w, and legal128w, each with its own frozen hub.
+The grid search, the main comparison, and the leak-size comparison run on all three datasets, and the other supporting experiments run on NQ, on legal128w, or on both.
 The \vf{40{,}000} training prompts of a dataset are divided once, at random, into two halves of \vf{20{,}000}.
 One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. 
 A leak draws its prompts at random from all \vf{40{,}000} training prompts. 
@@ -114,8 +114,8 @@ A leak draws its prompts at random from all \vf{40{,}000} training prompts.
 \paragraph{The 90-row leak.} In the main experiment, the attacker obtains a leak of \vf{90} rows, the first nine rows of each of ten prompts.
 The leak exposes the datasets to different degrees.
 On NQ, a prompt averages nine words, so nine rows expose almost the entire prompt.
+On legal10w, a prompt holds about \vf{13} rows, so nine rows again expose most of it. % src: results/legal10w/v7_2/main/v8_6-summary.json rows[*] (1, 3, 5, 10, 30, 100 prompts: 12, 34, 55, 125, 390, 1305 rows; E +0.0055, +0.2723, +0.300, +0.332, +0.220, +0.051; job 1595870, seed 1)
 On legal128w, a prompt is a window of about \vf{68} words, or \vf{86} rows, cut from a longer document, so the same nine rows expose only its opening words. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6); results/legal128w/v7_2/main/v8_6-summary.json rows[*].pairs (8612 rows for 100 prompts)
-On legal10w, a prompt holds about \vf{13} rows, so nine rows expose most of it. % src: results/legal10w/v7_2/main/v8_6-summary.json rows[*] (1, 3, 5, 10, 30, 100 prompts: 12, 34, 55, 125, 390, 1305 rows; E +0.0055, +0.2723, +0.300, +0.332, +0.220, +0.051; job 1595870, seed 1)
 The attacker's knowledge is therefore fixed at \vf{90} rows on every dataset, while the exposed fraction of each leaked prompt differs.
 
 \paragraph{Score.} Evaluation follows Section~\ref{sec:hub:eval}.
@@ -140,8 +140,9 @@ The gain from matching depends on the supervision fraction and the temperature, 
 The grid runs on the \vf{90}-row leak, with seed \vf{1} and the \vf{500} selection prompts of each dataset. % src: results/v7_2/main/mixed-w46-grid.json; results/legal128w/v7_2/main/mixed-w46-grid.json; w46-selection.json
 The selection rule, written before the grid was run, takes the cell with the highest mean word-F1 over the two datasets. % src: w46/plan.md; w46-selection.json rule
 That cell is $\alpha = 0.9$, $\tau = 2d$, with a two-dataset mean of \vf{0.534}. % src: w46-selection.json best (0.5336)
-The cell is the best on NQ (\vf{0.768}) and close to the best on legal128w, \vf{0.299} against \vf{0.314} at $\alpha = 0.8$, $\tau = 2d$. % src: mixed-w46-grid.json seeds.1.cells (0.7679; legal128w 0.2993, 0.3144)
+The cell is the best on NQ, at \vf{0.768}. % src: results/v7_2/main/mixed-w46-grid.json seeds.1.cells (0.7679)
 On legal10w, a dataset outside the selection rule, the same cell is again the best, at \vf{0.604}. % src: results/legal10w/v7_2/main/mixed-w46-grid.json seeds.1.cells (a0.9, t0.1476: 0.6040; next a0.8, t0.1476: 0.580; supervised 0.2251); job 1600092
+On legal128w the cell is close to the best, \vf{0.299} against \vf{0.314} at $\alpha = 0.8$, $\tau = 2d$. % src: results/legal128w/v7_2/main/mixed-w46-grid.json seeds.1.cells (0.2993, 0.3144)
 
 All three datasets show the same dependence on temperature.
 For $\alpha \le 0.95$, word-F1 peaks at $\tau = 2d$ and falls on either side, and several cells at a low temperature score below the supervised fit.
@@ -160,12 +161,13 @@ The titles give the supervised fit on the same leak.}
 \subsection{The main comparison}\label{sec:attack:main}
 
 Unpaired matching more than doubles reconstruction word-F1 on all three datasets and meets the criterion of H2 on NQ and legal128w, the two datasets that the criterion names (Table~\ref{tab:attack:main}, Figure~\ref{fig:attack:standard}).
-On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit on NQ, and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds)
-The gain is \vf{0.411} on NQ, with an interval of \vf{0.408} to \vf{0.415}, and \vf{0.219} on legal128w, with an interval of \vf{0.215} to \vf{0.222}. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113)
-Both gains exceed the required \vf{0.10}, and both lower bounds exceed the required \vf{0.05}.
-The gain appears in every seed, at no less than \vf{0.402} on NQ and \vf{0.201} on legal128w. % src: same files, hybrid minus supervised per seed (0.4018, 0.4189, 0.4135; 0.2010, 0.2444, 0.2112)
+On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 on NQ rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit, a gain of \vf{0.411} with an interval of \vf{0.408} to \vf{0.415}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113)
 On legal10w, a dataset added after the criterion was written, word-F1 rises from \vf{0.192} to \vf{0.599}, a gain of \vf{0.407} with an interval of \vf{0.403} to \vf{0.412}. % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
-The legal10w gain is at least \vf{0.380} in every seed. % src: same files, hybrid minus supervised per seed (0.3799, 0.3963, 0.4461)
+On legal128w, word-F1 rises from \vf{0.102} to \vf{0.321}, a gain of \vf{0.219} with an interval of \vf{0.215} to \vf{0.222}. % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval as for NQ
+The gains on NQ and legal128w exceed the required \vf{0.10}, and both lower bounds exceed the required \vf{0.05}.
+The gain appears in every seed, at no less than \vf{0.402} on NQ, \vf{0.380} on legal10w, and \vf{0.201} on legal128w. % src: same files, hybrid minus supervised per seed (0.4018, 0.4189, 0.4135; 0.2010, 0.2444, 0.2112); legal10w (0.3799, 0.3963, 0.4461)
+%% BIG CHANGE: new sentence (2026-11-17), the reading that orders the datasets; it restates the three gains and the exposure stated in the setup.
+The two datasets of short prompts gain about \vf{0.41}, and legal128w, where nine rows expose only the opening words of a prompt, gains about half as much.
 Both fits receive the same leak, so the gain comes from the two unpaired pools.
 
 \begin{table}[H]
@@ -181,10 +183,10 @@ Dataset & Prompts & Supervised fit & Hybrid fit & Gain \\
 \midrule
 NQ & \vf{4{,}500} held-out & \vf{0.354} & \vf{0.766} & \vf{$+0.411$} [\vf{0.408}, \vf{0.415}] \\ % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.macro_f1 (0.3544, 0.7659)
 NQ & \vf{500} selection & \vf{0.352} & \vf{0.762} & \vf{$+0.410$} [\vf{0.401}, \vf{0.420}] \\ % src: results/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.3519, 0.7623, 0.4104 [0.4005, 0.4196])
-legal128w & \vf{4{,}500} held-out & \vf{0.102} & \vf{0.321} & \vf{$+0.219$} [\vf{0.215}, \vf{0.222}] \\ % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (0.1021, 0.3209)
-legal128w & \vf{500} selection & \vf{0.102} & \vf{0.320} & \vf{$+0.218$} [\vf{0.208}, \vf{0.227}] \\ % src: results/legal128w/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.1021, 0.3196, 0.2175 [0.2076, 0.2268])
 legal10w & \vf{4{,}500} held-out & \vf{0.192} & \vf{0.599} & \vf{$+0.407$} [\vf{0.403}, \vf{0.412}] \\ % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
 legal10w & \vf{500} selection & \vf{0.190} & \vf{0.602} & \vf{$+0.412$} [\vf{0.399}, \vf{0.425}] \\ % src: results/legal10w/v7_2/main/mixed-w46-std.json seeds.*.cells.*.final.macro_f1 (supervised 0.2251, 0.1958, 0.1489; hybrid 0.6040, 0.5947, 0.6060); seed_summary.budgets.90 (0.4116 [0.3990, 0.4251])
+legal128w & \vf{4{,}500} held-out & \vf{0.102} & \vf{0.321} & \vf{$+0.219$} [\vf{0.215}, \vf{0.222}] \\ % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (0.1021, 0.3209)
+legal128w & \vf{500} selection & \vf{0.102} & \vf{0.320} & \vf{$+0.218$} [\vf{0.208}, \vf{0.227}] \\ % src: results/legal128w/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.1021, 0.3196, 0.2175 [0.2076, 0.2268])
 \bottomrule
 \end{tabular}
 \end{table}
@@ -198,15 +200,15 @@ Word-F1 averaged over three decoders on the \vf{4{,}500} held-out prompts, with 
 \end{figure}
 
 \paragraph{Control and reference.} The hybrid scores depend on the prompt's own hidden states and remain below the hub reference.
-On the selection prompts, the hybrid fit scores \vf{0.762} against its mismatched-prompt control of \vf{0.110} on NQ, \vf{0.320} against \vf{0.073} on legal128w, and \vf{0.602} against \vf{0.069} on legal10w. % src: mixed-w46-std.json seeds.*.cells.*.wrong_memory.macro_f1 (means 0.1104, 0.0733; legal10w 0.0690 from 0.0739, 0.0612, 0.0720)
+On the selection prompts, the hybrid fit scores \vf{0.762} against its mismatched-prompt control of \vf{0.110} on NQ, \vf{0.602} against \vf{0.069} on legal10w, and \vf{0.320} against \vf{0.073} on legal128w. % src: mixed-w46-std.json seeds.*.cells.*.wrong_memory.macro_f1 (NQ 0.1104; legal10w 0.0690 from 0.0739, 0.0612, 0.0720; legal128w 0.0733)
 The hub references are \vf{0.946} on NQ and \vf{0.982} on each legal dataset.
 On legal128w the supervised fit, at \vf{0.102}, is close to its control of \vf{0.070}, so \vf{90} rows alone yield little beyond the control. % src: same file (0.0698)
 
 \paragraph{Exact match and decoders.} Exact match distinguishes the word-overlap gain from full-prompt recovery.
 Under the hybrid fit, exact match is \vf{0.21} on NQ and rounds to zero on legal128w. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl, field exact_match, three decoders and three seeds (Corpus A hybrid 0.2121: SmolLM 0.4153, OLMo 0.1676, Qwen 0.0534; supervised 0.0001; legal128w hybrid: SmolLM 0.0001, OLMo 0, Qwen 0)
 The three decoders also differ.
-The hybrid fit scores \vf{0.886} through SmolLM, \vf{0.762} through OLMo, and \vf{0.650} through Qwen on NQ, and \vf{0.430}, \vf{0.160}, and \vf{0.372} on legal128w. % src: w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (0.8859, 0.7622, 0.6495; 0.4303, 0.1602, 0.3722)
-On legal10w the three scores are \vf{0.655}, \vf{0.587}, and \vf{0.555}. % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (SmolLM 0.6554, OLMo 0.5866, Qwen 0.5553)
+The hybrid fit scores \vf{0.886} through SmolLM, \vf{0.762} through OLMo, and \vf{0.650} through Qwen on NQ. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (0.8859, 0.7622, 0.6495)
+On legal10w the three scores are \vf{0.655}, \vf{0.587}, and \vf{0.555}, and on legal128w they are \vf{0.430}, \vf{0.160}, and \vf{0.372}. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (SmolLM 0.6554, OLMo 0.5866, Qwen 0.5553; 0.4303, 0.1602, 0.3722)
 Section~\ref{sec:attack:rewriting} draws on that difference.
 
 \paragraph{Decoded examples.} The hybrid fit recovers content words that the supervised fit loses, as three held-out NQ prompts through the SmolLM decoder illustrate (Table~\ref{tab:attack:examples}).
@@ -255,12 +257,12 @@ The result covers \vf{22} blind maps from two objectives, one target model, and 
 Matching helps most on leaks of \vf{27} to \vf{270} rows (Figure~\ref{fig:attack:budget}).
 The comparison repeats the main comparison at six leak sizes, the first nine rows of \vf{1}, \vf{3}, \vf{5}, \vf{10}, \vf{30}, and \vf{100} prompts, or \vf{9} to \vf{900} rows. % src: configs/w46_{nq,legal128w,legal10w}_std_L{9,27,45,270,900}.yaml; src/v7_2/anchors_linear.py span_start_pairs
 The setting stays at $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$, with one seed on the selection prompts.
-At \vf{90} rows the curve passes through the main comparison, where seed \vf{1} gains \vf{0.401} on NQ, \vf{0.206} on legal128w, and \vf{0.379} on legal10w. % src: results/{v7_2,legal128w/v7_2,legal10w/v7_2}/main/mixed-w46-std.json seeds.1.cells (hybrid 0.7679, 0.2993, 0.6040; supervised 0.3671, 0.0938, 0.2251)
+At \vf{90} rows the curve passes through the main comparison, where seed \vf{1} gains \vf{0.401} on NQ, \vf{0.379} on legal10w, and \vf{0.206} on legal128w. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/mixed-w46-std.json seeds.1.cells (hybrid 0.7679, 0.6040, 0.2993; supervised 0.3671, 0.2251, 0.0938)
 On NQ, the gain is \vf{0.354} at \vf{27} rows, peaks at \vf{0.418} at \vf{45} rows, and falls to \vf{0.270} at \vf{270} rows and \vf{0.089} at \vf{900} rows. % src: results/v7_2/main/mixed-w46-std-L{27,45,270,900}.json seeds.1.cells (hybrid 0.6093, 0.7217, 0.7956, 0.8323; supervised 0.2549, 0.3037, 0.5255, 0.7434); job 1601532
 On legal10w, the gain is \vf{0.243} at \vf{27} rows, peaks at \vf{0.379} at \vf{90} rows, and falls to \vf{0.314} at \vf{270} rows and \vf{0.089} at \vf{900} rows. % src: results/legal10w/v7_2/main/mixed-w46-std-L{27,45,270,900}.json (hybrid 0.3799, 0.5163, 0.6880, 0.7437; supervised 0.1365, 0.1686, 0.3737, 0.6548; gain at 45 rows 0.348); job 1601534
 On legal128w, the gain is \vf{0.090} at \vf{27} rows and \vf{0.198} at \vf{45} rows, peaks at \vf{0.206} at \vf{90} rows, and falls to \vf{0.173} at \vf{270} rows and \vf{0.018} at \vf{900} rows. % src: results/legal128w/v7_2/main/mixed-w46-std-L{27,45,270,900}.json seeds.1.cells (hybrid 0.1483, 0.2571, 0.3878, 0.4960; supervised 0.0586, 0.0593, 0.2144, 0.4783); job 1601533
 A leak of one prompt is too small for either fit.
-At \vf{9} rows the hybrid fit scores \vf{0.195} on NQ, a gain of \vf{0.036}, and on the two legal datasets it stays at the level of its mismatched-prompt control, at \vf{0.021} and \vf{0.061}. % src: mixed-w46-std-L9.json of each dataset (NQ hybrid 0.1951, supervised 0.1590; legal128w hybrid 0.0207, supervised 0.0445, control 0.023; legal10w hybrid 0.0613, supervised 0.0814, control 0.027)
+At \vf{9} rows the hybrid fit scores \vf{0.195} on NQ, a gain of \vf{0.036}, and on the two legal datasets it stays at the level of its mismatched-prompt control, at \vf{0.061} on legal10w and \vf{0.021} on legal128w. % src: mixed-w46-std-L9.json of each dataset (NQ hybrid 0.1951, supervised 0.1590; legal10w hybrid 0.0613, supervised 0.0814, control 0.027; legal128w hybrid 0.0207, supervised 0.0445, control 0.023)
 At \vf{900} rows the supervised fit has risen to \vf{0.743} on NQ and \vf{0.655} on legal10w, and little remains for matching to add.
 The setting was selected at \vf{90} rows, and the grid below tests it at \vf{900} rows.
 
@@ -294,6 +296,8 @@ The titles give the supervised fit on the same leak.}
 \subsection{Composition of the leak}\label{sec:attack:leak}
 
 At a fixed number of rows, a leak spread over more prompts yields a higher word-F1 than a leak drawn from one or two prompts (Figure~\ref{fig:attack:shape}).
+%% BIG CHANGE: new sentence (2026-11-17), why the composition comparison sits on legal128w.
+The comparison runs on legal128w, the one dataset whose prompts are long enough to vary the rows per prompt at a fixed number of rows.
 On legal128w, the hybrid fit scores \vf{0.321} with one row from each of \vf{90} prompts, \vf{0.304} with nine consecutive rows from each of ten prompts, and \vf{0.178} with \vf{90} rows from two prompts. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json (L90-random 0.3207); mixed-oct_w5-s1-L90-ext2.json (L90-span9 0.3039); mixed-oct_w5b-L-prefix.json (L90-prefix 0.1782)
 The content of the rows matters as well.
 A leak of stop words, or of one repeated word, leaves the hybrid fit at the level of the supervised fit, at \vf{0.058} against \vf{0.056} and \vf{0.054} against \vf{0.057}. % src: mixed-oct_w5-s1-L90.json cells *L90-stop (0.0582, 0.0555), *L90-one_word (0.0535, 0.0568)
@@ -337,8 +341,6 @@ The objective therefore measures agreement with hub outputs, while reconstructio
 
 To examine how the decoder's predictions relate to the reconstruction score, the same decoder runs twice on each prompt.
 The reference run receives a soft prompt from the hub outputs of OLMo, and the mapped-state run receives a soft prompt from the mapped states of the target model.
-Both runs see the true previous tokens, a setting called teacher forcing, and give a probability to every possible next token.
-A change in the predictions between the two runs therefore comes from replacing hub outputs with mapped states.
 Both runs receive the true previous tokens, a setting called teacher forcing, and assign a probability to every candidate next token.
 The comparison therefore shows how the decoder's predictions change when mapped states replace hub outputs.
 
@@ -431,9 +433,9 @@ Word-F1 in this section is computed on lower-cased words without edge punctuatio
 Condition & Mean of three & SmolLM alone & After rewriting & Gain \\
 \midrule
 NQ, \vf{92} rows & \vf{0.727} & \vf{0.854} & \vf{0.861} & \vf{$+0.134$} [\vf{0.124}, \vf{0.145}] \\ % src: attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json table."hybrid rung B".word_f1 (0.7271, 0.8610, +0.1339 [0.1237, 0.1449]); SmolLM alone recomputed from the per-prompt records (0.8539)
+legal10w, \vf{90} rows & \vf{0.627} & \vf{0.684} & \vf{0.745} & \vf{$+0.117$} [\vf{0.104}, \vf{0.130}] \\ % src: results/legal10w/v7_2/main/framework/attacker/attacker-b90-a0.9-sq-m0-t0.1476-r1-B8192-L90-span9-s1-haiku.json table."hybrid rung B".word_f1 (0.6273, 0.7446, +0.1173 [0.1041, 0.1303]); SmolLM alone recomputed (0.6839); run 2026-11-17, 4,500 calls
 legal128w, \vf{856} rows & \vf{0.539} & \vf{0.779} & \vf{0.802} & \vf{$+0.263$} [\vf{0.252}, \vf{0.273}] \\ % src: legal128w attacker-b10-...-haiku.json (0.5393, 0.8020, +0.2627 [0.2522, 0.2729]); SmolLM alone recomputed (0.7793)
 legal128w, \vf{8{,}612} rows & \vf{0.772} & \vf{0.890} & \vf{0.896} & \vf{$+0.124$} [\vf{0.115}, \vf{0.135}] \\ % src: legal128w attacker-b100-...-haiku.json (0.7721, 0.8963, +0.1242 [0.1145, 0.1349]); SmolLM alone recomputed (0.8897)
-legal10w, \vf{90} rows & \vf{0.627} & \vf{0.684} & \vf{0.745} & \vf{$+0.117$} [\vf{0.104}, \vf{0.130}] \\ % src: results/legal10w/v7_2/main/framework/attacker/attacker-b90-a0.9-sq-m0-t0.1476-r1-B8192-L90-span9-s1-haiku.json table."hybrid rung B".word_f1 (0.6273, 0.7446, +0.1173 [0.1041, 0.1303]); SmolLM alone recomputed (0.6839); run 2026-11-17, 4,500 calls
 \bottomrule
 \end{tabular}
 \end{table}
@@ -446,7 +448,7 @@ A confirmatory test requires a paired interval for the gain over the best decode
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
 A target model outside hub training connects to the hub through one affine map, and unpaired matching improves the reconstruction obtained from a small supervised leak.
-With \vf{90} leaked rows, word-F1 on held-out prompts rises from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.102} to \vf{0.321} on legal128w, and from \vf{0.192} to \vf{0.599} on legal10w. % src: results/{v7_2,legal128w/v7_2,legal10w/v7_2}/main/w46-confirmation-s{1,2,3}.json
+With \vf{90} leaked rows, word-F1 on held-out prompts rises from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.192} to \vf{0.599} on legal10w, and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/w46-confirmation-s{1,2,3}.json
 The gains on NQ and legal128w, the two datasets that H2 names, meet its criterion.
 
 The attack trains only an affine map, and the hub and its decoders stay frozen.
@@ -455,7 +457,8 @@ The gain from matching therefore suggests that the hidden states of the target m
 The Platonic Representation Hypothesis predicts this similarity between models, here for a target model that took no part in hub training.
 
 Three findings delimit the result.
-The gain is largest at small leaks and shrinks as the leak grows, to \vf{0.076} at \vf{986} rows on NQ.
+%% BIG CHANGE: claim corrected to the nine-row leak-size comparison (was: largest at small leaks, 0.076 at 986 rows on NQ).
+The gain peaks at leaks of \vf{45} to \vf{90} rows and shrinks as the leak grows, to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w, seed 1 (0.0889, 0.0889)
 The gain holds only within a range of temperatures.
 Without a leak, the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
