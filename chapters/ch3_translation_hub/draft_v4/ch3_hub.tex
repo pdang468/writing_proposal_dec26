@@ -121,7 +121,7 @@ A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002
 
 \paragraph{Free-running decoding.} H1 is evaluated under free-running decoding, because under teacher forcing the ground-truth prefix carries information about the next token.
 Each decoder conditions on the soft prompt and on its own generated prefix; greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap.
-The cap is the length of the soft prompt plus \vf{32} tokens on the legal datasets. % TODO(author): state the cap on Corpus A
+The cap is the length of the soft prompt plus \vf{32} tokens on the legal datasets. % TODO(author): state the cap on NQ
 
 \paragraph{Metrics.} Two metrics compare the reconstruction with the source prompt.
 Word-F1 is the harmonic mean of word precision and recall over word multisets, averaged over prompts.
@@ -140,7 +140,7 @@ All scores in this chapter are computed on the validation split, which also sele
 
 \paragraph{Criteria for H1.} One score summarizes a hub: mean cross-model word-F1, the free-running word-F1 averaged over the six cross-model directions on the validation split.
 A dataset fails H1 if that mean falls below \vf{0.90} or if the mismatched-prompt control on the same prompts reaches \vf{0.20}.
-Both thresholds come from the evaluation plan of the legal hubs and were applied to NQ retrospectively. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); no threshold precedes the Corpus A run
+Both thresholds come from the evaluation plan of the legal hubs and were applied to NQ retrospectively. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); no threshold precedes the NQ run
 
 %% ------------------------------------------------------------------
 \section{Results on Question Prompts}\label{sec:hub:results}\label{sec:hub:translation}

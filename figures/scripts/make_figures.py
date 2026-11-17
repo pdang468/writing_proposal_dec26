@@ -403,7 +403,7 @@ def leak_size_span9():
         ax.plot(xs, hyb, color=HYBRID, marker="s", lw=1.6, ms=4.5, markeredgecolor="white", markeredgewidth=0.6, label="hybrid fit")
         for x, s_, h in zip(xs, sup, hyb):
             ax.annotate(f"{h - s_:+.2f}", (x, max(h, s_)), xytext=(0, 5), textcoords="offset points", ha="center", fontsize=7.5, color=INK2)
-        g2 = (json.loads((ROOT / "results/v7_2/main/factorial.json").read_text())["controls"]["true_olmo_code"]["macro_f1"] if name == "NQ"
+        g2 = (json.loads((ROOT / "results/v7_2/main/hub-dev-eval-m32.json").read_text())["olmo_source_mean"]["hub"] if name == "NQ"  # cap rows+32, as the main comparison
               else load(f"{root}/mixed-v7_9-s0.json")["setting"]["corpus"]["g2"]["macro_f1"])
         ax.axhline(g2, color=INK2, lw=0.8, ls=":")
         ax.annotate(f"hub reference {g2:.3f}", (sizes[0], g2), xytext=(0, 3), textcoords="offset points", fontsize=7.5, color=INK2)
