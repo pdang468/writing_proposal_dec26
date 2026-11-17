@@ -17,25 +17,25 @@ With a leak of \vf{90} rows, about ninety words, the matching term raises mean w
 %% ------------------------------------------------------------------
 \section{Threat Model}\label{sec:attack:threat}
 
-The attacker is the honest-but-curious server of a split inference system.
+The adversary is the honest-but-curious server of a split inference system.
 The server follows the protocol and receives the hidden states that a client transmits to the cloud.
-The attacker's goal is to reconstruct a prompt from its sequence of hidden states.
-The attacker cannot query the target model, and for the prompt under attack it holds neither the text nor the token identities.
+The adversary's goal is to reconstruct a prompt from its sequence of hidden states.
+The adversary cannot query the target model, and for the prompt under attack it holds neither the text nor the token identities.
 In the experiments, the target model is Pythia-1B, observed at block \vf{12} (width \vf{2048}) with one vector per token. % src: configs/v7.yaml (unknowns.pythia: d3_block 12, width 2048)
 
-Four resources are available to the attacker.
+Four resources are available to the adversary.
 \begin{itemize}
 \item \textbf{The hub.} The frozen hub of Chapter~\ref{ch:hub} with its source adapters, its projectors, and its three decoders (Qwen, OLMo, SmolLM).
 \item \textbf{Two unpaired pools.} The first pool holds hidden states of the target model for prompts of the domain under attack, without their text.
 The second pool holds hub outputs of text from the same domain, computed by OLMo and its source adapter.
 No prompt of one pool is matched to a prompt of the other.
-\item \textbf{A leak.} A small set of prompts for which the attacker holds both the text and the target model's hidden states.
+\item \textbf{A leak.} A small set of prompts for which the adversary holds both the text and the target model's hidden states.
 \item \textbf{The tokenizer of the target model}, applied to the leaked prompts only.
 \end{itemize}
 
 \paragraph{Rows.} OLMo turns the leak into paired data.
-For each leaked prompt, the attacker runs OLMo on the text and obtains the hub outputs of that prompt. % src: src/v6_4/pairs.py (build_pairs)
-The target model and OLMo split the text into different tokens, so the attacker groups their tokens by shared character boundaries, as in the token groups of Section~\ref{sec:hub:training}.
+For each leaked prompt, the adversary runs OLMo on the text and obtains the hub outputs of that prompt. % src: src/v6_4/pairs.py (build_pairs)
+The target model and OLMo split the text into different tokens, so the adversary groups their tokens by shared character boundaries, as in the token groups of Section~\ref{sec:hub:training}.
 Each group forms a row, a pair of vectors for one short span of text.
 The pair holds the average of the target model's hidden states and the average of the hub outputs, both weighted by character coverage and not normalized to unit length. % src: src/v6_4/pairs.py
 A row covers about one word, so an NQ prompt of nine words yields about nine rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
@@ -111,12 +111,12 @@ The \vf{40{,}000} training prompts of a dataset are divided once, at random, int
 One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. 
 A leak draws its prompts at random from all \vf{40{,}000} training prompts. 
 
-\paragraph{The 90-row leak.} In the main experiment, the attacker obtains a leak of \vf{90} rows, the first nine rows of each of ten prompts.
+\paragraph{The 90-row leak.} In the main experiment, the adversary obtains a leak of \vf{90} rows, the first nine rows of each of ten prompts.
 The leak exposes the datasets to different degrees.
 On NQ, a prompt averages nine words, so nine rows expose almost the entire prompt.
 On legal10w, a prompt holds about \vf{13} rows, so nine rows again expose most of it. % src: results/legal10w/v7_2/main/v8_6-summary.json rows[*] (1, 3, 5, 10, 30, 100 prompts: 12, 34, 55, 125, 390, 1305 rows; E +0.0055, +0.2723, +0.300, +0.332, +0.220, +0.051; job 1595870, seed 1)
 On legal128w, a prompt is a window of about \vf{68} words, or \vf{86} rows, cut from a longer document, so the same nine rows expose only its opening words. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6); results/legal128w/v7_2/main/v8_6-summary.json rows[*].pairs (8612 rows for 100 prompts)
-The attacker's knowledge is therefore fixed at \vf{90} rows on every dataset, while the exposed fraction of each leaked prompt differs.
+The adversary's knowledge is therefore fixed at \vf{90} rows on every dataset, while the exposed fraction of each leaked prompt differs.
 
 \paragraph{Score.} Evaluation follows Section~\ref{sec:hub:eval}.
 Each of the three decoders generates greedily from the projected output of the map, up to the length of the soft prompt plus \vf{32} tokens in the main comparison.
@@ -484,4 +484,4 @@ At a leak of \vf{856} rows on legal128w, rewriting raises entity recall from \vf
 \item \textbf{Models and layer.} The results cover one block of two target models of about one billion parameters and three hub models, without a defense or a deployed system.
 \end{itemize}
 
-The experiments quantify reconstruction under the stated attacker resources, and an information-theoretic account remains future work (Chapter~\ref{ch:future}).
+The experiments quantify reconstruction under the stated adversary resources, and an information-theoretic account remains future work (Chapter~\ref{ch:future}).
