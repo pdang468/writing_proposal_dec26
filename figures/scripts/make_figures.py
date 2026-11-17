@@ -99,13 +99,14 @@ def load(rel):
     return json.loads((ROOT / rel).read_text())
 
 
-def grid():
-    """Hybrid word-F1 over supervision fraction and temperature, seed 1, 500 selection prompts."""
+def grid(rows=90, out="ch4/grid_search"):
+    """Hybrid word-F1 over supervision fraction and temperature, seed 1, 500 selection prompts.
+    Solid outline: the setting of the main comparison. Dashed outline (grids other than 90 rows): the best cell when it differs."""
     alphas = [0.8, 0.9, 0.95, 0.99]
     mults = [0.25, 0.5, 1, 2, 4]
     fig, axes = plt.subplots(1, 3, figsize=(9.6, 2.7))
     for ax, (name, root) in zip(axes, MAIN):
-        d = load(f"{root}/mixed-w46-grid.json")
+        d = load(f"{root}/mixed-w46-grid{'' if rows == 90 else f'-L{rows}'}.json")
         cells = d["seeds"]["1"]["cells"]
         taus = d["setting"]["tau_grid"]
         assert len(taus) == len(mults)
@@ -113,11 +114,11 @@ def grid():
         for a in alphas:
             row = []
             for t in taus:
-                keys = [k for k in cells if k.startswith(f"b90/a{a:g}/sq/") and f"/t{t:g}/" in k]
+                keys = [k for k in cells if k.startswith(f"b{rows}/a{a:g}/sq/") and f"/t{t:g}/" in k]
                 assert len(keys) == 1, (a, t, keys)
                 row.append(cells[keys[0]]["final"]["macro_f1"])
             z.append(row)
-        sup = cells["b90/a1/r1/L90-span9"]["final"]["macro_f1"]
+        sup = cells[f"b{rows}/a1/r1/L{rows}-span9"]["final"]["macro_f1"]
         hi = max(max(r) for r in z)
         ax.imshow(z, cmap="Blues", vmin=0, vmax=hi, aspect="auto")
         for i, row in enumerate(z):
@@ -126,6 +127,9 @@ def grid():
                         color="white" if v > 0.6 * hi else INK)
         i, j = alphas.index(0.9), mults.index(2)
         ax.add_patch(plt.Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False, edgecolor=ORANGE, lw=1.8))
+        _, bi, bj = max((v, i_, j_) for i_, r in enumerate(z) for j_, v in enumerate(r))
+        if rows != 90 and (bi, bj) != (i, j):
+            ax.add_patch(plt.Rectangle((bj - 0.5, bi - 0.5), 1, 1, fill=False, edgecolor=ORANGE, lw=1.4, ls="--"))
         ax.set_xticks(range(len(mults)))
         ax.set_xticklabels([f"{m:g}d" for m in mults])
         ax.set_yticks(range(len(alphas)))
@@ -138,7 +142,7 @@ def grid():
         print(name, "supervised", round(sup, 4), [[round(v, 4) for v in r] for r in z])
     axes[0].set_ylabel("supervision fraction")
     fig.tight_layout()
-    save(fig, "ch4/grid_search")
+    save(fig, out)
 
 
 def standard():
@@ -301,43 +305,8 @@ def leak_shape():
 
 
 def grid_leak_size():
-    """Hybrid word-F1 over supervision fraction and temperature at 90 and 864 leaked rows, legal128w, seed 1."""
-    alphas = [0.8, 0.9, 0.95, 0.97, 0.99]
-    mults = [0.1, 0.25, 0.5, 1, 2, 4]
-    fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.9))
-    for ax, rows in zip(axes, (90, 864)):
-        d = load(f"results/legal128w/v7_2/main/mixed-oct_w5-grid-L{rows}.json")
-        cells = d["seeds"]["1"]["cells"]
-        taus = d["setting"]["tau_grid"]
-        assert len(taus) == len(mults)
-        z = []
-        for a in alphas:
-            row = []
-            for t in taus:
-                keys = [k for k in cells if k.startswith(f"b{rows}/a{a:g}/sq/") and f"/t{t:g}/" in k]
-                assert len(keys) == 1, (a, t, keys)
-                row.append(cells[keys[0]]["final"]["macro_f1"])
-            z.append(row)
-        sup = cells[f"b{rows}/a1/r1/L{rows}-random"]["final"]["macro_f1"]
-        ax.imshow(z, cmap="Blues", vmin=0, vmax=0.7, aspect="auto")
-        best = max((v, i, j) for i, r in enumerate(z) for j, v in enumerate(r))
-        for i, row in enumerate(z):
-            for j, v in enumerate(row):
-                ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=7.5, color="white" if v > 0.42 else INK)
-        ax.add_patch(plt.Rectangle((best[2] - 0.5, best[1] - 0.5), 1, 1, fill=False, edgecolor=ORANGE, lw=1.8))
-        ax.set_xticks(range(len(mults)))
-        ax.set_xticklabels([f"{m:g}d" for m in mults])
-        ax.set_yticks(range(len(alphas)))
-        ax.set_yticklabels([f"{a:g}" for a in alphas])
-        ax.set_xlabel("temperature")
-        ax.set_title(f"{rows} leaked rows (supervised fit {sup:.2f})", fontsize=9)
-        for side in ("left", "bottom"):
-            ax.spines[side].set_visible(False)
-        ax.tick_params(length=0)
-        print(rows, "supervised", round(sup, 4), "best", round(best[0], 4), alphas[best[1]], mults[best[2]])
-    axes[0].set_ylabel("supervision fraction")
-    fig.tight_layout()
-    save(fig, "ch4/grid_leak_size")
+    """The grid of grid() at a leak of 900 rows (nine rows from each of 100 prompts), seed 1, 500 selection prompts."""
+    grid(rows=900, out="ch4/grid_leak_size")
 
 
 def budget_legal(corpus="legal128w", out="ch4/budget_curve_legal"):

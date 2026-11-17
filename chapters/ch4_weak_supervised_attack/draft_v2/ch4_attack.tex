@@ -262,7 +262,7 @@ On legal128w, the gain is \vf{0.090} at \vf{27} rows and \vf{0.198} at \vf{45} r
 A leak of one prompt is too small for either fit.
 At \vf{9} rows the hybrid fit scores \vf{0.195} on NQ, a gain of \vf{0.036}, and on the two legal datasets it stays at the level of its mismatched-prompt control, at \vf{0.021} and \vf{0.061}. % src: mixed-w46-std-L9.json of each dataset (NQ hybrid 0.1951, supervised 0.1590; legal128w hybrid 0.0207, supervised 0.0445, control 0.023; legal10w hybrid 0.0613, supervised 0.0814, control 0.027)
 At \vf{900} rows the supervised fit has risen to \vf{0.743} on NQ and \vf{0.655} on legal10w, and little remains for matching to add.
-The setting was selected at \vf{90} rows, so the gain at \vf{900} rows describes that setting and not the best hybrid fit for a leak of that size.
+The setting was selected at \vf{90} rows, and the grid below tests it at \vf{900} rows.
 
 \begin{figure}[ht]
 \centering
@@ -274,16 +274,19 @@ The dotted line is the hub reference.}
 \end{figure}
 
 \todo{Appendix: this part stays in the chapter for now and moves to an appendix.}
-A larger leak also moves the best setting of the grid of Section~\ref{sec:attack:grid} (Figure~\ref{fig:attack:grid-size}).
-With one row from each of \vf{90} legal128w prompts, the best cell is $\alpha = 0.8$, $\tau = 2d$, at a word-F1 of \vf{0.341} against \vf{0.108} for the supervised fit. % src: results/legal128w/v7_2/main/mixed-oct_w5-grid-L90.json selection.winners.90 (0.3411); cells b90/a1/r1/L90-random (0.1084)
-With one row from each of \vf{864} prompts, the best cell is $\alpha = 0.95$, $\tau = d$, at \vf{0.659} against \vf{0.548}. % src: results/legal128w/v7_2/main/mixed-oct_w5-grid-L864.json selection.winners.864 (0.6594); cells b864/a1/r1/L864-random (0.5480)
-The larger leak is also less sensitive to the setting, since every cell with $\alpha \ge 0.9$ and $\tau \ge 0.5d$ lies between \vf{0.46} and \vf{0.66}. % src: same file, seeds.1.cells (0.4620 to 0.6594)
+The setting of the main comparison stays at or near the best cell at \vf{900} rows on the two datasets of short prompts (Figure~\ref{fig:attack:grid-size}).
+The grid of Section~\ref{sec:attack:grid} is repeated on the leak of nine rows from each of \vf{100} prompts, with one seed on the selection prompts. % src: configs/w46_{nq,legal128w,legal10w}_grid_L900.yaml; jobs 1601643, 1601644, 1601645
+On NQ the setting remains the best cell, at \vf{0.832} against \vf{0.743} for the supervised fit. % src: results/v7_2/main/mixed-w46-grid-L900.json seeds.1.cells (0.8323; b900/a1 0.7434)
+On legal10w the best cell lowers the temperature to $\tau = d$ and scores \vf{0.759} against \vf{0.744} at the setting. % src: results/legal10w/v7_2/main/mixed-w46-grid-L900.json seeds.1.cells (a0.9 t0.0738 0.7594; a0.9 t0.1476 0.7437; b900/a1 0.6548)
+The small gain at \vf{900} rows on these two datasets therefore belongs to the leak and not to the setting.
+On legal128w the best cell moves to $\alpha = 0.95$, $\tau = d$, and scores \vf{0.596} against \vf{0.496} at the setting, a gain of \vf{0.118} over the supervised fit in place of \vf{0.018}. % src: results/legal128w/v7_2/main/mixed-w46-grid-L900.json seeds.1.cells (a0.95 t0.06485 0.5963; a0.9 t0.1297 0.4960; b900/a1 0.4783)
+The best cell is chosen on the prompts that score it, so its margin over the setting is an upper estimate.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{ch4/grid_leak_size}
-\caption{A larger leak moves the best cell toward a higher supervision fraction and a lower temperature (outlined), and flattens the grid.
-Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns) on legal128w, for leaks of one row from each of \vf{90} or \vf{864} prompts, seed \vf{1}, \vf{500} selection prompts, $B = 8{,}192$.
+\includegraphics[width=\textwidth]{ch4/grid_leak_size}
+\caption{At \vf{900} leaked rows the setting of the main comparison (solid outline) stays the best cell on NQ and within \vf{0.02} of it on legal10w, and on legal128w the best cell (dashed outline) moves to a higher supervision fraction and a lower temperature.
+Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns), for a leak of nine rows from each of \vf{100} prompts, seed \vf{1}, \vf{500} selection prompts, $B = 8{,}192$.
 The titles give the supervised fit on the same leak.}
 \label{fig:attack:grid-size}
 \end{figure}
@@ -299,7 +302,7 @@ The comparison rests on one seed and does not separate the number of prompts fro
 At larger leaks the number of prompts no longer separates the two fits on legal128w.
 Ten whole prompts supply \vf{856} rows, and the hybrid fit of the main comparison scores \vf{0.501} against \vf{0.487} for the supervised fit. % src: results/legal128w/v7_2/main/mixed-v8_7-s1.json seeds.1.cells b10/a0.9/sq/m0/t0.1297/r1/B8192 (0.5006), b10/a1/r1 (0.4869); budgets.10.anchor_counts.valid_aligned_pairs (856)
 Nine rows from each of \vf{100} prompts supply \vf{900} rows, and the two fits score \vf{0.496} and \vf{0.478}. % src: results/legal128w/v7_2/main/mixed-w46-std-L900.json seeds.1.cells (0.4960, 0.4783)
-The gain is below \vf{0.02} under both leaks, so at this size the fixed setting, and not the spread of the rows over prompts, limits the hybrid fit.
+The gain is below \vf{0.02} under both leaks, so at this size the spread of the rows over prompts does not limit the hybrid fit; the setting does, since the best cell of Figure~\ref{fig:attack:grid-size} gains \vf{0.118} on the nine-row leak.
 With \vf{30} and \vf{100} whole prompts, the supervised fit overtakes the hybrid fit, at \vf{0.731} against \vf{0.613} and \vf{0.813} against \vf{0.654}. % src: mixed-v8_7-s1.json, b30 and b100 cells (0.7307, 0.6131; 0.8133, 0.6544); 2,569 and 8,612 rows
 
 \begin{figure}[ht]
