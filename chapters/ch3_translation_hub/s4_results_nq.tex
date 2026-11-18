@@ -1,0 +1,45 @@
+\section{Results on Question Prompts}\label{sec:hub:results}\label{sec:hub:translation}
+
+Cross-model reconstruction on NQ meets both criteria for H1.
+On the \vf{5{,}000} validation prompts, cross-model word-F1 averages \vf{0.945}, against \vf{0.120} under the mismatched-prompt control; exact match averages \vf{0.71} and is zero under the control. % src: results/v6_3/hpc-final/inversion.json cross_mean (hub 0.9445, exact 0.7116; shuffled 0.1203, exact 0.0)
+The gap above the mismatched-prompt control shows that the reconstruction depends on the prompt's own hub outputs.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.62\textwidth]{ch3/direction_recovery_nq}
+\caption{The OLMo and SmolLM decoders reconstruct every source above 0.96 word-F1; the Qwen decoder reaches 0.84 to 0.88.
+Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} NQ validation prompts; diagonal cells are self-reconstruction.
+The mismatched-prompt control scores \vf{0.120} to \vf{0.121} in every direction.
+One hub seed.}
+\label{fig:hub:directions}
+\end{figure}
+
+The mean hides one weaker decoder (Figure~\ref{fig:hub:directions}).
+The four cross-model directions into OLMo and SmolLM score \vf{0.966} to \vf{0.990}; the two into Qwen score \vf{0.881} and \vf{0.874}, below the \vf{0.90} required of the mean. % src: results/v6_3/hpc-final/inversion.json directions
+
+Table~\ref{tab:hub:examples} shows reconstructions from OLMo $\to$ Qwen. % src: results/v6_3/hpc-final/inversion-records.jsonl, olmo->qwen hub arm
+
+\begin{table}[H]
+\caption{At an intermediate score one word changes; at a low score the names are lost.
+Reconstructions from OLMo $\to$ Qwen on NQ validation prompts, selected at high, intermediate, and low word-F1; the final row is generated under the mismatched-prompt control and scored against the original prompt.
+Decoded words that match the true prompt are green; the others are orange and bold.}
+\label{tab:hub:examples}
+\centering
+\small
+\begin{tabular}{@{}p{0.27\textwidth}p{0.68\textwidth}@{}}
+\toprule
+True prompt & who played uncle in only fools and horses \\
+Decoded, word-F1 \vf{1.00} & \hit{who played uncle in only fools and horses} \\
+\midrule
+True prompt & who has sang most songs in the world \\
+Decoded, word-F1 \vf{0.88} & \hit{who has} \miss{sung} \hit{most songs in the world} \\
+\midrule
+True prompt & is floral park in queens or long island \\
+Decoded, word-F1 \vf{0.50} & \hit{is} \miss{flower} \hit{park in} \miss{king} \hit{or} \miss{queen parks} \\
+\midrule
+True prompt & who played uncle in only fools and horses \\
+Mismatched prompt, word-F1 \vf{0.25} & \hit{who} \miss{plays the girl jinx} \hit{in} \miss{suicide squad} \\
+\bottomrule
+\end{tabular}
+\end{table}
+

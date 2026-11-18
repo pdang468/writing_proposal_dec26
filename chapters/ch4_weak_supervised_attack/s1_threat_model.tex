@@ -1,0 +1,27 @@
+\section{Threat Model}\label{sec:attack:threat}
+
+The adversary is the honest-but-curious server of a split inference system.
+The server follows the protocol and receives the hidden states that a client transmits to the cloud.
+The adversary's goal is to reconstruct a prompt from its sequence of hidden states.
+The adversary cannot query the target model, and for the prompt under attack it holds neither the text nor the token identities.
+In the experiments, the target model is Pythia-1B, observed at block \vf{12} (width \vf{2048}) with one vector per token. % src: configs/v7.yaml (unknowns.pythia: d3_block 12, width 2048)
+
+Four resources are available to the adversary.
+\begin{itemize}
+\item \textbf{The hub.} The frozen hub of Chapter~\ref{ch:hub} with its source adapters, its projectors, and its three decoders (Qwen, OLMo, SmolLM).
+\item \textbf{Two unpaired pools.} The first pool holds hidden states of the target model for prompts of the domain under attack, without their text.
+The second pool holds hub outputs of text from the same domain, computed by OLMo and its source adapter.
+No prompt of one pool is matched to a prompt of the other.
+\item \textbf{A leak.} A small set of short text spans for which the adversary holds both the text and the target model's hidden states.
+The standard leak holds \vf{90} rows, the first nine rows of each of ten prompts, and the adversary holds nothing else of those prompts.
+\item \textbf{The tokenizer of the target model}, applied to the leaked prompts only.
+\end{itemize}
+
+\paragraph{Rows.} OLMo turns the leak into paired data.
+For each leaked span, the adversary runs OLMo on the text and obtains the hub outputs of that span. % src: src/v6_4/pairs.py (build_pairs)
+The target model and OLMo split the text into different tokens, so the adversary groups their tokens by shared character boundaries, as in the token groups of Section~\ref{sec:hub:training}.
+Each group forms a row, a pair of vectors for one short span of text.
+The pair holds the average of the target model's hidden states and the average of the hub outputs, both weighted by character coverage and not normalized to unit length. % src: src/v6_4/pairs.py
+A row covers about one word, so an NQ prompt of nine words yields about nine rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
+The affine map is fitted on rows, so the size of a leak is counted in rows.
+

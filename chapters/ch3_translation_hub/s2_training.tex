@@ -1,0 +1,61 @@
+\section{Training}\label{sec:hub:training}
+
+Training is fully supervised: each prompt passes through all three frozen models, and every update includes all nine directions.
+The objective combines a reconstruction loss with two alignment losses:
+\begin{equation}
+\mathcal{L} = \mathcal{L}_{\text{dec}} + 0.1\,\mathcal{L}_{\text{InfoNCE}} + 1.0\,\mathcal{L}_{\text{geom}} .
+\label{eq:hub:loss}
+\end{equation}
+The decoding loss $\mathcal{L}_{\text{dec}}$ trains the hub to retain the input information that the frozen decoders need.
+The contrastive loss $\mathcal{L}_{\text{InfoNCE}}$ encourages the three models to place the same text span at the same point of the hub.
+The geometry loss $\mathcal{L}_{\text{geom}}$ encourages the hub to keep the similarities among spans that each model's hidden states already hold.
+
+\paragraph{Decoding loss.} For each direction, the decoder receives the soft prompt and its start token.
+Under teacher forcing it also receives the ground-truth prompt tokens $x_1 \ldots x_T$.
+The decoder then makes $T+1$ predictions: the $T$ prompt tokens and then the end-of-sequence token.
+The target is the prompt itself, not its continuation.
+The loss of direction $d$, $\text{CE}_d$, averages cross-entropy over the $T+1$ predictions and then over prompts. % src: v6_3/plan.md section 4; src/v3/evaluate.py (teacher_forced_batch)
+The decoding loss is a weighted mean over the nine directions:
+\begin{equation}
+\mathcal{L}_{\text{dec}} = \frac{1}{7}\Big(\sum_{d\,\in\,\text{cross}} \text{CE}_d + \frac{1}{3}\sum_{d\,\in\,\text{self}} \text{CE}_d\Big).
+\label{eq:hub:dec}
+\end{equation}
+% src: src/v6_2/losses.py (weighted_direction_ce: (sum cross + 1/3 sum self)/7; h3_objective); configs/v6_3.yaml (loss)
+Self-reconstruction is expected to succeed without any alignment between models, so its three directions together receive the weight of one cross-model direction, and the loss concentrates on translation between models.
+Cross-model reconstruction thus accounts for $6/7$ of the decoding loss and self-reconstruction for $1/7$.
+
+\paragraph{Token groups.} The two alignment losses compare models at corresponding positions of a prompt, yet the three tokenizers segment a prompt differently.
+For each pair of models, the tokens are therefore collected into token groups: a group ends only at a character position where both tokenizers end a token (whitespace is ignored). % src: src/v3/alignment.py (connected components, a_weights, b_weights); src/v6_2/data.py (_pair_groups)
+If one tokenizer splits \emph{unbelievable} into \emph{un \textbar{} believable} and the other into \emph{un \textbar{} believ \textbar{} able}, the word yields two groups: \emph{un}, with one token per model, and \emph{believable}, with one token under the first model and two under the second.
+Each model contributes one vector per group: the mean of its token vectors, weighted by character coverage and normalized to unit length.
+
+\paragraph{Contrastive loss.} For a model pair $(a,b)$, let $g^a_i$ and $g^b_i$ be the group vectors of group $i$, computed from the hub outputs of models $a$ and $b$.
+The positive pair is $(g^a_i, g^b_i)$: one text span of one prompt, represented by two models.
+The negatives are the vectors $g^b_j$ of groups from other prompts in the batch:
+\begin{equation}
+\ell^{\,a\to b}_i = -\log\frac{\exp(g^a_i\cdot g^b_i/\tau)}{\sum_{j\in\mathcal{N}_i}\exp(g^a_i\cdot g^b_j/\tau)},
+\qquad \tau = 0.05 ,
+\label{eq:hub:infonce}
+\end{equation}
+where $\mathcal{N}_i$ contains group $i$ and its negatives.
+The loss is averaged over groups within each prompt, then over prompts, over the two orders of each pair, and over the three model pairs. % src: src/v3/losses.py (_symmetric_group_info_nce_encoded, _negative_mask_from_codes, _mean_within_query_codes, grouped_info_nce)
+
+\paragraph{Geometry loss.} For model $a$ of a pair, let the rows of $X_a$ be the group vectors computed from its hidden states and the rows of $Y_a$ the group vectors computed from its hub outputs.
+Each token vector is first centered on the model's mean hidden state or mean hub output.
+The Gram matrix $\Gamma(A) = AA^{\top}$ of a matrix $A$ of group vectors contains the inner products between groups.
+The distance $d(A,B)$ is the mean squared difference between the off-diagonal entries of $\Gamma(A)$ and $\Gamma(B)$.
+The loss is
+\begin{equation}
+\mathcal{L}_{\text{geom}} = \tfrac{1}{2}\Big(\overline{d(X_a, Y_a)} + \overline{d(Y_a, Y_b)}\Big),
+\label{eq:hub:geom}
+\end{equation}
+where the first bar denotes a mean over the two models of each pair and over the three pairs, and the second a mean over the three pairs.
+The first term compares one model with itself: the similarities among its hub outputs should match those among its hidden states.
+The second term compares two models: the similarities among the hub outputs of model $a$ should match those of model $b$ on the same groups. % src: src/v4/geometry.py; src/v6_2/train.py (_geometry_sides, compute_initial_statistics)
+
+\paragraph{Schedule and checkpoint selection.} The hub is trained for \vf{2{,}500} AdamW updates of \vf{32} prompts each, drawn from \vf{40{,}000} training prompts, with one random seed.
+The learning rate rises to $3\times10^{-4}$ over \vf{250} warmup updates and follows a cosine decay to zero; weight decay is \vf{0.01} on the linear weights, and gradients are clipped at norm \vf{1.0}. % src: configs/v6_3.yaml (training)
+Teacher-forced Acc@1 selects the checkpoint.
+Acc@1 is the fraction of prompt tokens that the decoder ranks first given the ground-truth prefix, averaged over the \vf{5{,}000} validation prompts and the six cross-model directions.
+A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained: on NQ (Natural Questions queries), update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
+

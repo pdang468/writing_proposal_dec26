@@ -1,0 +1,43 @@
+\section{Results on Legal Text}\label{sec:hub:legal}
+
+Two legal datasets test H1 on text that differs from question prompts in vocabulary and in length.
+A separate hub is trained per dataset, with the architecture and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training}.
+
+\paragraph{Datasets.} Both datasets are cut from the same legal documents.
+The legal10w dataset cuts ten consecutive words from a document, from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
+The legal128w dataset cuts one longer contiguous window, starting at a word drawn uniformly over the document.
+The window grows word by word and stops at \vf{100} tokens under the tokenizer that yields the most tokens for it. % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
+A window of that length averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
+The name records a looser ceiling, \vf{128} tokens under every tokenizer, which the \vf{100}-token stop keeps out of reach. % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
+Each dataset has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
+
+\paragraph{Results.} Both legal hubs meet both criteria for H1 (Table~\ref{tab:hub:legal}).
+Mean cross-model word-F1 is \vf{0.977} on each dataset, against mismatched-prompt controls of \vf{0.071} on legal10w and \vf{0.152} on legal128w. % src: results/legal{10w,128w}/v6_3/inversion.json cross_mean (hub 0.9767, 0.9769; shuffled 0.0706, 0.1519)
+Every cross-model direction exceeds \vf{0.90}; the lowest is Qwen $\to$ OLMo on legal128w, at \vf{0.955} (Figure~\ref{fig:hub:legal-directions}). % src: same files, directions (cross minima 0.9552, 0.9670)
+The lower scores into Qwen on NQ do not recur: the cross-model directions into Qwen score \vf{0.975} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9858, 0.9752)
+Exact match is higher on the ten-word prompts of legal10w, at \vf{0.83}, than on the long prompts of legal128w, at \vf{0.58}; the comparison does not isolate length from content.
+
+\begin{table}[H]
+\caption{Each legal hub exceeds a mean cross-model word-F1 of \vf{0.90} with a control below \vf{0.20}.
+Free-running word-F1 and exact match averaged over the six cross-model directions on the \vf{5{,}000} validation prompts of each dataset, one hub seed per dataset; each control is evaluated on the same prompts and directions as its score.}
+\label{tab:hub:legal}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Dataset & Word-F1 & Exact match & Control word-F1 \\
+\midrule
+legal10w & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % src: results/legal10w/v6_3/inversion.json cross_mean (0.9767, 0.8291, 0.0706)
+legal128w & \vf{0.977} & \vf{0.58} & \vf{0.152} \\ % src: results/legal128w/v6_3/inversion.json cross_mean (0.9769, 0.5814, 0.1519)
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{ch3/direction_recovery_legal}
+\caption{Every direction of the two legal hubs reaches a word-F1 of at least 0.95.
+Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} validation prompts of each legal dataset; diagonal cells are self-reconstruction.
+One hub seed per dataset.}
+\label{fig:hub:legal-directions}
+\end{figure}
+

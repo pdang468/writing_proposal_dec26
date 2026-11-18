@@ -1,49 +1,42 @@
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
-%% BIG CHANGE: polish; restructure the argument and pacing, retaining the stated scope.
-Unpaired matching improves reconstruction word-F1 when the affine map is fitted on a small leak.
-With \vf{90} leaked rows, mean word-F1 on \vf{4{,}500} held-out prompts rises from \vf{0.354} to \vf{0.766} on Corpus A and from \vf{0.102} to \vf{0.321} on legal128w, averaged over three seeds. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json
-Both gains meet H2, including its required interval lower bound of \vf{0.05}.
-The ablations delimit this result: the gain shrinks as the leak grows and depends on the temperature, while the tested blind maps exceed their controls by at most \vf{0.025} word-F1.
+%% BIG CHANGE: discussion opening rewritten at the author's request (2026-11-17): the objective first, then the attack, then the size of the gain; transitions added; no number changed.
+The chapter asked whether a model outside hub training can be read through the hub when the adversary holds only a small leak.
+The attack connects such a target model to the frozen hub through one affine map.
+A leak of \vf{90} rows supervises the map, and unpaired matching aligns it further on data that carry no correspondence.
+Matching accounts for most of the reconstruction.
+On held-out NQ prompts the leak alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
+The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
+Word-F1 thus more than doubles on every dataset, and the gains on NQ and legal128w, the two datasets that H2 names, meet its criterion.
 
-The exploratory rewriting experiment yields a different comparison.
-A second-round language model exceeds the mean of the three decoders by \vf{0.12} to \vf{0.26} word-F1 in three conditions, but exceeds the best decoder by only \vf{0.01} to \vf{0.02}, without an interval for that difference. % src: results/*/v7_2/main/framework/attacker/*-haiku.json
-This result rests on one seed and selection prompts; it does not establish a reliable improvement over the best decoder.
+The gain also bears on the representations themselves.
+The attack trains only an affine map, while the hub and its decoders stay frozen, and an affine map preserves the linear structure of the hidden states it receives.
+The gain from matching therefore suggests that the hidden states of the target model and the hub outputs share that structure up to an affine transformation.
+The Platonic Representation Hypothesis predicts this similarity between models, here for a target model that took no part in hub training.
 
-\paragraph{Resources and alignment.} The attack requires the frozen hub and its decoders, the hidden states of the target model for prompts without text, the attacker's own text of the same domain, and a leak of rows.
-%% BIG CHANGE: polish; reorganize explanation without changing the reported evidence.
-The leak supplies the paired correspondences for fitting the map; constructing those rows requires the target tokenizer for the leaked prompts.
-The experiments also select settings on \vf{500} prompts with known text (Section~\ref{sec:attack:threat}).
-The unpaired pools carry no pairing between hidden states and text, yet they account for the difference between the supervised and the hybrid fit.
-%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-The second round receives only the decoders' reconstructions and the kind of text.
+Three findings bound the gain.
+First, the gain depends on the size of the leak, with a peak at \vf{45} to \vf{90} rows and a fall to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w, seed 1 (0.0889, 0.0889)
+Second, the gain holds only within a range of temperatures.
+Third, matching does not replace the leak, since without one the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
-%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-\paragraph{What the reconstructions contain.} Word-F1 measures overlap between the reconstructed and reference words.
-On legal text the reconstructions keep the frame of a passage and substitute names and numbers (Table~\ref{tab:attack:legal-examples}), and after the second round entity recall stays at \vf{0.37} for a budget of \vf{10} (Section~\ref{sec:attack:rewriting}).
-On legal128w the hybrid fit also has the higher teacher-forced cross-entropy (Section~\ref{sec:attack:teacher}).
-%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-Exact match under the hybrid fit is \vf{0.21} on Corpus A and rounds to zero on legal128w (Section~\ref{sec:attack:hybrid}).
-The results therefore establish a gain in word overlap; they do not establish exact recovery, recovery of the facts of a prompt, or an amount of leaked information.
+Two supporting experiments concern the decoders and not the map.
+The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and the two do not improve together.
+Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts, with one seed, and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
+A second-round language model, in turn, merges the three decoders' reconstructions into one text at the level of the best decoder, \vf{0.12} to \vf{0.26} word-F1 above their mean.
 
-\paragraph{Limitations.} Six limitations bound the claims.
+\paragraph{What the reconstructions contain.} The results establish a gain in word overlap, not exact recovery, recovery of the facts of a prompt, or an amount of leaked information.
+Exact match under the hybrid fit is \vf{0.21} on NQ and rounds to zero on legal128w.
+In legal128w reconstructions from the leak-composition experiment (Section~\ref{sec:attack:leak}), the errors are fluent substitutions, e.g., ``registrant'' becomes ``insurer'', and dates, section numbers, and a company name are replaced by others of the same kind. % src: results/legal128w/v7_2/main/mixed-v7_9/runs/b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random-s1/endpoint/decoding.jsonl, SmolLM records
+A reconstruction does not mark which of its words match the source.
+At a leak of \vf{856} rows on legal128w, rewriting raises entity recall from \vf{0.21} to \vf{0.37}, and most named entities remain unrecovered.
+
+\paragraph{Limitations.} Four limitations bound the claims.
 \begin{itemize}
-%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-\item \textbf{Held-out prompts.} Only the main comparison and two ablations evaluate the \vf{4{,}500} held-out prompts.
-Most other scores come from the \vf{500} selection prompts, which also selected the settings; the second round evaluates \vf{450} of them, and one blind comparison evaluates all \vf{5{,}000} validation prompts.
-The held-out prompts are held out from the attack settings, not from the hub checkpoint, which all validation prompts selected.
-%% BIG CHANGE: polish; reword or relocate this passage for precision and flow.
-The test splits have not been evaluated.
-\item \textbf{Seeds.} The main comparison and the Corpus A budget curve rest on three seeds; the second round and the legal128w teacher-forced scores rest on one, and each ablation table states its seeds.
-The intervals describe variation over prompts, not over seeds.
-\item \textbf{Several settings.} The experiments differ in supervision fraction, temperature, batch size, and form of the leak (Table~\ref{tab:attack:settings}), so their scores do not combine into one curve.
-\item \textbf{Settings chosen with known text.} The supervision fraction and the temperature were selected by word-F1 on prompts whose text is known.
-An attacker without such prompts would have to fix them in another way, and no run measures the cost.
-\item \textbf{Same-domain pools.} Both unpaired pools and the leak come from the training prompts of the corpus under attack.
-The results do not show how the attack behaves when the attacker's text comes from another domain, or when the unpaired pool is small.
-\item \textbf{Models and layer.} The results cover one block of two target models of about one billion parameters, three hub models, and one second-round language model.
-They do not cover a deployed system, a larger target model, a quantized or noised hidden state, or a defense.
+\item \textbf{Settings chosen with known text.} The supervision fraction and the temperature were selected by word-F1 on \vf{500} prompts whose text is known, and no run measures the cost of selecting them without such prompts.
+\item \textbf{Supporting experiments.} Only the main comparison runs on held-out prompts with three seeds.
+The supporting experiments rest on the \vf{500} selection prompts and one seed, and those other than the leak-size comparison and its grid run at earlier settings.
+\item \textbf{Same-domain pools.} Both unpaired pools and the leak come from the dataset under attack, and no run tests text from another domain or a smaller pool.
+\item \textbf{Models and layer.} The results cover one block of two target models of about one billion parameters and three hub models, without a defense or a deployed system.
 \end{itemize}
 
-The leak supplies correspondences that constrain the affine map, and the matching term compares unpaired representations; the experiments do not establish that either source determines the map alone.
-The experiments quantify reconstruction under the stated attack resources; an information-theoretic account remains future work (Chapter~\ref{ch:future}).
+The experiments quantify reconstruction under the stated adversary resources, and an information-theoretic account remains future work (Chapter~\ref{ch:future}).
