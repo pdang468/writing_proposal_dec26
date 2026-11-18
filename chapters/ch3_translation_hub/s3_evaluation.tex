@@ -11,8 +11,9 @@ Exact match is the fraction of reconstructions identical to their source prompt 
 
 \paragraph{Mismatched-prompt control.} The mismatched-prompt control gives each decoder the hub outputs of another prompt and scores its output against the original prompt.
 Prompt $i$ receives the hub outputs of prompt $i+1$, and the last prompt receives those of the first. % src: src/v6_3/inversion.py (shuffled_indices: (i + 1) mod n); src/v8/projectors.py (wrong_partner: same rule)
-The control score thus measures the word overlap that a fluent decoder reaches from the common words of a dataset alone.
-A reconstruction score above the control shows that the reconstruction depends on the prompt's own hub outputs.
+Even with the wrong hub outputs, the score stays above zero, because prompts of one dataset share common words.
+The control score measures that shared-word overlap.
+A reconstruction that scores above the control therefore reads the hub outputs of its own prompt.
 
 \paragraph{NQ.} The NQ dataset contains query strings from Natural Questions, split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts.
 Near-duplicate questions never cross a split. % src: configs/v3.yaml (split_schema_version v2-stage2-textcluster-v1); src/v3/splits.py
