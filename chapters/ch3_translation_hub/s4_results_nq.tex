@@ -15,6 +15,8 @@ The mismatched-prompt control scores \vf{0.120} to \vf{0.121} in every direction
 
 The mean hides one weaker decoder (Figure~\ref{fig:hub:directions}).
 The four cross-model directions into OLMo and SmolLM score \vf{0.966} to \vf{0.989}; the two into Qwen score \vf{0.881} and \vf{0.874}. % src: results/v7_2/main/hub-val-eval-m32.json readout.per_direction_mean
+%% BIG CHANGE (2026-11-18): new sentence, the self-reconstruction score of Qwen from the figure, to place the weakness in the decoder.
+Qwen reconstructs prompts from its own hidden states at \vf{0.842}, so its lower scores hold for every source model. % src: same file, qwen->qwen 0.8424; qwen->olmo 0.969, qwen->smollm 0.989
 
 Table~\ref{tab:hub:examples} shows reconstructions from OLMo $\to$ Qwen. % src: results/v6_3/hpc-final/inversion-records.jsonl, olmo->qwen hub arm
 

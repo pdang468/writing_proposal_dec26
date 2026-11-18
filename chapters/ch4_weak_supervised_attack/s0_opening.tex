@@ -8,3 +8,6 @@ Second, a matching term aligns unpaired data, hidden states of the target model 
 The chapter tests whether the matching term improves reconstruction over the leak alone.
 With a leak of \vf{90} rows, about \vf{90} words, the matching term raises mean word-F1 on \vf{4{,}500} held-out NQ prompts from \vf{0.35} to \vf{0.77}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
 
+%% BIG CHANGE (2026-11-18): the hypothesis moved here from the end of the Method section, as in Chapter 3; its wording no longer needs the terms hybrid fit and supervised fit.
+\paragraph{Hypothesis: matching improves reconstruction from a small leak.}\label{sec:attack:hypotheses}
+With a leak of \vf{90} rows, a map trained on the leak and the matching term reaches a higher word-F1 than a map trained on the leak alone.

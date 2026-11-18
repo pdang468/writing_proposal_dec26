@@ -47,13 +47,7 @@ The term therefore requires no correspondence between the hidden states of the t
 The temperature is expressed as a multiple of a scale $d$ measured on the hub alone.
 For each hub output, the gap is the difference between its highest and second-highest scores against the other hub outputs of its batch.
 The scale $d$ is the median gap over \vf{100} batches of \vf{512} hub outputs. % src: src/v7_2/gap.py; results/*/v7_2/main/mixed-v7_9-s0.json gap
-The scale is \vf{0.0576} on NQ, \vf{0.0738} on legal10w, and \vf{0.0648} on legal100t. % src: results/v7_2/main/mixed-v7_9-s0.json gap.sqdist.median (0.05761); results/legal10w/v7_2/main/mixed-v7_9-s0.json (0.07380); results/legal128w/v7_2/main/mixed-v7_9-s0.json (0.06485)
+% CUT 2026-11-18 (per-dataset values): The scale is \vf{0.0576} on NQ, \vf{0.0738} on legal10w, and \vf{0.0648} on legal100t. % src: results/v7_2/main/mixed-v7_9-s0.json gap.sqdist.median (0.05761); results/legal10w/v7_2/main/mixed-v7_9-s0.json (0.07380); results/legal128w/v7_2/main/mixed-v7_9-s0.json (0.06485)
 
-\paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates, each on \vf{512} rows of the leak and $B$ elements from each unpaired pool. % src: configs/v7_9_s4.yaml (training); src/v7/training.py (lr_multiplier); results/v7_2/main/mixed-v7_9-s5.json setting (paired_batch_rows 512)
+\paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates, each on \vf{512} rows drawn from the leak with replacement and $B$ elements from each unpaired pool. % src: configs/v7_9_s4.yaml (training); src/v7/training.py (lr_multiplier); results/v7_2/main/mixed-v7_9-s5.json setting (paired_batch_rows 512)
 The map after the last update is evaluated, without checkpoint selection.
-
-\paragraph{Hypothesis: matching improves reconstruction from a small leak.}\label{sec:attack:hypotheses}
-With a leak of \vf{90} rows, the hybrid fit reaches a higher word-F1 than the supervised fit.
-The hypothesis is tested on word-F1, the word overlap between a reconstruction and the true prompt.
-Exact match and decoded examples accompany word-F1 to separate word overlap from full recovery.
-

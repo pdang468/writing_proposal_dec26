@@ -1,52 +1,50 @@
 \section{Matching Improves Reconstruction from a Small Leak}\label{sec:attack:hybrid}\label{sec:attack:main}
 
-Unpaired matching more than doubles reconstruction word-F1 on all three datasets (Table~\ref{tab:attack:main}, Figure~\ref{fig:attack:standard}).
-On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 on NQ rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit, a gain of \vf{0.411} with an interval of \vf{0.408} to \vf{0.415}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113)
-On legal10w, word-F1 rises from \vf{0.192} to \vf{0.599}, a gain of \vf{0.407} with an interval of \vf{0.403} to \vf{0.412}. % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
-On legal100t, word-F1 rises from \vf{0.102} to \vf{0.321}, a gain of \vf{0.219} with an interval of \vf{0.215} to \vf{0.222}. % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval as for NQ
+Unpaired matching more than doubles reconstruction word-F1 on all three datasets (Table~\ref{tab:attack:main}).
+On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 on NQ rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit, a gain of \vf{0.411}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113) ; results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
+The gains on legal10w and legal100t are \vf{0.407} and \vf{0.219}.
 %% BIG CHANGE: new sentence (2026-11-17), the reading that orders the datasets; it restates the three gains and the exposure stated in the setup.
 The two datasets of short prompts gain about \vf{0.41}, and legal100t, where \vf{9} rows expose only the opening words of a prompt, gains about half as much.
 Both fits receive the same leak, so the gain comes from the two unpaired pools.
 
 \begin{table}[H]
 \caption{With \vf{90} leaked rows, the hybrid fit exceeds the supervised fit by \vf{0.41} word-F1 on NQ, by \vf{0.41} on legal10w, and by \vf{0.22} on legal100t.
-Word-F1 averaged over three decoders, Pythia as the target model, $\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$.
+Word-F1 averaged over three decoders and three fits on the \vf{4{,}500} held-out prompts, Pythia as the target model, $\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$.
 The held-out prompts selected no setting of the attack; each interval is a \vf{95} percent interval from a paired bootstrap over prompts.}
 \label{tab:attack:main}
 \centering
 \small\setlength{\tabcolsep}{4pt}
-\begin{tabular}{llccc}
+\begin{tabular}{lccc}
 \toprule
-Dataset & Prompts & Supervised fit & Hybrid fit & Gain \\
+Dataset & Supervised fit & Hybrid fit & Gain \\
 \midrule
-NQ & \vf{4{,}500} held-out & \vf{0.354} & \vf{0.766} & \vf{$+0.411$} [\vf{0.408}, \vf{0.415}] \\ % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.macro_f1 (0.3544, 0.7659)
-NQ & \vf{500} selection & \vf{0.352} & \vf{0.762} & \vf{$+0.410$} [\vf{0.401}, \vf{0.420}] \\ % src: results/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.3519, 0.7623, 0.4104 [0.4005, 0.4196])
-legal10w & \vf{4{,}500} held-out & \vf{0.192} & \vf{0.599} & \vf{$+0.407$} [\vf{0.403}, \vf{0.412}] \\ % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
-legal10w & \vf{500} selection & \vf{0.190} & \vf{0.602} & \vf{$+0.412$} [\vf{0.399}, \vf{0.425}] \\ % src: results/legal10w/v7_2/main/mixed-w46-std.json seeds.*.cells.*.final.macro_f1 (supervised 0.2251, 0.1958, 0.1489; hybrid 0.6040, 0.5947, 0.6060); seed_summary.budgets.90 (0.4116 [0.3990, 0.4251])
-legal100t & \vf{4{,}500} held-out & \vf{0.102} & \vf{0.321} & \vf{$+0.219$} [\vf{0.215}, \vf{0.222}] \\ % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (0.1021, 0.3209)
-legal100t & \vf{500} selection & \vf{0.102} & \vf{0.320} & \vf{$+0.218$} [\vf{0.208}, \vf{0.227}] \\ % src: results/legal128w/v7_2/main/mixed-w46-std.json seed_summary.budgets.90 (0.1021, 0.3196, 0.2175 [0.2076, 0.2268])
+NQ & \vf{0.354} & \vf{0.766} & \vf{$+0.411$} [\vf{0.408}, \vf{0.415}] \\ % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.macro_f1 (0.3544, 0.7659)
+legal10w & \vf{0.192} & \vf{0.599} & \vf{$+0.407$} [\vf{0.403}, \vf{0.412}] \\ % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
+legal100t & \vf{0.102} & \vf{0.321} & \vf{$+0.219$} [\vf{0.215}, \vf{0.222}] \\ % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (0.1021, 0.3209)
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.75\textwidth]{ch4/standard_cell}
-\caption{The hybrid fit exceeds the supervised fit on all three datasets.
-Word-F1 averaged over three decoders on the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows; bars are means, dots the individual fits, and each bracket the gain of the hybrid fit.}
-\label{fig:attack:standard}
-\end{figure}
+% CUT 2026-11-18 (the figure repeats the table above):
+% \begin{figure}[ht]
+% \centering
+% \includegraphics[width=0.75\textwidth]{ch4/standard_cell}
+% \caption{The hybrid fit exceeds the supervised fit on all three datasets.
+% Word-F1 averaged over three decoders on the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows; bars are means, dots the individual fits, and each bracket the gain of the hybrid fit.}
+% \label{fig:attack:standard}
+% \end{figure}
 
-\paragraph{Control and reference.} The hybrid scores depend on the prompt's own hidden states and remain below the hub reference.
-On the selection prompts, the hybrid fit scores \vf{0.762} against its mismatched-prompt control of \vf{0.110} on NQ, \vf{0.602} against \vf{0.069} on legal10w, and \vf{0.320} against \vf{0.073} on legal100t. % src: mixed-w46-std.json seeds.*.cells.*.wrong_memory.macro_f1 (NQ 0.1104; legal10w 0.0690 from 0.0739, 0.0612, 0.0720; legal128w 0.0733)
-The hub references are \vf{0.947} on NQ and \vf{0.982} on each legal dataset.
-On legal100t the supervised fit, at \vf{0.102}, is close to its control of \vf{0.070}, so \vf{90} rows alone yield little beyond the control. % src: same file (0.0698)
+\paragraph{Control and reference.} The hybrid scores depend on the prompt's own hidden states and remain below the hub references of Section~\ref{sec:attack:experiments}.
+On the selection prompts, the hybrid fit scores \vf{0.768} against its mismatched-prompt control of \vf{0.108} on NQ, \vf{0.604} against \vf{0.074} on legal10w, and \vf{0.299} against \vf{0.073} on legal100t. % src: mixed-w46-std.json of each dataset, seeds.1.cells.*.final.macro_f1 and wrong_memory.macro_f1 (NQ 0.7679, 0.1081; legal10w 0.6040, 0.0739; legal128w 0.2993, 0.0725)
+On legal100t the supervised fit, at \vf{0.094}, is close to its control of \vf{0.059}, so \vf{90} rows alone yield little beyond the control. % src: results/legal128w/v7_2/main/mixed-w46-std.json seeds.1.cells (0.0938, 0.0594)
 
-\paragraph{Exact match and decoders.} Exact match distinguishes the word-overlap gain from full-prompt recovery.
-Under the hybrid fit, exact match is \vf{0.21} on NQ and rounds to zero on legal100t. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl, field exact_match, three decoders and three seeds (NQ hybrid 0.2121: SmolLM 0.4153, OLMo 0.1676, Qwen 0.0534; supervised 0.0001; legal128w hybrid: SmolLM 0.0001, OLMo 0, Qwen 0)
+\paragraph{Exact match and decoders.} On the held-out prompts, exact match distinguishes the word-overlap gain from full-prompt recovery.
+Under the hybrid fit, exact match is \vf{0.21} on NQ, against zero under the supervised fit, and it rounds to zero on legal100t. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl, field exact_match, three decoders and three seeds (NQ hybrid 0.2121: SmolLM 0.4153, OLMo 0.1676, Qwen 0.0534; supervised 0.0001; legal128w hybrid: SmolLM 0.0001, OLMo 0, Qwen 0)
+% TODO: exact match on legal10w (the held-out decoding file is on the cluster, not in the local results)
 The three decoders also differ.
 The hybrid fit scores \vf{0.886} through SmolLM, \vf{0.762} through OLMo, and \vf{0.650} through Qwen on NQ. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (0.8859, 0.7622, 0.6495)
-On legal10w the three scores are \vf{0.655}, \vf{0.587}, and \vf{0.555}, and on legal100t they are \vf{0.430}, \vf{0.160}, and \vf{0.372}. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (SmolLM 0.6554, OLMo 0.5866, Qwen 0.5553; 0.4303, 0.1602, 0.3722)
+On legal10w the same order holds, at \vf{0.655}, \vf{0.587}, and \vf{0.555}.
+On legal100t the OLMo decoder falls to \vf{0.160}, against \vf{0.430} through SmolLM and \vf{0.372} through Qwen. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (SmolLM 0.6554, OLMo 0.5866, Qwen 0.5553; 0.4303, 0.1602, 0.3722)
 
 \paragraph{Decoded examples.} The hybrid fit recovers content words that the supervised fit loses, as three held-out NQ prompts through the SmolLM decoder illustrate (Table~\ref{tab:attack:examples}).
 At a word-F1 of \vf{0.80} the hybrid fit changes one name, and at \vf{0.40} it keeps the question frame and loses the title.

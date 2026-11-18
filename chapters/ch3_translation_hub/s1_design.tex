@@ -26,12 +26,10 @@ The projected vectors form a soft prompt, and the decoder generates the reconstr
 
 \paragraph{Models and directions.} The three models are Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B.
 Each contributes hidden states from the block at three quarters of its depth: block \vf{18} of \vf{24} in Qwen (width \vf{1024}), block \vf{12} of \vf{16} in OLMo (width \vf{2048}), and block \vf{18} of \vf{24} in SmolLM (width \vf{2048}). % src: configs/v6_3.yaml (d3_block, width); configs/v3.yaml (blocks, depth_fractions)
-The depth is a fixed choice and was not tuned.
-The effect of depth on reconstruction is left to future work (Chapter~\ref{ch:future}).
 A direction pairs a source model with a decoder, e.g., Qwen $\to$ hub $\to$ OLMo.
 Three models define nine directions: six cross-model directions and three self-reconstruction directions.
 In a cross-model direction the decoder reconstructs the prompt from another model's hidden states, so the cross-model results test the hypothesis.
-In this setting, only the adapters, the backbone, and the projectors are trainable; the three language models remain frozen as both sources and decoders.
+Only the adapters, the backbone, and the projectors are trainable; the three language models remain frozen as both sources and decoders.
 
 \paragraph{Token-wise mapping.} The hub maps each token independently.
 Equation~\ref{eq:hub:map} has no positional input and no attention across tokens, so each hub output depends on one source hidden state, although that state may already encode prompt context.

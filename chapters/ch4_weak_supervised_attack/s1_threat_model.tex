@@ -4,7 +4,6 @@ The adversary is the honest-but-curious server of a split inference system.
 The server follows the protocol and receives the hidden states that a client transmits to the cloud.
 The adversary's goal is to reconstruct a prompt from its sequence of hidden states.
 The adversary cannot query the target model, and for the prompt under attack it holds neither the text nor the token identities.
-In the experiments, the target model is Pythia-1B, observed at block \vf{12} (width \vf{2048}) with one vector per token. % src: configs/v7.yaml (unknowns.pythia: d3_block 12, width 2048)
 
 Four resources are available to the adversary.
 \begin{itemize}
@@ -22,6 +21,6 @@ For each leaked span, the adversary runs OLMo on the text and obtains the hub ou
 The target model and OLMo split the text into different tokens, so the adversary groups their tokens by shared character boundaries, as in the token groups of Section~\ref{sec:hub:training}.
 Each group forms a row, a pair of vectors for one short span of text.
 The pair holds the average of the target model's hidden states and the average of the hub outputs, both weighted by character coverage and not normalized to unit length. % src: src/v6_4/pairs.py
-A row covers about \vf{1} word, so an NQ prompt of \vf{9} words yields about \vf{9} rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
+On NQ a row covers about \vf{1} word, so a prompt of \vf{9} words yields about \vf{9} rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
 The affine map is fitted on rows, so the size of a leak is counted in rows.
 

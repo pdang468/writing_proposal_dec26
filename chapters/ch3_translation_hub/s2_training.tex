@@ -1,6 +1,12 @@
 \section{Training}\label{sec:hub:training}
 
-Training is fully supervised: each prompt passes through all three frozen models, and every update includes all nine directions.
+%% BIG CHANGE (2026-11-18): the NQ paragraph moved here from the Evaluation section, so the dataset is defined before its first mention.
+\paragraph{Dataset.} The hub is trained and evaluated on NQ, a dataset of query strings from Natural Questions.
+The dataset is split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts.
+Near-duplicate questions never cross a split. % src: configs/v3.yaml (split_schema_version v2-stage2-textcluster-v1); src/v3/splits.py
+The validation prompts average \vf{9} words and range from \vf{6} to \vf{19}. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
+
+\paragraph{Objective.} Training is fully supervised: each prompt passes through all three frozen models, and every update includes all nine directions.
 The objective combines a reconstruction loss with two alignment losses:
 \begin{equation}
 \mathcal{L} = \mathcal{L}_{\text{dec}} + 0.1\,\mathcal{L}_{\text{InfoNCE}} + 1.0\,\mathcal{L}_{\text{geom}} .
@@ -22,7 +28,6 @@ The decoding loss is a weighted mean over the nine directions:
 \end{equation}
 % src: src/v6_2/losses.py (weighted_direction_ce: (sum cross + 1/3 sum self)/7; h3_objective); configs/v6_3.yaml (loss)
 Self-reconstruction is expected to succeed without any alignment between models, so its three directions together receive the weight of one cross-model direction, and the loss concentrates on translation between models.
-Cross-model reconstruction thus accounts for $6/7$ of the decoding loss and self-reconstruction for $1/7$.
 
 \paragraph{Token groups.} The two alignment losses compare models at corresponding positions of a prompt, yet the three tokenizers segment a prompt differently.
 For each pair of models, the tokens are therefore collected into token groups: a group ends only at a character position where both tokenizers end a token (whitespace is ignored). % src: src/v3/alignment.py (connected components, a_weights, b_weights); src/v6_2/data.py (_pair_groups)
@@ -41,7 +46,7 @@ where $\mathcal{N}_i$ contains group $i$ and its negatives.
 The loss is averaged over groups within each prompt, then over prompts, over the two orders of each pair, and over the three model pairs. % src: src/v3/losses.py (_symmetric_group_info_nce_encoded, _negative_mask_from_codes, _mean_within_query_codes, grouped_info_nce)
 
 \paragraph{Geometry loss.} For model $a$ of a pair, let the rows of $X_a$ be the group vectors computed from its hidden states and the rows of $Y_a$ the group vectors computed from its hub outputs.
-Each token vector is first centered on the model's mean hidden state or mean hub output.
+Each token vector is first centered on the model's mean hidden state or mean hub output, both computed once over the training prompts before training. % src: src/v6_2/train.py (compute_initial_statistics)
 The Gram matrix $\Gamma(A) = AA^{\top}$ of a matrix $A$ of group vectors contains the inner products between groups.
 The distance $d(A,B)$ is the mean squared difference between the off-diagonal entries of $\Gamma(A)$ and $\Gamma(B)$.
 The loss is
@@ -53,10 +58,10 @@ where the first bar denotes a mean over the two models of each pair and over the
 The first term compares one model with itself: the similarities among its hub outputs should match those among its hidden states.
 The second term compares two models: the similarities among the hub outputs of model $a$ should match those of model $b$ on the same groups. % src: src/v4/geometry.py; src/v6_2/train.py (_geometry_sides, compute_initial_statistics)
 
-\paragraph{Schedule and checkpoint selection.} The hub is trained for \vf{2{,}500} AdamW updates of \vf{32} prompts each, drawn from \vf{40{,}000} training prompts.
-The learning rate rises to $3\times10^{-4}$ over \vf{250} warmup updates and follows a cosine decay to zero; weight decay is \vf{0.01} on the linear weights, and gradients are clipped at norm \vf{1.0}. % src: configs/v6_3.yaml (training)
+\paragraph{Schedule and checkpoint selection.} The hub is trained for \vf{2{,}500} AdamW updates of \vf{32} training prompts each.
+% CUT 2026-11-18 (optimizer detail): The learning rate rises to $3\times10^{-4}$ over \vf{250} warmup updates and follows a cosine decay to zero; weight decay is \vf{0.01} on the linear weights, and gradients are clipped at norm \vf{1.0}. % src: configs/v6_3.yaml (training)
 Teacher-forced Acc@1 selects the checkpoint.
 Acc@1 is the fraction of prompt tokens that the decoder ranks first given the ground-truth prefix, averaged over the \vf{5{,}000} validation prompts and the six cross-model directions.
-A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained.
-On NQ (Natural Questions queries) the retained checkpoint is update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
+% CUT 2026-11-18 (checkpoint rule): A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained.
+The selected checkpoint is update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
 

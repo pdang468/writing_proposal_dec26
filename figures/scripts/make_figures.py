@@ -228,41 +228,31 @@ def rewriting():
 
 
 def cross_entropy():
-    """Excess cross-entropy per content word under teacher forcing, against the budget."""
+    """Excess cross-entropy per content word under teacher forcing at the 90-row leak, three datasets."""
     panels = [
-        ("NQ (three seeds)", "results/v7_2/main/framework/teacher_forced/summary.json", [10, 30, 100],
-         "b{b}-a0.95-sq-m0-t0.1152-r1-B8192"),
-        ("legal128w (seed 1)", "results/legal128w/v7_2/main/framework/teacher_forced/summary.json", [1, 10, 30, 100],
-         "b{b}-a0.95-sq-m0-t0.1297-r1-B8192"),
+        ("NQ", "results/v7_2/main/framework/teacher_forced-w46/summary.json", "t0.11522"),
+        ("legal10w", "results/legal10w/v7_2/main/framework/teacher_forced-w46/summary.json", "t0.1476"),
+        ("legal100t", "results/legal128w/v7_2/main/framework/teacher_forced-w46/summary.json", "t0.1297"),
     ]
-    # leak size in rows: Corpus A the mean over three seeds (mixed-v7_9-s5.json anchor_counts), legal128w seed 1
-    a = load("results/v7_2/main/mixed-v7_9-s5.json")["seeds"]
-    rows_a = {b: round(sum(a[s]["budgets"][str(b)]["anchor_counts"]["valid_aligned_pairs"] for s in a) / len(a)) for b in (10, 30, 100)}
-    rows_l = {r["budget"]: r["pairs"] for r in load("results/legal128w/v7_2/main/v8_6-summary.json")["rows"]}
-    fig, axes = plt.subplots(1, 2, figsize=(6.6, 2.8), sharey=True)
-    for ax, (name, rel, budgets, hybrid) in zip(axes, panels):
-        xs = [(rows_a if name.startswith("NQ") else rows_l)[b] for b in budgets]
+    fig, ax = plt.subplots(figsize=(5.6, 2.9))
+    width, step = 0.26, 1.0
+    series = (("no soft prompt", "#b9b8b3"), ("supervised fit", SUPERVISED), ("hybrid fit", HYBRID))
+    for i, (name, rel, tau) in enumerate(panels):
         arms = load(rel)["arms"]
         get = lambda key: arms[key]["classes"]["content"]["excess_per_word"]
-        sup = [get(f"b{b}-a1-r1") for b in budgets]
-        hyb = [get(hybrid.format(b=b)) for b in budgets]
-        ax.plot(xs, sup, color=SUPERVISED, marker="o", ls=(0, (5, 2)), lw=1.6, ms=4.5, label="supervised fit")
-        ax.plot(xs, hyb, color=HYBRID, marker="s", lw=1.6, ms=4.5, label="hybrid fit")
-        none = get("no_memory")
-        ax.axhline(none, color=INK2, lw=0.8, ls=":")
-        ax.annotate(f"no memory {none:.2f}", (xs[0], none), xytext=(0, 3), textcoords="offset points",
-                    fontsize=8, color=INK2)
-        ax.set_xscale("log")
-        ax.set_xticks(xs)
-        ax.set_xticklabels([f"{x:,}" for x in xs])
-        ax.minorticks_off()
-        ax.set_xlabel("leaked rows")
-        ax.set_title(name, fontsize=9)
-        ax.grid(axis="y")
-        print(name, "supervised", [round(v, 4) for v in sup], "hybrid", [round(v, 4) for v in hyb], "none", round(none, 4))
-    axes[0].set_ylabel("excess cross-entropy\n(nats per content word)")
-    axes[0].set_ylim(0, 8.5)
-    axes[1].legend(loc="upper right", fontsize=8)
+        values = (get("no_memory"), get("b90-a1-r1-L90-span9"), get(f"b90-a0.9-sq-m0-{tau}-r1-B8192-L90-span9"))
+        for k, (v, (label, color)) in enumerate(zip(values, series)):
+            x = i * step + (k - 1) * width
+            ax.bar(x, v, width * 0.92, color=color, label=label if i == 0 else None)
+            ax.annotate(f"{v:.2f}", (x, v), xytext=(0, 2), textcoords="offset points", ha="center", fontsize=8, color=INK)
+        print(name, "none, supervised, hybrid", [round(v, 4) for v in values])
+    ax.set_xticks([i * step for i in range(len(panels))])
+    ax.set_xticklabels([p_[0] for p_ in panels])
+    ax.set_ylabel("excess cross-entropy\n(nats per content word)")
+    ax.set_ylim(0, 12.5)
+    ax.grid(axis="y")
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=8)
     fig.tight_layout()
     save(fig, "ch4/cross_entropy")
 
@@ -284,22 +274,22 @@ def bars(ax, groups, width=0.36, step=1.0):
 
 
 def leak_shape():
-    """About 90 leaked rows spread over more or fewer prompts, seed 1, 500 selection prompts."""
+    """90 leaked rows spread over more or fewer prompts at the setting of the main comparison, 500 selection prompts."""
     L = "results/legal128w/v7_2/main"
-    H = "a0.99/sq/m0/t0.06485/r1/B8192"
+    H = "a0.9/sq/m0/t0.1297/r1/B8192"
     cell = lambda rel, key: load(rel)["seeds"]["1"]["cells"][key]
     f1 = lambda c: c["final"]["macro_f1"]
+    comp = f"{L}/mixed-w46-std-L90-composition.json"
     specs = [
-        ("2 prompts\n90 rows", f"{L}/mixed-oct_w5b-L-prefix.json", f"b90/{H}/L90-prefix", "b90/a1/r1/L90-prefix"),
-        ("10 prompts\n9 rows each", f"{L}/mixed-oct_w5-s1-L90-ext2.json", f"b90/{H}/L90-span9", "b90/a1/r1/L90-span9"),
-        ("90 prompts\n1 row each", f"{L}/mixed-oct_w5-s1-L90.json", f"b90/{H}/L90-random", "b90/a1/r1/L90-random"),
+        ("2 prompts\n90 rows", comp, f"b90/{H}/L90-prefix", "b90/a1/r1/L90-prefix"),
+        ("10 prompts\n9 rows each", f"{L}/mixed-w46-std.json", f"b90/{H}/L90-span9", "b90/a1/r1/L90-span9"),
+        ("90 prompts\n1 row each", comp, f"b90/{H}/L90-random", "b90/a1/r1/L90-random"),
     ]
     groups = []
     for name, rel, hk, sk in specs:
         h, s_ = cell(rel, hk), cell(rel, sk)
-        assert h["anchor_counts"]["leak_rows" if "leak_rows" in h["anchor_counts"] else "prompts"] > 0
         groups.append((f1(s_), f1(h)))
-        print(name.replace("\n", " "), "supervised", round(f1(s_), 4), "hybrid", round(f1(h), 4), "prompts", h["anchor_counts"].get("prompts"))
+        print(name.replace("\n", " "), "supervised", round(f1(s_), 4), "hybrid", round(f1(h), 4), h.get("anchor_counts"))
     step = 1.4
     fig, ax = plt.subplots(figsize=(5.2, 2.9))
     bars(ax, groups, step=step)

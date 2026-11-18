@@ -1,6 +1,6 @@
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
-This work asked whether an adversary who holds only a small leak can read the input of a model outside the hub through a lightweight affine map.
+This chapter asked whether an adversary who holds only a small leak can read the input of a model outside the hub through a lightweight affine map.
 A leak of \vf{90} rows supervises the map, and unpaired matching refines it on data that carry no correspondence.
 
 The results support the hypothesis that unpaired matching improves reconstruction from a small leak.
@@ -8,7 +8,7 @@ On held-out NQ prompts the supervised training on leaks alone reaches a word-F1 
 The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w, a gain of \vf{0.407}, and from \vf{0.102} to \vf{0.321} on legal100t, a gain of \vf{0.219}. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
 Word-F1 thus more than doubles on every dataset.
 
-The attack trains only a lightweight affine map, while the hub and its decoders stay frozen.
+The attack trains only the affine map, while the hub and its decoders stay frozen.
 The gain from matching therefore suggests that such a map can carry the structure of the target model's hidden states into the shared space of the hub.
 The Platonic Representation Hypothesis predicts this similarity between models, here for a target model that took no part in hub training.
 
@@ -17,14 +17,15 @@ First, the gain depends on the size of the leak, with a peak at \vf{45} to \vf{9
 Second, the gain requires a temperature within the range where the matching term can tell its candidates apart.
 Third, matching does not replace the leak, since without one the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
-Two supporting experiments explore the map further.
-The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and those predictions and word-F1 do not improve together.
-Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal100t prompts and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
+%% BIG CHANGE (2026-11-18): the paragraph follows the rerun of the decoder-predictions section at the setting of the main comparison; the sentence on KL training is cut with that step.
+A supporting experiment relates the objective to the decoder's predictions.
+The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy measures how well the decoder predicts the true tokens.
+At the \vf{90}-row leak, matching lowers the excess cross-entropy on all three datasets, from \vf{7.73} to \vf{1.36} nats per content word on NQ and from \vf{5.58} to \vf{5.11} on legal100t. % src: teacher_forced-w46/summary.json of NQ and legal128w
 
 %% BIG CHANGE: new paragraph (2026-11-18) on second-round rewriting, stated with the one result at the chapter's setting; the reading in the last sentence is bounded to legal10w.
-The three decoders of the hub yield three reconstructions of each prompt, and a second round merges them into a better one.
-A language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
-On legal10w with a leak of \vf{90} rows, rewriting lifts word-F1 from \vf{0.627}, the mean of the three decoders, to \vf{0.745}. % src: Table tab:attack:rewriting, legal10w row
+The three decoders of the hub yield three reconstructions of each prompt.
+In a second round, a language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
+On legal10w with a leak of \vf{90} rows, rewriting lifts word-F1 from \vf{0.627}, the mean of the three decoders, to \vf{0.745}. % src: Section sec:attack:rewriting
 The gain costs the adversary no further access to the target model.
 
 \paragraph{Limitations.} Two limitations bound the claims.
@@ -33,5 +34,4 @@ The gain costs the adversary no further access to the target model.
 \item \textbf{Models and layer.} The results cover one block of one target model of about one billion parameters and three hub models, without a defense or a deployed system.
 \end{itemize}
 
-The experiments quantify reconstruction under the stated adversary resources.
-A second target model and an information-theoretic account remain future work (Chapter~\ref{ch:future}).
+A second target model remains future work.
