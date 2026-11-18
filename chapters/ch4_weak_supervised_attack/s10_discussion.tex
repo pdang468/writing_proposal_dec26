@@ -30,7 +30,8 @@ The gain costs the adversary no further access to the target model.
 \paragraph{Limitations.} Two limitations bound the claims.
 \begin{itemize}
 \item \textbf{Settings chosen with known domain.} The supervision fraction and the temperature were selected by word-F1 on \vf{500} prompts of the known domain, and that score reads their text.
-\item \textbf{Models and layer.} The results cover one block of two target models of about one billion parameters and three hub models, without a defense or a deployed system.
+\item \textbf{Models and layer.} The results cover one block of one target model of about one billion parameters and three hub models, without a defense or a deployed system.
 \end{itemize}
 
-The experiments quantify reconstruction under the stated adversary resources, and an information-theoretic account remains future work (Chapter~\ref{ch:future}).
+The experiments quantify reconstruction under the stated adversary resources.
+A second target model and an information-theoretic account remain future work (Chapter~\ref{ch:future}).
