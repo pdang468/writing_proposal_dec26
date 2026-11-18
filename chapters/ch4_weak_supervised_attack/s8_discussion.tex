@@ -3,14 +3,13 @@
 This work asked whether an adversary who holds only a small leak can read the input of a model outside the hub through a lightweight affine map.
 A leak of \vf{90} rows supervises the map, and unpaired matching refines it on data that carry no correspondence.
 
-On held-out NQ prompts the supervised training on leaks alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
-The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
+The results support the hypothesis that unpaired matching improves reconstruction from a small leak.
+On held-out NQ prompts the supervised training on leaks alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}, a gain of \vf{0.411}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
+The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w, a gain of \vf{0.407}, and from \vf{0.102} to \vf{0.321} on legal128w, a gain of \vf{0.219}. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
 Word-F1 thus more than doubles on every dataset.
-These gains support the hypothesis that unpaired matching improves reconstruction from a small leak.
-The gain is \vf{0.411} on NQ, \vf{0.407} on legal10w, and \vf{0.219} on legal128w. % src: Table tab:attack:main
 
-The attack trains only an affine map, while the hub and its decoders stay frozen, and an affine map preserves the linear structure of the hidden states it receives.
-The gain from matching therefore suggests that the hidden states of the target model and the hub outputs share that structure up to an affine transformation.
+The attack trains only a lightweight affine map, while the hub and its decoders stay frozen.
+The gain from matching therefore suggests that such a map can carry the structure of the target model's hidden states into the shared space of the hub.
 The Platonic Representation Hypothesis predicts this similarity between models, here for a target model that took no part in hub training.
 
 Three findings bound the gain.
@@ -20,8 +19,7 @@ Third, matching does not replace the leak, since without one the tested blind ma
 
 Two supporting experiments explore the map further.
 The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and those predictions and word-F1 do not improve together.
-Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts, with one seed, and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
-A second-round language model, in turn, merges the three decoders' reconstructions into one text at the level of the best decoder, \vf{0.12} to \vf{0.26} word-F1 above their mean.
+Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
 
 \paragraph{Limitations.} Two limitations bound the claims.
 \begin{itemize}
