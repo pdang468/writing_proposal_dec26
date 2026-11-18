@@ -6,7 +6,7 @@ They vary the presence of the leak, its composition, and the components of the m
 \subsection{Matching without a leak}\label{sec:attack:blind}
 
 Matching alone, without any leaked row, yields little word-F1 beyond the mismatched-prompt controls.
-On NQ, the blind maps tested score at most \vf{0.153} word-F1, against a hub reference of \vf{0.946} at the shorter generation cap of those runs, and none exceeds its mismatched-prompt control by more than \vf{0.025} (interval \vf{0.019} to \vf{0.030}). % src: results/v7_2/main/gw.json (highest blind word-F1 0.1528, control 0.1414); results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304]); also results/v7/main-different_text-pythia/results.json and results/v7_2/main/mixed-v7_9-s1.json (alpha 0 cells)
+On NQ, the blind maps tested score at most \vf{0.153} word-F1, against a hub reference of \vf{0.946}, and none exceeds its mismatched-prompt control by more than \vf{0.025} (interval \vf{0.019} to \vf{0.030}). % src: results/v7_2/main/gw.json (highest blind word-F1 0.1528, control 0.1414); results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304]); also results/v7/main-different_text-pythia/results.json and results/v7_2/main/mixed-v7_9-s1.json (alpha 0 cells)
 The blind-map gains remain small compared with the gains from matching on a small leak.
 The result covers \vf{22} blind maps from two objectives, one target model, and one dataset, and it does not show that no unpaired method can connect a target model. % src: 9 + 1 + 6 + 6 maps in the four files above
 

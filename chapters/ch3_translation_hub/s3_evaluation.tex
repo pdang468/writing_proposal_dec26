@@ -7,7 +7,8 @@ Greedy generation starts at the start token and stops at the end-of-sequence tok
 The cap is the length of the soft prompt plus \vf{32} tokens. % src: results/v7_2/main/hub-val-eval-m32.json setting.cap_margin 32 (NQ); legal hub configs (32)
 
 \paragraph{Metrics.} Two metrics score a reconstruction against its source prompt.
-Word-F1 is the word-level F1 score between the two texts, with repeated words counted and word order ignored, averaged over prompts. % src: src/v7_2/content.py word_f1 (whitespace_multiset_metrics)
+Word-F1 scores the words that the two texts share, with repeated words counted and word order ignored.
+A reported word-F1 is the mean over prompts. % src: src/v7_2/content.py word_f1 (whitespace_multiset_metrics)
 Exact match is the fraction of reconstructions identical to their source prompt after Unicode and whitespace normalization.
 
 \paragraph{Mismatched-prompt control.} A fluent decoder may score above zero without reading its soft prompt, because prompts of one dataset share common words.
