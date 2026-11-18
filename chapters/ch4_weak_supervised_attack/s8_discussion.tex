@@ -5,7 +5,8 @@ A leak of \vf{90} rows supervises the map, and unpaired matching refines it on d
 
 On held-out NQ prompts the supervised training on leaks alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
 The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
-Word-F1 more than doubles on every dataset, and the gains on NQ and legal128w, the two datasets that H2 names, meet its criterion.
+Word-F1 thus more than doubles on every dataset.
+The gains on NQ and legal128w meet the criterion of H2.
 
 The attack trains only an affine map, while the hub and its decoders stay frozen, and an affine map preserves the linear structure of the hidden states it receives.
 The gain from matching therefore suggests that the hidden states of the target model and the hub outputs share that structure up to an affine transformation.
