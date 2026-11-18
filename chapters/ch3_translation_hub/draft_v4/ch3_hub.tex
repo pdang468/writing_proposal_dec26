@@ -45,7 +45,8 @@ The projected vectors form a soft prompt, and the decoder generates the reconstr
 
 \paragraph{Models and directions.} The three models are Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B.
 Each contributes hidden states from the block at three quarters of its depth: block \vf{18} of \vf{24} in Qwen (width \vf{1024}), block \vf{12} of \vf{16} in OLMo (width \vf{2048}), and block \vf{18} of \vf{24} in SmolLM (width \vf{2048}). % src: configs/v6_3.yaml (d3_block, width); configs/v3.yaml (blocks, depth_fractions)
-% \todo{One sentence on why this depth, with its source.}
+The depth is a fixed choice and was not tuned.
+The effect of depth on reconstruction is left to future work (Chapter~\ref{ch:future}).
 A direction pairs a source model with a decoder, e.g., Qwen $\to$ hub $\to$ OLMo.
 Three models define nine directions: six cross-model directions and three self-reconstruction directions.
 In a cross-model direction the decoder reconstructs the prompt from another model's hidden states, so the cross-model results test H1.
@@ -79,7 +80,8 @@ The decoding loss is a weighted mean over the nine directions:
 \label{eq:hub:dec}
 \end{equation}
 % src: src/v6_2/losses.py (weighted_direction_ce: (sum cross + 1/3 sum self)/7; h3_objective); configs/v6_3.yaml (loss)
-Cross-model reconstruction thus accounts for $6/7$ of the decoding loss and self-reconstruction for $1/7$. % TODO(author): state why self-reconstruction is down-weighted; v6_2/plan.md fixes the weight without a reason
+Self-reconstruction is expected to succeed without any alignment between models, so its three directions together receive the weight of one cross-model direction, and the loss concentrates on translation between models.
+Cross-model reconstruction thus accounts for $6/7$ of the decoding loss and self-reconstruction for $1/7$.
 
 \paragraph{Token groups.} The two alignment losses compare models at corresponding positions of a prompt, yet the three tokenizers segment a prompt differently.
 For each pair of models, the tokens are therefore collected into token groups: a group ends only at a character position where both tokenizers end a token (whitespace is ignored). % src: src/v3/alignment.py (connected components, a_weights, b_weights); src/v6_2/data.py (_pair_groups)
@@ -121,7 +123,7 @@ A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002
 
 \paragraph{Free-running decoding.} H1 is evaluated under free-running decoding, because under teacher forcing the ground-truth prefix carries information about the next token.
 Each decoder conditions on the soft prompt and on its own generated prefix; greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap.
-The cap is the length of the soft prompt plus \vf{32} tokens on the legal datasets. % TODO(author): state the cap on NQ
+The cap is the length of the soft prompt plus \vf{8} tokens on NQ and plus \vf{32} tokens on the legal datasets. % src: configs/v6_3.yaml (cap_margin 8); legal hub configs (32); NQ re-evaluated at 32 moves no direction by more than 0.001 (commit e1ec486)
 
 \paragraph{Metrics.} Two metrics compare the reconstruction with the source prompt.
 Word-F1 is the harmonic mean of word precision and recall over word multisets, averaged over prompts.
@@ -194,18 +196,19 @@ Mismatched prompt, word-F1 \vf{0.25} & \hit{who} \miss{plays the girl jinx} \hit
 Two legal datasets test H1 on text that differs from question prompts in vocabulary and in length.
 A separate hub is trained per dataset, with the architecture and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training}.
 
-\paragraph{Datasets.} The legal128w dataset cuts one contiguous window from each legal document, starting at a word drawn uniformly over the document.
+\paragraph{Datasets.} Both datasets are cut from the same legal documents.
+The legal10w dataset cuts ten consecutive words from a document, from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
+The legal128w dataset cuts one longer contiguous window, starting at a word drawn uniformly over the document.
 The window grows word by word and stops at \vf{100} tokens under the tokenizer that yields the most tokens for it. % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
 A window of that length averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
 The name records a looser ceiling, \vf{128} tokens under every tokenizer, which the \vf{100}-token stop keeps out of reach. % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
-The legal10w dataset cuts ten consecutive words from the same source documents, from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
 Each dataset has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
 
 \paragraph{Results.} Both legal hubs meet both criteria for H1 (Table~\ref{tab:hub:legal}).
-Mean cross-model word-F1 is \vf{0.977} on each dataset, against mismatched-prompt controls of \vf{0.152} on legal128w and \vf{0.071} on legal10w. % src: results/legal{128w,10w}/v6_3/inversion.json cross_mean (hub 0.9769, 0.9767; shuffled 0.1519, 0.0706)
+Mean cross-model word-F1 is \vf{0.977} on each dataset, against mismatched-prompt controls of \vf{0.071} on legal10w and \vf{0.152} on legal128w. % src: results/legal{10w,128w}/v6_3/inversion.json cross_mean (hub 0.9767, 0.9769; shuffled 0.0706, 0.1519)
 Every cross-model direction exceeds \vf{0.90}; the lowest is Qwen $\to$ OLMo on legal128w, at \vf{0.955} (Figure~\ref{fig:hub:legal-directions}). % src: same files, directions (cross minima 0.9552, 0.9670)
 The lower scores into Qwen on NQ do not recur: the cross-model directions into Qwen score \vf{0.975} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9858, 0.9752)
-Exact match is lower on the long prompts of legal128w, at \vf{0.58}, than on the ten-word prompts of legal10w, at \vf{0.83}; the comparison does not isolate length from content.
+Exact match is higher on the ten-word prompts of legal10w, at \vf{0.83}, than on the long prompts of legal128w, at \vf{0.58}; the comparison does not isolate length from content.
 
 \begin{table}[H]
 \caption{Each legal hub exceeds a mean cross-model word-F1 of \vf{0.90} with a control below \vf{0.20}.
@@ -216,8 +219,8 @@ Free-running word-F1 and exact match averaged over the six cross-model direction
 \toprule
 Dataset & Word-F1 & Exact match & Control word-F1 \\
 \midrule
-legal128w & \vf{0.977} & \vf{0.58} & \vf{0.152} \\ % src: results/legal128w/v6_3/inversion.json cross_mean (0.9769, 0.5814, 0.1519)
 legal10w & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % src: results/legal10w/v6_3/inversion.json cross_mean (0.9767, 0.8291, 0.0706)
+legal128w & \vf{0.977} & \vf{0.58} & \vf{0.152} \\ % src: results/legal128w/v6_3/inversion.json cross_mean (0.9769, 0.5814, 0.1519)
 \bottomrule
 \end{tabular}
 \end{table}

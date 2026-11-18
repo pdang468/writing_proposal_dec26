@@ -9,7 +9,7 @@ This chapter adds a target model and connects it to the frozen hub through an af
 The frozen projectors and decoders then reconstruct the target model's prompts from the output of the map.
 
 Two sources of information train the map.
-First, a small leak, a set of prompts with both their text and the target model's hidden states, supervises the map directly.
+First, a small leak, a set of short text spans with both their text and the target model's hidden states, supervises the map directly.
 Second, a matching term aligns unpaired data, hidden states of the target model and hub outputs with no correspondence between them.
 The chapter tests whether the matching term improves reconstruction over the leak alone.
 With a leak of \vf{90} rows, about ninety words, the matching term raises mean word-F1 on \vf{4{,}500} held-out NQ prompts from \vf{0.35} to \vf{0.77} over three seeds. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
@@ -29,12 +29,13 @@ Four resources are available to the adversary.
 \item \textbf{Two unpaired pools.} The first pool holds hidden states of the target model for prompts of the domain under attack, without their text.
 The second pool holds hub outputs of text from the same domain, computed by OLMo and its source adapter.
 No prompt of one pool is matched to a prompt of the other.
-\item \textbf{A leak.} A small set of prompts for which the adversary holds both the text and the target model's hidden states.
+\item \textbf{A leak.} A small set of short text spans for which the adversary holds both the text and the target model's hidden states.
+The standard leak holds \vf{90} rows, the first nine rows of each of ten prompts, and the adversary holds nothing else of those prompts.
 \item \textbf{The tokenizer of the target model}, applied to the leaked prompts only.
 \end{itemize}
 
 \paragraph{Rows.} OLMo turns the leak into paired data.
-For each leaked prompt, the adversary runs OLMo on the text and obtains the hub outputs of that prompt. % src: src/v6_4/pairs.py (build_pairs)
+For each leaked span, the adversary runs OLMo on the text and obtains the hub outputs of that span. % src: src/v6_4/pairs.py (build_pairs)
 The target model and OLMo split the text into different tokens, so the adversary groups their tokens by shared character boundaries, as in the token groups of Section~\ref{sec:hub:training}.
 Each group forms a row, a pair of vectors for one short span of text.
 The pair holds the average of the target model's hidden states and the average of the hub outputs, both weighted by character coverage and not normalized to unit length. % src: src/v6_4/pairs.py
@@ -305,14 +306,6 @@ The content of the rows matters as well.
 A leak of stop words, or of one repeated word, leaves the hybrid fit at the level of the supervised fit, at \vf{0.058} against \vf{0.056} and \vf{0.054} against \vf{0.057}. % src: mixed-oct_w5-s1-L90.json cells *L90-stop (0.0582, 0.0555), *L90-one_word (0.0535, 0.0568)
 The comparison rests on one seed and does not separate the number of prompts from the content of the particular prompts drawn.
 
-At larger leaks the number of prompts no longer separates the two fits on legal128w.
-Ten whole prompts supply \vf{856} rows, and the hybrid fit of the main comparison scores \vf{0.501} against \vf{0.487} for the supervised fit. % src: results/legal128w/v7_2/main/mixed-v8_7-s1.json seeds.1.cells b10/a0.9/sq/m0/t0.1297/r1/B8192 (0.5006), b10/a1/r1 (0.4869); budgets.10.anchor_counts.valid_aligned_pairs (856)
-Nine rows from each of \vf{100} prompts supply \vf{900} rows, and the two fits score \vf{0.496} and \vf{0.478}. % src: results/legal128w/v7_2/main/mixed-w46-std-L900.json seeds.1.cells (0.4960, 0.4783)
-The gain is below \vf{0.02} under both leaks, so the spread of the rows over prompts makes little difference at this size under the setting of the main comparison.
-%% BIG CHANGE: claim narrowed after review (2026-11-17); one seed, and the best cell is chosen on the prompts that score it.
-A different setting recovers part of the gain, since the best cell of Figure~\ref{fig:attack:grid-size} gains \vf{0.118} on the nine-row leak.
-With \vf{30} and \vf{100} whole prompts, the supervised fit overtakes the hybrid fit, at \vf{0.731} against \vf{0.613} and \vf{0.813} against \vf{0.654}. % src: mixed-v8_7-s1.json, b30 and b100 cells (0.7307, 0.6131; 0.8133, 0.6544); 2,569 and 8,612 rows
-
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.8\textwidth]{ch4/leak_shape}
@@ -451,25 +444,29 @@ A confirmatory test requires a paired interval for the gain over the best decode
 %% ------------------------------------------------------------------
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
-A target model outside hub training connects to the hub through one affine map, and unpaired matching improves the reconstruction obtained from a small supervised leak.
-With \vf{90} leaked rows, word-F1 on held-out prompts rises from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.192} to \vf{0.599} on legal10w, and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/w46-confirmation-s{1,2,3}.json
-The gains on NQ and legal128w, the two datasets that H2 names, meet its criterion.
+%% BIG CHANGE: discussion opening rewritten at the author's request (2026-11-17): the objective first, then the attack, then the size of the gain; transitions added; no number changed.
+The chapter asked whether a model outside hub training can be read through the hub when the adversary holds only a small leak.
+The attack connects such a target model to the frozen hub through one affine map.
+A leak of \vf{90} rows supervises the map, and unpaired matching aligns it further on data that carry no correspondence.
+Matching accounts for most of the reconstruction.
+On held-out NQ prompts the leak alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
+The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
+Word-F1 thus more than doubles on every dataset, and the gains on NQ and legal128w, the two datasets that H2 names, meet its criterion.
 
-The attack trains only an affine map, and the hub and its decoders stay frozen.
-An affine map preserves the linear structure of the hidden states it receives.
+The gain also bears on the representations themselves.
+The attack trains only an affine map, while the hub and its decoders stay frozen, and an affine map preserves the linear structure of the hidden states it receives.
 The gain from matching therefore suggests that the hidden states of the target model and the hub outputs share that structure up to an affine transformation.
 The Platonic Representation Hypothesis predicts this similarity between models, here for a target model that took no part in hub training.
 
-Three findings delimit the result.
-%% BIG CHANGE: claim corrected to the nine-row leak-size comparison (was: largest at small leaks, 0.076 at 986 rows on NQ).
-The gain peaks at leaks of \vf{45} to \vf{90} rows and shrinks as the leak grows, to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w, seed 1 (0.0889, 0.0889)
-The gain holds only within a range of temperatures.
-Without a leak, the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
+Three findings bound the gain.
+First, the gain depends on the size of the leak, with a peak at \vf{45} to \vf{90} rows and a fall to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w, seed 1 (0.0889, 0.0889)
+Second, the gain holds only within a range of temperatures.
+Third, matching does not replace the leak, since without one the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
-A lower decoder loss and a higher word-F1 do not improve together consistently.
-The objective does not measure the decoder's predictions, and teacher-forced cross-entropy and KL divergence do.
+Two supporting experiments concern the decoders and not the map.
+The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and the two do not improve together.
 Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts, with one seed, and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
-A second-round language model merges the three decoders' reconstructions into one text at the level of the best decoder, \vf{0.12} to \vf{0.26} word-F1 above their mean.
+A second-round language model, in turn, merges the three decoders' reconstructions into one text at the level of the best decoder, \vf{0.12} to \vf{0.26} word-F1 above their mean.
 
 \paragraph{What the reconstructions contain.} The results establish a gain in word overlap, not exact recovery, recovery of the facts of a prompt, or an amount of leaked information.
 Exact match under the hybrid fit is \vf{0.21} on NQ and rounds to zero on legal128w.

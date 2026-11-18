@@ -207,7 +207,7 @@ directions()
 directions({"NQ": "results/v6_3/hpc-final/inversion.json"}, "direction_recovery_nq", (3.9, 2.9),
            control="mismatched prompt")  # the records' "shuffled" arm is another prompt's memory
 # The two legal hubs of the chapter (2026-11-15); legal10s is held back.
-directions({c: f"results/{c}/v6_3/inversion.json" for c in ("legal128w", "legal10w")},
+directions({c: f"results/{c}/v6_3/inversion.json" for c in ("legal10w", "legal128w")},
            "direction_recovery_legal", (6.4, 2.9), control="control")
 translation()
 ceiling()
