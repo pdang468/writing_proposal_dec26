@@ -3,11 +3,10 @@
 \paragraph{Free-running decoding.} The hypothesis is tested under free-running decoding.
 % Teacher forcing would hand the decoder the true previous tokens, and that prefix carries information about the next token.
 Each decoder instead conditions on the soft prompt and on its own generated prefix.
-Greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap of the length of soft propmt plus \vf{32} tokens.
+Greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap of the length of the soft prompt plus \vf{32} tokens. % src: results/v7_2/main/hub-val-eval-m32.json setting.cap_margin 32 (NQ); legal hub configs (32)
 
 \paragraph{Metrics.} Two metrics score a reconstruction against its source prompt.
-Word-F1 scores the words that the two texts share, with repeated words counted and word order ignored.
-A reported word-F1 is the mean over prompts. % src: src/v7_2/content.py word_f1 (whitespace_multiset_metrics)
+Word-F1 counts the words that the two texts share, repeats included, ignores their order, and averages the resulting score over prompts. % src: src/v7_2/content.py word_f1 (whitespace_multiset_metrics)
 Exact match is the fraction of reconstructions identical to their source prompt after Unicode and whitespace normalization.
 
 \paragraph{Mismatched-prompt control.} A fluent decoder may score above zero without reading its soft prompt, because prompts of one dataset share common words.
