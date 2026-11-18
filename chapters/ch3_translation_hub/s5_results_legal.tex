@@ -6,17 +6,16 @@ A separate hub is trained per dataset, with the architecture and objective of Se
 
 \paragraph{Datasets.} Both datasets are cut from the same legal documents, and each prompt starts at a word drawn uniformly over its document. % src: documents/glossary.md (window corpus, piece corpus)
 A legal10w prompt holds ten consecutive words.
-A legal128w prompt is longer, and its length is limited in tokens.
-The prompt grows word by word until it reaches \vf{100} tokens under the tokenizer that yields the most tokens for it. % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
-At that limit a prompt averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
-The \vf{128} in the name is a looser token limit that no prompt reaches, not a word count. % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
+A legal100t prompt is longer and grows word by word until it reaches \vf{100} tokens under the tokenizer that yields the most tokens for it. % legal100t is named legal128w in configs and result files % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
+Such a prompt averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
+ % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
 Each dataset has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
 
 \paragraph{Results.} Both legal hubs support the hypothesis (Table~\ref{tab:hub:legal}).
-Mean cross-model word-F1 is \vf{0.977} on each dataset, against mismatched-prompt controls of \vf{0.071} on legal10w and \vf{0.152} on legal128w. % src: results/legal{10w,128w}/v6_3/inversion.json cross_mean (hub 0.9767, 0.9769; shuffled 0.0706, 0.1519)
-The lowest cross-model direction is Qwen $\to$ OLMo on legal128w, at \vf{0.955} (Figure~\ref{fig:hub:legal-directions}). % src: same files, directions (cross minima 0.9552, 0.9670)
+Mean cross-model word-F1 is \vf{0.977} on each dataset, against mismatched-prompt controls of \vf{0.071} on legal10w and \vf{0.152} on legal100t. % src: results/legal{10w,128w}/v6_3/inversion.json cross_mean (hub 0.9767, 0.9769; shuffled 0.0706, 0.1519)
+The lowest cross-model direction is Qwen $\to$ OLMo on legal100t, at \vf{0.955} (Figure~\ref{fig:hub:legal-directions}). % src: same files, directions (cross minima 0.9552, 0.9670)
 The lower scores into Qwen on NQ do not recur: the cross-model directions into Qwen score \vf{0.975} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9858, 0.9752)
-Exact match is higher on the ten-word prompts of legal10w, at \vf{0.83}, than on the long prompts of legal128w, at \vf{0.58}; the comparison does not isolate length from content.
+Exact match is higher on the ten-word prompts of legal10w, at \vf{0.83}, than on the long prompts of legal100t, at \vf{0.58}; the comparison does not isolate length from content.
 
 \begin{table}[H]
 \caption{Each legal hub reaches a mean cross-model word-F1 of \vf{0.977}, against controls of \vf{0.071} and \vf{0.152}.
@@ -28,7 +27,7 @@ Free-running word-F1 and exact match averaged over the six cross-model direction
 Dataset & Word-F1 & Exact match & Control word-F1 \\
 \midrule
 legal10w & \vf{0.977} & \vf{0.83} & \vf{0.071} \\ % src: results/legal10w/v6_3/inversion.json cross_mean (0.9767, 0.8291, 0.0706)
-legal128w & \vf{0.977} & \vf{0.58} & \vf{0.152} \\ % src: results/legal128w/v6_3/inversion.json cross_mean (0.9769, 0.5814, 0.1519)
+legal100t & \vf{0.977} & \vf{0.58} & \vf{0.152} \\ % src: results/legal128w/v6_3/inversion.json cross_mean (0.9769, 0.5814, 0.1519)
 \bottomrule
 \end{tabular}
 \end{table}

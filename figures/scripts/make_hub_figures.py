@@ -48,6 +48,21 @@ def nq_cap32():
 
 
 def save(fig, name):
+    import matplotlib.text, matplotlib.ticker
+    def shown(s):  # names as the dissertation prints them: legal128w in result files is legal100t in the text
+        return s.replace("legal128w", "legal100t").replace(" (seed 1)", "")
+    renamed = False
+    for ax in fig.axes:
+        for axis in (ax.xaxis, ax.yaxis):
+            fmt = axis.get_major_formatter()
+            if isinstance(fmt, matplotlib.ticker.FixedFormatter):
+                renamed |= any(shown(s) != s for s in fmt.seq)
+                fmt.seq = [shown(s) for s in fmt.seq]
+    for text in fig.findobj(matplotlib.text.Text):
+        renamed |= shown(text.get_text()) != text.get_text()
+        text.set_text(shown(text.get_text()))
+    if renamed:
+        print("RENAMED", name)
     path = OUT / "ch3" / name
     fig.savefig(path.with_suffix(".pdf"))
     fig.savefig(path.with_suffix(".png"), dpi=200)

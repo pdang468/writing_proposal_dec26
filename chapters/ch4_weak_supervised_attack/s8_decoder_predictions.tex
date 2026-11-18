@@ -22,7 +22,7 @@ The averages are reported in nats per content word. % src: teacher_forced_run.py
 
 \paragraph{The matching term and the decoder.} On NQ the hybrid fit has the lower excess cross-entropy at every leak size, \vf{1.76} nats against \vf{7.61} under the supervised fit at \vf{92} rows (Figure~\ref{fig:attack:ce}). % src: results/v7_2/main/framework/teacher_forced/summary.json arms.{b10-a1-r1, b10-a0.95-sq-m0-t0.1152-r1-B8192}.classes.content.excess_per_word (7.6127, 1.7640)
 At that leak size the supervised fit, at \vf{7.61}, is worse than a decoder with no soft prompt at all, at \vf{6.08}. % src: same file, arms.no_memory (6.0751)
-On legal128w the order reverses, and the hybrid fit has the higher excess cross-entropy at every leak size, \vf{2.82} against \vf{2.46} at \vf{856} rows. % src: results/legal128w/v7_2/main/framework/teacher_forced/summary.json (2.8195, 2.4597)
+On legal100t the order reverses, and the hybrid fit has the higher excess cross-entropy at every leak size, \vf{2.82} against \vf{2.46} at \vf{856} rows. % src: results/legal128w/v7_2/main/framework/teacher_forced/summary.json (2.8195, 2.4597)
 Its word-F1 at that leak size is nevertheless the higher one, \vf{0.523} against \vf{0.487}. % src: results/legal128w/v7_2/main/v8_6-summary.json rows (hybrid_B8192 0.5228, supervised 0.4869)
 The KL divergence follows the excess cross-entropy within \vf{0.25} nats in every cell.
 The matching term therefore raises word-F1 without consistently improving the decoder's next-token predictions.
@@ -30,14 +30,14 @@ The matching term therefore raises word-F1 without consistently improving the de
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.95\textwidth]{ch4/cross_entropy}
-\caption{Under teacher forcing, the hybrid fit is below the supervised fit on NQ and above it on legal128w.
+\caption{Under teacher forcing, the hybrid fit is below the supervised fit on NQ and above it on legal100t.
 Excess cross-entropy in nats per content word against the number of leaked rows, \vf{500} selection prompts; the dotted line, labeled no memory, is a decoder with no soft prompt.
 Hybrid fit with $\alpha = 0.95$, $\tau = 2d$, $B = 8{,}192$.}
 \label{fig:attack:ce}
 \end{figure}
 
 \paragraph{Training the map on the decoder's predictions.}\label{sec:attack:decoderkl} A further step places the decoder inside the objective.
-Starting from a hybrid fit on legal128w ($\alpha = 0.99$, $\tau = d$), the step trains the affine map through the frozen SmolLM decoder on the prompts of the leak, with the KL divergence defined above as its training loss. % src: oct_w4/plan.md; results/legal128w/v7_2/main/oct_w4-summary.json budgets.*.selected (kl/beta0)
+Starting from a hybrid fit on legal100t ($\alpha = 0.99$, $\tau = d$), the step trains the affine map through the frozen SmolLM decoder on the prompts of the leak, with the KL divergence defined above as its training loss. % src: oct_w4/plan.md; results/legal128w/v7_2/main/oct_w4-summary.json budgets.*.selected (kl/beta0)
 On the \vf{4{,}500} held-out prompts, the KL divergence and the cross-entropy of SmolLM both fall at every leak size (Table~\ref{tab:attack:decoderkl}).
 The cross-entropy falls by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at leaks of \vf{856}, \vf{2{,}569}, and \vf{8{,}612} rows.
 Word-F1 rises by at most \vf{0.023} at the same leak sizes. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce; confirmation.f1_gain_vs_start.kl/beta0.f1 (+0.0092 [0.0062, 0.0123]; +0.0111 [0.0090, 0.0134]; +0.0233 [0.0212, 0.0254])
@@ -46,7 +46,7 @@ A lower training loss thus lowers the cross-entropy and the KL divergence but ad
 
 \begin{table}[H]
 \caption{Training the map through the decoder with the KL loss lowers cross-entropy and KL divergence by \vf{0.15} to \vf{0.26} nats and raises word-F1 by \vf{0.01} to \vf{0.02}.
-SmolLM decoder, legal128w, \vf{4{,}500} held-out prompts; cross-entropy and KL divergence in nats per content word under teacher forcing; each gain carries a \vf{95} percent interval from a paired bootstrap over prompts.}
+SmolLM decoder, legal100t, \vf{4{,}500} held-out prompts; cross-entropy and KL divergence in nats per content word under teacher forcing; each gain carries a \vf{95} percent interval from a paired bootstrap over prompts.}
 \label{tab:attack:decoderkl}
 \centering
 \small\setlength{\tabcolsep}{4pt}

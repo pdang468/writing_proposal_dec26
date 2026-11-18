@@ -5,7 +5,7 @@ A leak of \vf{90} rows supervises the map, and unpaired matching refines it on d
 
 The results support the hypothesis that unpaired matching improves reconstruction from a small leak.
 On held-out NQ prompts the supervised training on leaks alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}, a gain of \vf{0.411}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
-The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w, a gain of \vf{0.407}, and from \vf{0.102} to \vf{0.321} on legal128w, a gain of \vf{0.219}. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
+The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w, a gain of \vf{0.407}, and from \vf{0.102} to \vf{0.321} on legal100t, a gain of \vf{0.219}. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
 Word-F1 thus more than doubles on every dataset.
 
 The attack trains only a lightweight affine map, while the hub and its decoders stay frozen.
@@ -19,7 +19,7 @@ Third, matching does not replace the leak, since without one the tested blind ma
 
 Two supporting experiments explore the map further.
 The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and those predictions and word-F1 do not improve together.
-Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
+Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal100t prompts and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
 
 %% BIG CHANGE: new paragraph (2026-11-18) on second-round rewriting, stated with the one result at the chapter's setting; the reading in the last sentence is bounded to legal10w.
 The three decoders of the hub yield three reconstructions of each prompt, and a second round merges them into a better one.

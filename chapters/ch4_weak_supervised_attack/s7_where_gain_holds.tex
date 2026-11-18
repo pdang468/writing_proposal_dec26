@@ -14,8 +14,8 @@ The result covers \vf{22} blind maps from two objectives, one target model, and 
 
 At a fixed number of rows, a leak spread over more prompts yields a higher word-F1 than a leak drawn from one or two prompts (Figure~\ref{fig:attack:shape}).
 %% BIG CHANGE: new sentence (2026-11-17), why the composition comparison sits on legal128w.
-The comparison runs on legal128w, the one dataset whose prompts are long enough to vary the rows per prompt at a fixed number of rows.
-On legal128w, the hybrid fit scores \vf{0.321} with one row from each of \vf{90} prompts, \vf{0.304} with nine consecutive rows from each of ten prompts, and \vf{0.178} with \vf{90} rows from two prompts. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json (L90-random 0.3207); mixed-oct_w5-s1-L90-ext2.json (L90-span9 0.3039); mixed-oct_w5b-L-prefix.json (L90-prefix 0.1782)
+The comparison runs on legal100t, the one dataset whose prompts are long enough to vary the rows per prompt at a fixed number of rows.
+On legal100t, the hybrid fit scores \vf{0.321} with one row from each of \vf{90} prompts, \vf{0.304} with nine consecutive rows from each of ten prompts, and \vf{0.178} with \vf{90} rows from two prompts. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json (L90-random 0.3207); mixed-oct_w5-s1-L90-ext2.json (L90-span9 0.3039); mixed-oct_w5b-L-prefix.json (L90-prefix 0.1782)
 The content of the rows matters as well.
 A leak of stop words, or of one repeated word, leaves the hybrid fit at the level of the supervised fit, at \vf{0.058} against \vf{0.056} and \vf{0.054} against \vf{0.057}. % src: mixed-oct_w5-s1-L90.json cells *L90-stop (0.0582, 0.0555), *L90-one_word (0.0535, 0.0568)
 The comparison does not separate the number of prompts from the content of the particular prompts drawn.
@@ -23,7 +23,7 @@ The comparison does not separate the number of prompts from the content of the p
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.8\textwidth]{ch4/leak_shape}
-\caption{With \vf{90} leaked rows on legal128w, the hybrid fit scores \vf{0.18} for a leak from two prompts and \vf{0.30} to \vf{0.32} for a leak spread over \vf{10} or \vf{90} prompts.
+\caption{With \vf{90} leaked rows on legal100t, the hybrid fit scores \vf{0.18} for a leak from two prompts and \vf{0.30} to \vf{0.32} for a leak spread over \vf{10} or \vf{90} prompts.
 Word-F1 averaged over three decoders, \vf{500} selection prompts, hybrid fit with $\alpha = 0.99$, $\tau = d$, $B = 8{,}192$.
 Each bracket gives the gain of the hybrid fit.}
 \label{fig:attack:shape}

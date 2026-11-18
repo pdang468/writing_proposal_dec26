@@ -14,16 +14,16 @@ The experiment covers \vf{450} of the \vf{500} selection prompts, and the instru
 \paragraph{Result.} Rewriting exceeds the mean word-F1 of the three reconstructions in every tested condition, and its small advantage over the best single decoder carries no interval (Table~\ref{tab:attack:rewriting}).
 On NQ at a leak of \vf{92} rows, word-F1 rises from a three-decoder mean of \vf{0.727} to \vf{0.861}, while SmolLM alone scores \vf{0.854}. % src: results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json; results/legal128w/v7_2/main/framework/attacker/attacker-b{10,100}-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json, table."hybrid rung B".word_f1; SmolLM alone recomputed from the per-prompt records (0.8539)
 Across the four conditions the gain over the mean is \vf{0.12} to \vf{0.26}, with every paired interval above zero.
-The gain over SmolLM alone is \vf{0.01} on NQ, \vf{0.06} on legal10w, where the three decoders score closest to one another, and \vf{0.01} to \vf{0.02} on legal128w. % src: results/legal10w/v7_2/main/framework/attacker/attacker-b90-a0.9-sq-m0-t0.1476-r1-B8192-L90-span9-s1-haiku.json table."hybrid rung B".word_f1 (0.6273, 0.7446); per-decoder scores recomputed from the endpoint decoding on the 450 prompts (SmolLM 0.6839, OLMo 0.6176, Qwen 0.5804)
+The gain over SmolLM alone is \vf{0.01} on NQ, \vf{0.06} on legal10w, where the three decoders score closest to one another, and \vf{0.01} to \vf{0.02} on legal100t. % src: results/legal10w/v7_2/main/framework/attacker/attacker-b90-a0.9-sq-m0-t0.1476-r1-B8192-L90-span9-s1-haiku.json table."hybrid rung B".word_f1 (0.6273, 0.7446); per-decoder scores recomputed from the endpoint decoding on the 450 prompts (SmolLM 0.6839, OLMo 0.6176, Qwen 0.5804)
 Given one reconstruction, the language model changes word-F1 by at most \vf{0.023}, averaged over the three decoders. % src: same files, table."hybrid rung A".word_f1.gain (-0.0017, +0.0226, +0.0119)
 Entity recall measures the share of the true prompt's named entities that appear in the output.
-At leaks of \vf{92} rows on NQ and \vf{856} rows on legal128w, rewriting raises entity recall above the three-decoder mean, from \vf{0.50} to \vf{0.71} and from \vf{0.21} to \vf{0.37}. % src: same files, table."hybrid rung B".entity_recall (0.5000, 0.7116; 0.2106, 0.3743; 0.4399, 0.5735)
-At \vf{8{,}612} rows on legal128w, entity recall rises from \vf{0.44} to \vf{0.57}.
+At leaks of \vf{92} rows on NQ and \vf{856} rows on legal100t, rewriting raises entity recall above the three-decoder mean, from \vf{0.50} to \vf{0.71} and from \vf{0.21} to \vf{0.37}. % src: same files, table."hybrid rung B".entity_recall (0.5000, 0.7116; 0.2106, 0.3743; 0.4399, 0.5735)
+At \vf{8{,}612} rows on legal100t, entity recall rises from \vf{0.44} to \vf{0.57}.
 On legal10w at \vf{90} rows, entity recall rises from \vf{0.17} to \vf{0.21}. % src: legal10w attacker file, table."hybrid rung B".entity_recall (0.1695, 0.2143, +0.045 [0.019, 0.074])
 
 \begin{table}[H]
 \caption{Rewriting exceeds the mean of the three decoders by \vf{0.12} to \vf{0.26} word-F1 and SmolLM alone by \vf{0.01} to \vf{0.06}.
-Hybrid fits with $\tau = 2d$, $B = 8{,}192$, \vf{450} selection prompts; $\alpha = 0.95$ on leaks of whole prompts for NQ and legal128w, and the fit of the main comparison ($\alpha = 0.9$, the \vf{90}-row leak) for legal10w; the gain is after rewriting minus the mean of three, with a \vf{95} percent interval from a paired bootstrap over prompts.
+Hybrid fits with $\tau = 2d$, $B = 8{,}192$, \vf{450} selection prompts; $\alpha = 0.95$ on leaks of whole prompts for NQ and legal100t, and the fit of the main comparison ($\alpha = 0.9$, the \vf{90}-row leak) for legal10w; the gain is after rewriting minus the mean of three, with a \vf{95} percent interval from a paired bootstrap over prompts.
 Word-F1 in this section is computed on lower-cased words without edge punctuation.}
 \label{tab:attack:rewriting}
 \centering
@@ -34,8 +34,8 @@ Condition & Mean of three & SmolLM alone & After rewriting & Gain \\
 \midrule
 NQ, \vf{92} rows & \vf{0.727} & \vf{0.854} & \vf{0.861} & \vf{$+0.134$} [\vf{0.124}, \vf{0.145}] \\ % src: attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json table."hybrid rung B".word_f1 (0.7271, 0.8610, +0.1339 [0.1237, 0.1449]); SmolLM alone recomputed from the per-prompt records (0.8539)
 legal10w, \vf{90} rows & \vf{0.627} & \vf{0.684} & \vf{0.745} & \vf{$+0.117$} [\vf{0.104}, \vf{0.130}] \\ % src: results/legal10w/v7_2/main/framework/attacker/attacker-b90-a0.9-sq-m0-t0.1476-r1-B8192-L90-span9-s1-haiku.json table."hybrid rung B".word_f1 (0.6273, 0.7446, +0.1173 [0.1041, 0.1303]); SmolLM alone recomputed (0.6839); run 2026-11-17, 4,500 calls
-legal128w, \vf{856} rows & \vf{0.539} & \vf{0.779} & \vf{0.802} & \vf{$+0.263$} [\vf{0.252}, \vf{0.273}] \\ % src: legal128w attacker-b10-...-haiku.json (0.5393, 0.8020, +0.2627 [0.2522, 0.2729]); SmolLM alone recomputed (0.7793)
-legal128w, \vf{8{,}612} rows & \vf{0.772} & \vf{0.890} & \vf{0.896} & \vf{$+0.124$} [\vf{0.115}, \vf{0.135}] \\ % src: legal128w attacker-b100-...-haiku.json (0.7721, 0.8963, +0.1242 [0.1145, 0.1349]); SmolLM alone recomputed (0.8897)
+legal100t, \vf{856} rows & \vf{0.539} & \vf{0.779} & \vf{0.802} & \vf{$+0.263$} [\vf{0.252}, \vf{0.273}] \\ % src: legal128w attacker-b10-...-haiku.json (0.5393, 0.8020, +0.2627 [0.2522, 0.2729]); SmolLM alone recomputed (0.7793)
+legal100t, \vf{8{,}612} rows & \vf{0.772} & \vf{0.890} & \vf{0.896} & \vf{$+0.124$} [\vf{0.115}, \vf{0.135}] \\ % src: legal128w attacker-b100-...-haiku.json (0.7721, 0.8963, +0.1242 [0.1145, 0.1349]); SmolLM alone recomputed (0.8897)
 \bottomrule
 \end{tabular}
 \end{table}
