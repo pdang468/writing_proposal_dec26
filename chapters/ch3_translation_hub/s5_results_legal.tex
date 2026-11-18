@@ -19,7 +19,7 @@ Exact match is higher on the ten-word prompts of legal10w, at \vf{0.83}, than on
 
 \begin{table}[H]
 \caption{Each legal hub reaches a mean cross-model word-F1 of \vf{0.977}, against controls of \vf{0.071} and \vf{0.152}.
-Free-running word-F1 and exact match averaged over the six cross-model directions on the \vf{5{,}000} validation prompts of each dataset, one hub seed per dataset; each control is evaluated on the same prompts and directions as its score.}
+Free-running word-F1 and exact match averaged over the six cross-model directions on the \vf{5{,}000} validation prompts of each dataset; each control is evaluated on the same prompts and directions as its score.}
 \label{tab:hub:legal}
 \centering
 \begin{tabular}{lccc}
@@ -36,8 +36,7 @@ legal128w & \vf{0.977} & \vf{0.58} & \vf{0.152} \\ % src: results/legal128w/v6_3
 \centering
 \includegraphics[width=\textwidth]{ch3/direction_recovery_legal}
 \caption{Every direction of the two legal hubs reaches a word-F1 of at least 0.95.
-Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} validation prompts of each legal dataset; diagonal cells are self-reconstruction.
-One hub seed per dataset.}
+Free-running word-F1, with exact match below, by source model (rows) and decoder (columns) on the \vf{5{,}000} validation prompts of each legal dataset; diagonal cells are self-reconstruction.}
 \label{fig:hub:legal-directions}
 \end{figure}
 

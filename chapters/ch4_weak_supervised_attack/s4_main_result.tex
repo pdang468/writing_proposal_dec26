@@ -4,14 +4,13 @@ Unpaired matching more than doubles reconstruction word-F1 on all three datasets
 On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 on NQ rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit, a gain of \vf{0.411} with an interval of \vf{0.408} to \vf{0.415}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113)
 On legal10w, word-F1 rises from \vf{0.192} to \vf{0.599}, a gain of \vf{0.407} with an interval of \vf{0.403} to \vf{0.412}. % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
 On legal128w, word-F1 rises from \vf{0.102} to \vf{0.321}, a gain of \vf{0.219} with an interval of \vf{0.215} to \vf{0.222}. % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval as for NQ
-The gain appears in every seed, at no less than \vf{0.402} on NQ, \vf{0.380} on legal10w, and \vf{0.201} on legal128w. % src: same files, hybrid minus supervised per seed (0.4018, 0.4189, 0.4135; 0.2010, 0.2444, 0.2112); legal10w (0.3799, 0.3963, 0.4461)
 %% BIG CHANGE: new sentence (2026-11-17), the reading that orders the datasets; it restates the three gains and the exposure stated in the setup.
 The two datasets of short prompts gain about \vf{0.41}, and legal128w, where nine rows expose only the opening words of a prompt, gains about half as much.
 Both fits receive the same leak, so the gain comes from the two unpaired pools.
 
 \begin{table}[H]
 \caption{With \vf{90} leaked rows, the hybrid fit exceeds the supervised fit by \vf{0.41} word-F1 on NQ, by \vf{0.41} on legal10w, and by \vf{0.22} on legal128w.
-Word-F1 averaged over three decoders and three seeds, Pythia as the target model, $\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$.
+Word-F1 averaged over three decoders, Pythia as the target model, $\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$.
 The held-out prompts selected no setting of the attack; each interval is a \vf{95} percent interval from a paired bootstrap over prompts.}
 \label{tab:attack:main}
 \centering
@@ -33,8 +32,8 @@ legal128w & \vf{500} selection & \vf{0.102} & \vf{0.320} & \vf{$+0.218$} [\vf{0.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.75\textwidth]{ch4/standard_cell}
-\caption{The hybrid fit exceeds the supervised fit in every seed on all three datasets.
-Word-F1 averaged over three decoders on the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows; bars are means over three seeds, dots the seeds, and each bracket the gain of the hybrid fit.}
+\caption{The hybrid fit exceeds the supervised fit on all three datasets.
+Word-F1 averaged over three decoders on the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows; bars are means, dots the individual fits, and each bracket the gain of the hybrid fit.}
 \label{fig:attack:standard}
 \end{figure}
 
@@ -55,7 +54,7 @@ The supervised fit on the same leak keeps the question word and loses the conten
 
 \begin{table}[H]
 \caption{With the same \vf{90} rows, the hybrid fit reconstructs content words that the supervised fit loses.
-Reconstructions through the SmolLM decoder for three held-out NQ prompts, chosen at high, intermediate, and low word-F1 of the hybrid fit (seed \vf{1}).
+Reconstructions through the SmolLM decoder for three held-out NQ prompts, chosen at high, intermediate, and low word-F1 of the hybrid fit.
 Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:attack:examples}
 \centering

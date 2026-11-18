@@ -53,7 +53,7 @@ where the first bar denotes a mean over the two models of each pair and over the
 The first term compares one model with itself: the similarities among its hub outputs should match those among its hidden states.
 The second term compares two models: the similarities among the hub outputs of model $a$ should match those of model $b$ on the same groups. % src: src/v4/geometry.py; src/v6_2/train.py (_geometry_sides, compute_initial_statistics)
 
-\paragraph{Schedule and checkpoint selection.} The hub is trained for \vf{2{,}500} AdamW updates of \vf{32} prompts each, drawn from \vf{40{,}000} training prompts, with one random seed.
+\paragraph{Schedule and checkpoint selection.} The hub is trained for \vf{2{,}500} AdamW updates of \vf{32} prompts each, drawn from \vf{40{,}000} training prompts.
 The learning rate rises to $3\times10^{-4}$ over \vf{250} warmup updates and follows a cosine decay to zero; weight decay is \vf{0.01} on the linear weights, and gradients are clipped at norm \vf{1.0}. % src: configs/v6_3.yaml (training)
 Teacher-forced Acc@1 selects the checkpoint.
 Acc@1 is the fraction of prompt tokens that the decoder ranks first given the ground-truth prefix, averaged over the \vf{5{,}000} validation prompts and the six cross-model directions.

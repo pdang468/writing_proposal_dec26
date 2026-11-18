@@ -9,7 +9,7 @@ It receives the three reconstructions, with the SmolLM reconstruction first, and
 Its instruction reads ``You get three noisy copies of the same question. Copy 1 is the most reliable; start from it and apply majority rules where the copies disagree. Fix spelling, broken words and repeats. Reply with the text only, inside \texttt{<text></text>}.''
 On the two legal datasets the instruction says ``SEC filing excerpt'' in place of ``question''.
 The language model receives the reconstructions, the kind of text, and the instruction that names SmolLM as the most reliable copy, but no hidden state and no part of the true prompt.
-The experiment covers \vf{450} of the \vf{500} selection prompts and one seed, and the instruction was selected on the other \vf{50}. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
+The experiment covers \vf{450} of the \vf{500} selection prompts, and the instruction was selected on the other \vf{50}. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
 
 \paragraph{Result.} Rewriting exceeds the mean word-F1 of the three reconstructions in every tested condition, and its small advantage over the best single decoder carries no interval (Table~\ref{tab:attack:rewriting}).
 On NQ at a leak of \vf{92} rows, word-F1 rises from a three-decoder mean of \vf{0.727} to \vf{0.861}, while SmolLM alone scores \vf{0.854}. % src: results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json; results/legal128w/v7_2/main/framework/attacker/attacker-b{10,100}-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json, table."hybrid rung B".word_f1; SmolLM alone recomputed from the per-prompt records (0.8539)
@@ -23,7 +23,7 @@ On legal10w at \vf{90} rows, entity recall rises from \vf{0.17} to \vf{0.21}. % 
 
 \begin{table}[H]
 \caption{Rewriting exceeds the mean of the three decoders by \vf{0.12} to \vf{0.26} word-F1 and SmolLM alone by \vf{0.01} to \vf{0.06}.
-Hybrid fits with $\tau = 2d$, $B = 8{,}192$, seed \vf{1}, \vf{450} selection prompts; $\alpha = 0.95$ on leaks of whole prompts for NQ and legal128w, and the fit of the main comparison ($\alpha = 0.9$, the \vf{90}-row leak) for legal10w; the gain is after rewriting minus the mean of three, with a \vf{95} percent interval from a paired bootstrap over prompts.
+Hybrid fits with $\tau = 2d$, $B = 8{,}192$, \vf{450} selection prompts; $\alpha = 0.95$ on leaks of whole prompts for NQ and legal128w, and the fit of the main comparison ($\alpha = 0.9$, the \vf{90}-row leak) for legal10w; the gain is after rewriting minus the mean of three, with a \vf{95} percent interval from a paired bootstrap over prompts.
 Word-F1 in this section is computed on lower-cased words without edge punctuation.}
 \label{tab:attack:rewriting}
 \centering
