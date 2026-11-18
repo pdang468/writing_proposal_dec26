@@ -21,6 +21,12 @@ Two supporting experiments explore the map further.
 The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and those predictions and word-F1 do not improve together.
 Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
 
+%% BIG CHANGE: new paragraph (2026-11-18) on second-round rewriting, stated with the one result at the chapter's setting; the reading in the last sentence is bounded to legal10w.
+A further experiment adds a language model after the three decoders.
+The language model receives the three reconstructions of a prompt, and no hidden state, and rewrites them into one text.
+On legal10w with a leak of \vf{90} rows, the rewritten text reaches a word-F1 of \vf{0.745}, against \vf{0.627} for the mean of the three decoders and \vf{0.684} for the best of them. % src: Table tab:attack:rewriting, legal10w row
+The three decoders therefore make different errors on that dataset, and a second round combines their reconstructions without further access to the target model.
+
 \paragraph{Limitations.} Two limitations bound the claims.
 \begin{itemize}
 \item \textbf{Settings chosen with known domain.} The supervision fraction and the temperature were selected by word-F1 on \vf{500} prompts of the known domain, and that score reads their text.
