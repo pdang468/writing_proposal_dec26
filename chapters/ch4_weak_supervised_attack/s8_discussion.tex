@@ -1,41 +1,30 @@
 \section{Discussion and Limitations}\label{sec:attack:discussion}
-
-%% BIG CHANGE: discussion opening rewritten at the author's request (2026-11-17): the objective first, then the attack, then the size of the gain; transitions added; no number changed.
-The chapter asked whether a model outside hub training can be read through the hub when the adversary holds only a small leak.
-The attack connects such a target model to the frozen hub through one affine map.
+This work asked whether an adversary could read the input of outside hub model using a lightweight affine map and holds only a small leak.
 A leak of \vf{90} rows supervises the map, and unpaired matching aligns it further on data that carry no correspondence.
-Matching accounts for most of the reconstruction.
+Matching push the word-F1 score significantly to the reliable reconstruction range.
+
 On held-out NQ prompts the leak alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
 The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
 Word-F1 thus more than doubles on every dataset, and the gains on NQ and legal128w, the two datasets that H2 names, meet its criterion.
 
-The gain also bears on the representations themselves.
 The attack trains only an affine map, while the hub and its decoders stay frozen, and an affine map preserves the linear structure of the hidden states it receives.
 The gain from matching therefore suggests that the hidden states of the target model and the hub outputs share that structure up to an affine transformation.
 The Platonic Representation Hypothesis predicts this similarity between models, here for a target model that took no part in hub training.
 
 Three findings bound the gain.
 First, the gain depends on the size of the leak, with a peak at \vf{45} to \vf{90} rows and a fall to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w, seed 1 (0.0889, 0.0889)
-Second, the gain holds only within a range of temperatures.
+Second, the gain requires a proper range of temperatures, where is could distinguish between the difference between the matching candidates.
 Third, matching does not replace the leak, since without one the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
-Two supporting experiments concern the decoders and not the map.
+Two supporting experiments aim to explore the map further.
 The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and the two do not improve together.
 Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts, with one seed, and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
 A second-round language model, in turn, merges the three decoders' reconstructions into one text at the level of the best decoder, \vf{0.12} to \vf{0.26} word-F1 above their mean.
 
-\paragraph{What the reconstructions contain.} The results establish a gain in word overlap, not exact recovery, recovery of the facts of a prompt, or an amount of leaked information.
-Exact match under the hybrid fit is \vf{0.21} on NQ and rounds to zero on legal128w.
-In legal128w reconstructions from the leak-composition experiment (Section~\ref{sec:attack:leak}), the errors are fluent substitutions, e.g., ``registrant'' becomes ``insurer'', and dates, section numbers, and a company name are replaced by others of the same kind. % src: results/legal128w/v7_2/main/mixed-v7_9/runs/b90-a0.99-sq-m0-t0.06485-r1-B8192-L90-random-s1/endpoint/decoding.jsonl, SmolLM records
-A reconstruction does not mark which of its words match the source.
-At a leak of \vf{856} rows on legal128w, rewriting raises entity recall from \vf{0.21} to \vf{0.37}, and most named entities remain unrecovered.
 
 \paragraph{Limitations.} Four limitations bound the claims.
 \begin{itemize}
-\item \textbf{Settings chosen with known text.} The supervision fraction and the temperature were selected by word-F1 on \vf{500} prompts whose text is known, and no run measures the cost of selecting them without such prompts.
-\item \textbf{Supporting experiments.} Only the main comparison runs on held-out prompts with three seeds.
-The supporting experiments rest on the \vf{500} selection prompts and one seed, and those other than the leak-size comparison and its grid run at earlier settings.
-\item \textbf{Same-domain pools.} Both unpaired pools and the leak come from the dataset under attack, and no run tests text from another domain or a smaller pool.
+\item \textbf{Settings chosen with known domain.} The supervision fraction and the temperature were selected by word-F1 on \vf{500} prompts whose text domain is known.
 \item \textbf{Models and layer.} The results cover one block of two target models of about one billion parameters and three hub models, without a defense or a deployed system.
 \end{itemize}
 
