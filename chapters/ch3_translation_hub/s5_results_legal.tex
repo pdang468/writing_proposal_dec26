@@ -4,11 +4,10 @@ NQ prompts are short questions.
 Two legal datasets repeat the test on legal text, one with prompts of ten words and one with prompts of about \vf{68} words. % src: legal10w piece length; legal128w validation mean 67.6 words (see Datasets paragraph)
 A separate hub is trained per dataset, with the architecture and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training}.
 
-\paragraph{Datasets.} Both datasets are cut from the same legal documents.
-The legal10w dataset cuts ten consecutive words from a document, from a start word drawn uniformly over the document. % src: documents/glossary.md (window corpus, piece corpus)
-The legal128w dataset cuts one longer contiguous window, starting at a word drawn uniformly over the document.
-The window grows word by word and stops at \vf{100} tokens under the tokenizer that yields the most tokens for it. % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
-A window of that length averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
+\paragraph{Datasets.} Both datasets are cut from the same legal documents, and each prompt starts at a word drawn uniformly over its document. % src: documents/glossary.md (window corpus, piece corpus)
+A legal10w prompt holds ten consecutive words.
+A legal128w prompt grows word by word and stops at \vf{100} tokens under the tokenizer that yields the most tokens for it. % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
+Such a prompt averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
 The name records a looser ceiling, \vf{128} tokens under every tokenizer, which the \vf{100}-token stop keeps out of reach. % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
 Each dataset has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
 
