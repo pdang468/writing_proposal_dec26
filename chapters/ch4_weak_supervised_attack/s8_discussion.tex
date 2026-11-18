@@ -25,7 +25,7 @@ Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{
 A further experiment adds a language model after the three decoders.
 The language model receives the three reconstructions of a prompt, and no hidden state, and rewrites them into one text.
 On legal10w with a leak of \vf{90} rows, the rewritten text reaches a word-F1 of \vf{0.745}, against \vf{0.627} for the mean of the three decoders. % src: Table tab:attack:rewriting, legal10w row
-The hub advantages in three different output combining with second round review there fore increase the reconstruction score without access to the target model.
+The hub thus offers three reconstructions of each prompt, and a second round that combines them raises the reconstruction score without access to the target model.
 
 \paragraph{Limitations.} Two limitations bound the claims.
 \begin{itemize}
