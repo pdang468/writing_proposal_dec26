@@ -6,7 +6,7 @@ A leak of \vf{90} rows supervises the map, and unpaired matching refines it on d
 On held-out NQ prompts the supervised training on leaks alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
 The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
 Word-F1 thus more than doubles on every dataset.
-These gains support H2, the hypothesis that unpaired matching improves reconstruction from a small leak.
+These gains support the hypothesis that unpaired matching improves reconstruction from a small leak.
 On NQ and legal128w, the two datasets of its criterion, the gains of \vf{0.411} and \vf{0.219} exceed the required \vf{0.10}. % src: Table tab:attack:main; w46/plan.md (prediction P1)
 
 The attack trains only an affine map, while the hub and its decoders stay frozen, and an affine map preserves the linear structure of the hidden states it receives.
