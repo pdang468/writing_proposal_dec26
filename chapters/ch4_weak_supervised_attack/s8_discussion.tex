@@ -1,11 +1,13 @@
 \section{Discussion and Limitations}\label{sec:attack:discussion}
-This work asked whether an adversary could read the input of outside hub model using a lightweight affine map and holds only a small leak.
-A leak of \vf{90} rows supervises the map, and unpaired matching aligns it further on data that carry no correspondence.
-Matching push the word-F1 score significantly to the reliable reconstruction range.
 
+This work asked whether an adversary who holds only a small leak can read the input of a model outside the hub through a lightweight affine map.
+A leak of \vf{90} rows supervises the map, and unpaired matching aligns it further on data that carry no correspondence.
+
+%% BIG CHANGE: the author's sentence moved to open the paragraph of its numbers; "significantly" and "reliable reconstruction range" replaced by what the numbers show (legal128w stays at 0.32).
+Matching lifts word-F1 from a level where few words of a prompt are recovered to one where, on NQ and legal10w, most are.
 On held-out NQ prompts the leak alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
 The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
-Word-F1 thus more than doubles on every dataset, and the gains on NQ and legal128w, the two datasets that H2 names, meet its criterion.
+Word-F1 more than doubles on every dataset, and the gains on NQ and legal128w, the two datasets that H2 names, meet its criterion.
 
 The attack trains only an affine map, while the hub and its decoders stay frozen, and an affine map preserves the linear structure of the hidden states it receives.
 The gain from matching therefore suggests that the hidden states of the target model and the hub outputs share that structure up to an affine transformation.
@@ -13,18 +15,17 @@ The Platonic Representation Hypothesis predicts this similarity between models, 
 
 Three findings bound the gain.
 First, the gain depends on the size of the leak, with a peak at \vf{45} to \vf{90} rows and a fall to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w, seed 1 (0.0889, 0.0889)
-Second, the gain requires a proper range of temperatures, where is could distinguish between the difference between the matching candidates.
+Second, the gain requires a temperature within the range where the matching term can tell its candidates apart.
 Third, matching does not replace the leak, since without one the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
-Two supporting experiments aim to explore the map further.
+Two supporting experiments explore the map further.
 The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and the two do not improve together.
 Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts, with one seed, and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
 A second-round language model, in turn, merges the three decoders' reconstructions into one text at the level of the best decoder, \vf{0.12} to \vf{0.26} word-F1 above their mean.
 
-
-\paragraph{Limitations.} Four limitations bound the claims.
+\paragraph{Limitations.} Two limitations bound the claims.
 \begin{itemize}
-\item \textbf{Settings chosen with known domain.} The supervision fraction and the temperature were selected by word-F1 on \vf{500} prompts whose text domain is known.
+\item \textbf{Settings chosen with known domain.} The supervision fraction and the temperature were selected by word-F1 on \vf{500} prompts of the known domain, and that score reads their text. %% BIG CHANGE: word-F1 needs the true text, so the selection reads more than the domain
 \item \textbf{Models and layer.} The results cover one block of two target models of about one billion parameters and three hub models, without a defense or a deployed system.
 \end{itemize}
 
