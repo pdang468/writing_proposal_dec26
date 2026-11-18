@@ -22,10 +22,10 @@ The objective measures agreement with hub outputs, whereas teacher-forced cross-
 Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
 
 %% BIG CHANGE: new paragraph (2026-11-18) on second-round rewriting, stated with the one result at the chapter's setting; the reading in the last sentence is bounded to legal10w.
-A further experiment adds a language model after the three decoders.
-The language model receives the three reconstructions of a prompt, and no hidden state, and rewrites them into one text.
-On legal10w with a leak of \vf{90} rows, the rewritten text reaches a word-F1 of \vf{0.745}, against \vf{0.627} for the mean of the three decoders. % src: Table tab:attack:rewriting, legal10w row
-The hub thus offers three reconstructions of each prompt, and a second round that combines them raises the reconstruction score without access to the target model.
+The three decoders of the hub yield three reconstructions of each prompt, and a second round merges them into a better one.
+A language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
+On legal10w with a leak of \vf{90} rows, rewriting lifts word-F1 from \vf{0.627}, the mean of the three decoders, to \vf{0.745}. % src: Table tab:attack:rewriting, legal10w row
+The gain costs the adversary no further access to the target model.
 
 \paragraph{Limitations.} Two limitations bound the claims.
 \begin{itemize}
