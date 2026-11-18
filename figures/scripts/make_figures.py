@@ -278,8 +278,6 @@ def leak_shape():
         ("2 prompts\n90 rows", f"{L}/mixed-oct_w5b-L-prefix.json", f"b90/{H}/L90-prefix", "b90/a1/r1/L90-prefix"),
         ("10 prompts\n9 rows each", f"{L}/mixed-oct_w5-s1-L90-ext2.json", f"b90/{H}/L90-span9", "b90/a1/r1/L90-span9"),
         ("90 prompts\n1 row each", f"{L}/mixed-oct_w5-s1-L90.json", f"b90/{H}/L90-random", "b90/a1/r1/L90-random"),
-        ("NQ\n10 prompts, 90 rows", "results/v7_2/main/mixed-oct_w5b-A-prefix.json",
-         "b90/a0.99/sq/m0/t0.05761/r1/B8192/L90-prefix", "b90/a1/r1/L90-prefix"),
     ]
     groups = []
     for name, rel, hk, sk in specs:
@@ -288,14 +286,12 @@ def leak_shape():
         groups.append((f1(s_), f1(h)))
         print(name.replace("\n", " "), "supervised", round(f1(s_), 4), "hybrid", round(f1(h), 4), "prompts", h["anchor_counts"].get("prompts"))
     step = 1.4
-    fig, ax = plt.subplots(figsize=(6.2, 2.9))
+    fig, ax = plt.subplots(figsize=(5.2, 2.9))
     bars(ax, groups, step=step)
-    ax.axvline(2 * step + 0.95, color=INK2, lw=0.8, ls=":")
-    ax.annotate("legal128w", (1.6 * step, 0.72), ha="center", fontsize=8.5, color=INK2)
     ax.set_xticks([i * step for i in range(len(specs))])
     ax.set_xticklabels([s_[0] for s_ in specs], fontsize=8)
-    ax.set_xlim(-0.5, 3 * step + 0.95)
-    ax.set_ylim(0, 0.8)
+    ax.set_xlim(-0.5, 2 * step + 0.95)
+    ax.set_ylim(0, 0.5)
     ax.set_ylabel("word-F1 (mean of three decoders)")
     ax.grid(axis="y")
     ax.set_axisbelow(True)

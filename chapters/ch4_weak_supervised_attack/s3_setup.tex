@@ -1,7 +1,7 @@
 \section{Experimental Setup}\label{sec:attack:experiments}
 
 \paragraph{Datasets and pools.} The experiments run on the three datasets of Chapter~\ref{ch:hub}, NQ, legal10w, and legal128w, each with its own frozen hub.
-The grid search, the main comparison, and the leak-size comparison run on all three datasets, and the other supporting experiments run on NQ, on legal128w, or on both.
+The grid search, the main comparison, and the leak-size comparison run on all three datasets, and each other supporting experiment runs on one or more of them.
 The \vf{40{,}000} training prompts of a dataset are divided once, at random, into two halves of \vf{20{,}000}.
 One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. 
 A leak draws its prompts at random from all \vf{40{,}000} training prompts. 

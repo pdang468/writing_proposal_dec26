@@ -57,5 +57,6 @@ The second term compares two models: the similarities among the hub outputs of m
 The learning rate rises to $3\times10^{-4}$ over \vf{250} warmup updates and follows a cosine decay to zero; weight decay is \vf{0.01} on the linear weights, and gradients are clipped at norm \vf{1.0}. % src: configs/v6_3.yaml (training)
 Teacher-forced Acc@1 selects the checkpoint.
 Acc@1 is the fraction of prompt tokens that the decoder ranks first given the ground-truth prefix, averaged over the \vf{5{,}000} validation prompts and the six cross-model directions.
-A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained: on NQ (Natural Questions queries), update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
+A checkpoint is scored every \vf{250} updates, and the earliest within \vf{0.002} of the best is retained.
+On NQ (Natural Questions queries) the retained checkpoint is update \vf{2{,}250}, at Acc@1 \vf{0.954}. % src: results/v6_3/hpc-final/report.json (selected_step, cross_mean); src/v3/evaluate.py (content_accuracy_at1)
 

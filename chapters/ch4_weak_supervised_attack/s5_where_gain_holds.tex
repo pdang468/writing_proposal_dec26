@@ -68,8 +68,7 @@ The comparison rests on one seed and does not separate the number of prompts fro
 \includegraphics[width=0.8\textwidth]{ch4/leak_shape}
 \caption{With \vf{90} leaked rows on legal128w, the hybrid fit scores \vf{0.18} for a leak from two prompts and \vf{0.30} to \vf{0.32} for a leak spread over \vf{10} or \vf{90} prompts.
 Word-F1 averaged over three decoders, seed \vf{1}, \vf{500} selection prompts, hybrid fit with $\alpha = 0.99$, $\tau = d$, $B = 8{,}192$.
-Each bracket gives the gain of the hybrid fit.
-The NQ leak takes whole prompts, so the two datasets differ in more than the domain.}
+Each bracket gives the gain of the hybrid fit.}
 \label{fig:attack:shape}
 \end{figure}
 
@@ -83,5 +82,5 @@ The squared-distance score adds \vf{0.043} over a cosine score, a supervision fr
 
 The gain recurs for a second target model in the one available comparison.
 Llama-3.2-1B, observed at block \vf{12} (width \vf{2048}), replaces Pythia on NQ with a leak of \vf{90} rows from ten prompts, one seed, and the selection prompts. % src: configs/v7.yaml (unknowns.llama: d3_block 12, width 2048)
-Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} under the supervised fit, and Pythia under the same setting reaches \vf{0.604} against \vf{0.352}. % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json cells *L90-prefix (0.6324, 0.3696, +0.2628 [0.2514, 0.2742]); results/v7_2/main/mixed-oct_w5b-A-prefix.json (0.6042, 0.3516, +0.2526 [0.2426, 0.2640])
+Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} under the supervised fit, and Pythia under the same setting ($\alpha = 0.99$, $\tau = d$, $B = 8{,}192$) reaches \vf{0.604} against \vf{0.352}. % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json cells *L90-prefix (0.6324, 0.3696, +0.2628 [0.2514, 0.2742]); results/v7_2/main/mixed-oct_w5b-A-prefix.json (0.6042, 0.3516, +0.2526 [0.2426, 0.2640])
 

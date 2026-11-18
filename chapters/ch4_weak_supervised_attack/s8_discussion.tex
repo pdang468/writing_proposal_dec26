@@ -19,7 +19,7 @@ Second, the gain requires a temperature within the range where the matching term
 Third, matching does not replace the leak, since without one the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
 Two supporting experiments explore the map further.
-The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and the two do not improve together.
+The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy and KL divergence measure the decoder's predictions, and those predictions and word-F1 do not improve together.
 Training the map on the KL divergence lowers the cross-entropy of SmolLM by \vf{0.15} to \vf{0.26} nats per content word on held-out legal128w prompts, with one seed, and adds little word-F1. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce
 A second-round language model, in turn, merges the three decoders' reconstructions into one text at the level of the best decoder, \vf{0.12} to \vf{0.26} word-F1 above their mean.
 

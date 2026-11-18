@@ -14,7 +14,7 @@ The second pool holds hub outputs of text from the same domain, computed by OLMo
 No prompt of one pool is matched to a prompt of the other.
 \item \textbf{A leak.} A small set of short text spans for which the adversary holds both the text and the target model's hidden states.
 The standard leak holds \vf{90} rows, the first nine rows of each of ten prompts, and the adversary holds nothing else of those prompts.
-\item \textbf{The tokenizer of the target model}, applied to the leaked prompts only.
+\item \textbf{The tokenizer of the target model}, applied to the leaked spans only.
 \end{itemize}
 
 \paragraph{Rows.} OLMo turns the leak into paired data.
