@@ -1,34 +1,7 @@
-\section{Matching Improves Reconstruction from a Small Leak}\label{sec:attack:hybrid}
-
-One setting of the hybrid fit, selected on NQ and legal128w, serves all three datasets, and at that setting matching improves word-F1 over the supervised fit on the same leak.
-
-\subsection{Supervision fraction and temperature}\label{sec:attack:grid}
-
-The gain from matching depends on the supervision fraction and the temperature, so a grid search over both precedes the main comparison (Figure~\ref{fig:attack:grid}).
-The grid runs on the \vf{90}-row leak, with seed \vf{1} and the \vf{500} selection prompts of each dataset. % src: results/v7_2/main/mixed-w46-grid.json; results/legal128w/v7_2/main/mixed-w46-grid.json; w46-selection.json
-The selection rule, written before the grid was run, takes the cell with the highest mean word-F1 over the two datasets. % src: w46/plan.md; w46-selection.json rule
-That cell is $\alpha = 0.9$, $\tau = 2d$, with a two-dataset mean of \vf{0.534}. % src: w46-selection.json best (0.5336)
-The cell is the best on NQ, at \vf{0.768}. % src: results/v7_2/main/mixed-w46-grid.json seeds.1.cells (0.7679)
-On legal10w, a dataset outside the selection rule, the same cell is again the best, at \vf{0.604}. % src: results/legal10w/v7_2/main/mixed-w46-grid.json seeds.1.cells (a0.9, t0.1476: 0.6040; next a0.8, t0.1476: 0.580; supervised 0.2251); job 1600092
-On legal128w the cell is close to the best, \vf{0.299} against \vf{0.314} at $\alpha = 0.8$, $\tau = 2d$. % src: results/legal128w/v7_2/main/mixed-w46-grid.json seeds.1.cells (0.2993, 0.3144)
-
-All three datasets show the same dependence on temperature.
-For $\alpha \le 0.95$, word-F1 peaks at $\tau = 2d$ and falls on either side, and several cells at a low temperature score below the supervised fit.
-The matching term therefore helps only within a range of temperatures.
-One setting serves all three datasets, although finding it required prompts with known text.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{ch4/grid_search}
-\caption{One setting, $\alpha = 0.9$ and $\tau = 2d$ (outlined), has the highest mean word-F1 over NQ and legal128w, the two datasets of the selection rule, and is the best cell on legal10w.
-Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns), on the \vf{90}-row leak, seed \vf{1}, \vf{500} selection prompts per dataset, $B = 8{,}192$.
-The titles give the supervised fit on the same leak.}
-\label{fig:attack:grid}
-\end{figure}
-
-\subsection{The main comparison}\label{sec:attack:main}
+\section{Matching Improves Reconstruction from a Small Leak}\label{sec:attack:hybrid}\label{sec:attack:main}
 
 Unpaired matching more than doubles reconstruction word-F1 on all three datasets (Table~\ref{tab:attack:main}, Figure~\ref{fig:attack:standard}).
+The hybrid fit runs at one setting on all three datasets, $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$, selected by the grid of Section~\ref{sec:attack:grid}.
 On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 on NQ rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit, a gain of \vf{0.411} with an interval of \vf{0.408} to \vf{0.415}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113)
 On legal10w, word-F1 rises from \vf{0.192} to \vf{0.599}, a gain of \vf{0.407} with an interval of \vf{0.403} to \vf{0.412}. % src: results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
 On legal128w, word-F1 rises from \vf{0.102} to \vf{0.321}, a gain of \vf{0.219} with an interval of \vf{0.215} to \vf{0.222}. % src: results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval as for NQ
@@ -105,4 +78,3 @@ Supervised fit, word-F1 \vf{0.12} & \hit{who} \miss{won homer in many times unti
 \bottomrule
 \end{tabular}
 \end{table}
-

@@ -1,0 +1,41 @@
+\section{Where the Gain Holds}\label{sec:attack:ablations}\label{sec:attack:negative}
+
+Four comparisons delimit the main result.
+They vary the presence of the leak, its composition, the components of the matching term, and the target model.
+
+\subsection{Matching without a leak}\label{sec:attack:blind}
+
+Matching alone, without any leaked row, yields little word-F1 beyond the mismatched-prompt controls.
+On NQ, the blind maps tested score at most \vf{0.153} word-F1, against a hub reference of \vf{0.946} at the shorter generation cap of those runs, and none exceeds its mismatched-prompt control by more than \vf{0.025} (interval \vf{0.019} to \vf{0.030}). % src: results/v7_2/main/gw.json (highest blind word-F1 0.1528, control 0.1414); results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304]); also results/v7/main-different_text-pythia/results.json and results/v7_2/main/mixed-v7_9-s1.json (alpha 0 cells)
+The blind-map gains remain small compared with the gains from matching on a small leak.
+The result covers \vf{22} blind maps from two objectives, one target model, and one dataset, and it does not show that no unpaired method can connect a target model. % src: 9 + 1 + 6 + 6 maps in the four files above
+
+\subsection{Composition of the leak}\label{sec:attack:leak}
+
+At a fixed number of rows, a leak spread over more prompts yields a higher word-F1 than a leak drawn from one or two prompts (Figure~\ref{fig:attack:shape}).
+%% BIG CHANGE: new sentence (2026-11-17), why the composition comparison sits on legal128w.
+The comparison runs on legal128w, the one dataset whose prompts are long enough to vary the rows per prompt at a fixed number of rows.
+On legal128w, the hybrid fit scores \vf{0.321} with one row from each of \vf{90} prompts, \vf{0.304} with nine consecutive rows from each of ten prompts, and \vf{0.178} with \vf{90} rows from two prompts. % src: results/legal128w/v7_2/main/mixed-oct_w5-s1-L90.json (L90-random 0.3207); mixed-oct_w5-s1-L90-ext2.json (L90-span9 0.3039); mixed-oct_w5b-L-prefix.json (L90-prefix 0.1782)
+The content of the rows matters as well.
+A leak of stop words, or of one repeated word, leaves the hybrid fit at the level of the supervised fit, at \vf{0.058} against \vf{0.056} and \vf{0.054} against \vf{0.057}. % src: mixed-oct_w5-s1-L90.json cells *L90-stop (0.0582, 0.0555), *L90-one_word (0.0535, 0.0568)
+The comparison rests on one seed and does not separate the number of prompts from the content of the particular prompts drawn.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\textwidth]{ch4/leak_shape}
+\caption{With \vf{90} leaked rows on legal128w, the hybrid fit scores \vf{0.18} for a leak from two prompts and \vf{0.30} to \vf{0.32} for a leak spread over \vf{10} or \vf{90} prompts.
+Word-F1 averaged over three decoders, seed \vf{1}, \vf{500} selection prompts, hybrid fit with $\alpha = 0.99$, $\tau = d$, $B = 8{,}192$.
+Each bracket gives the gain of the hybrid fit.}
+\label{fig:attack:shape}
+\end{figure}
+
+\subsection{Components of the matching term}\label{sec:attack:components}
+
+The matching term was selected in sequential steps on NQ, and four steps each raise word-F1 at a leak of about \vf{92} rows.
+The squared-distance score adds \vf{0.043} over a cosine score, a supervision fraction of \vf{0.95} adds \vf{0.096} over one, a temperature of $2d$ adds \vf{0.110} over $d$, and a batch of \vf{2{,}048} adds \vf{0.092} over \vf{512}. % src: results/v7_2/main/mixed-v7_9-s{1,2,3}.json (score_effect, cell_minus_benchmark, axis_effect at budget 10), three seeds, 500 selection prompts
+
+\subsection{A second target model}\label{sec:attack:llama}
+
+The gain recurs for a second target model in the one available comparison.
+Llama-3.2-1B, observed at block \vf{12} (width \vf{2048}), replaces Pythia on NQ with a leak of \vf{90} rows from ten prompts, one seed, and the selection prompts. % src: configs/v7.yaml (unknowns.llama: d3_block 12, width 2048)
+Llama reaches a word-F1 of \vf{0.632} under the hybrid fit against \vf{0.370} under the supervised fit, and Pythia under the same setting ($\alpha = 0.99$, $\tau = d$, $B = 8{,}192$) reaches \vf{0.604} against \vf{0.352}. % src: results/nqllama/v7_2/main/mixed-oct_w5b-s1-prefix.json cells *L90-prefix (0.6324, 0.3696, +0.2628 [0.2514, 0.2742]); results/v7_2/main/mixed-oct_w5b-A-prefix.json (0.6042, 0.3516, +0.2526 [0.2426, 0.2640])
