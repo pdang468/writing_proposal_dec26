@@ -4,11 +4,11 @@
 Teacher forcing would hand the decoder the true previous tokens, and that prefix carries information about the next token.
 Under free-running decoding, each decoder instead conditions on the soft prompt and on its own generated prefix.
 Greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap.
-The cap is the length of the soft prompt plus \vf{8} tokens on NQ and plus \vf{32} tokens on the legal datasets. % src: configs/v6_3.yaml (cap_margin 8); legal hub configs (32); NQ re-evaluated at 32 moves no direction by more than 0.001 (commit e1ec486)
+The cap is the length of the soft prompt plus \vf{32} tokens. % src: results/v7_2/main/hub-val-eval-m32.json setting.cap_margin 32 (NQ); legal hub configs (32)
 
 \paragraph{Metrics.} Two metrics score a reconstruction against its source prompt.
-Word-F1 is the bag-of-words F1 score, averaged over prompts, and ignores word order.
-Exact match is the fraction of reconstructions identical to their source prompt after text normalization.
+Word-F1 is the word-level F1 score between the two texts, with repeated words counted and word order ignored, averaged over prompts. % src: src/v7_2/content.py word_f1 (whitespace_multiset_metrics)
+Exact match is the fraction of reconstructions identical to their source prompt after Unicode and whitespace normalization.
 
 \paragraph{Mismatched-prompt control.} A fluent decoder may score above zero without reading its soft prompt, because prompts of one dataset share common words.
 The mismatched-prompt control measures that floor: the decoder receives the hub outputs of another prompt, and its output is scored against the original prompt.

@@ -37,6 +37,16 @@ def load(rel):
     return json.loads((ROOT / rel).read_text())
 
 
+def nq_cap32():
+    """The NQ hub at the cap of the legal hubs (soft-prompt length plus 32), in the layout of inversion.json."""
+    r = load("results/v7_2/main/hub-val-eval-m32.json")["readout"]
+    assert r["n_prompts"] == 5000
+    cells = {k: {"hub": {"word_f1": m["hub"], "exact_match": r["exact_match_mean"][k], "prompt_count": r["n_prompts"]}}
+             for k, m in r["per_direction_mean"].items()}
+    return {"directions": cells, "cross_mean": {"hub": {"word_f1": r["cross_macro_mean"]},
+                                                "shuffled": {"word_f1": r["wrong_macro_mean"]}}}
+
+
 def save(fig, name):
     path = OUT / "ch3" / name
     fig.savefig(path.with_suffix(".pdf"))
@@ -100,7 +110,7 @@ def directions(files=None, out="direction_recovery", figsize=(6.4, 2.75), contro
     fig, axes = plt.subplots(1, len(files), figsize=figsize, squeeze=False)
     axes = axes[0]
     for ax, (name, rel) in zip(axes, files.items()):
-        d = load(rel)
+        d = rel if isinstance(rel, dict) else load(rel)
         grid = [[d["directions"][f"{s}->{t}"]["hub"] for t, _ in MODELS] for s, _ in MODELS]
         assert all(c["prompt_count"] == 5000 for row in grid for c in row)
         image = ax.imshow([[c["word_f1"] for c in row] for row in grid], cmap=cmap, vmin=0.80, vmax=1.0)
@@ -204,7 +214,7 @@ def ceiling():
 architecture()
 directions()
 # Corpus A alone, for the chapter while the legal results are held back (2026-11-09).
-directions({"NQ": "results/v6_3/hpc-final/inversion.json"}, "direction_recovery_nq", (3.9, 2.9),
+directions({"NQ": nq_cap32()}, "direction_recovery_nq", (3.9, 2.9),
            control="mismatched prompt")  # the records' "shuffled" arm is another prompt's memory
 # The two legal hubs of the chapter (2026-11-15); legal10s is held back.
 directions({c: f"results/{c}/v6_3/inversion.json" for c in ("legal10w", "legal128w")},
