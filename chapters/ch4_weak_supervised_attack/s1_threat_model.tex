@@ -13,7 +13,7 @@ Four resources are available to the adversary.
 The second pool holds hub outputs of text from the same domain, computed by OLMo and its source adapter.
 No prompt of one pool is matched to a prompt of the other.
 \item \textbf{A leak.} A small set of short text spans for which the adversary holds both the text and the target model's hidden states.
-The standard leak holds \vf{90} rows, the first nine rows of each of ten prompts, and the adversary holds nothing else of those prompts.
+The standard leak holds \vf{90} rows, the first \vf{9} rows of each of \vf{10} prompts, and the adversary holds nothing else of those prompts.
 \item \textbf{The tokenizer of the target model}, applied to the leaked spans only.
 \end{itemize}
 
@@ -22,6 +22,6 @@ For each leaked span, the adversary runs OLMo on the text and obtains the hub ou
 The target model and OLMo split the text into different tokens, so the adversary groups their tokens by shared character boundaries, as in the token groups of Section~\ref{sec:hub:training}.
 Each group forms a row, a pair of vectors for one short span of text.
 The pair holds the average of the target model's hidden states and the average of the hub outputs, both weighted by character coverage and not normalized to unit length. % src: src/v6_4/pairs.py
-A row covers about one word, so an NQ prompt of nine words yields about nine rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
+A row covers about \vf{1} word, so an NQ prompt of \vf{9} words yields about \vf{9} rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
 The affine map is fitted on rows, so the size of a leak is counted in rows.
 

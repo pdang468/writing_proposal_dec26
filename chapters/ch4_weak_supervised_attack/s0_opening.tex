@@ -6,5 +6,5 @@ Two sources of information train the map.
 First, a small leak, a set of short text spans with both their text and the target model's hidden states, supervises the map directly.
 Second, a matching term aligns unpaired data, hidden states of the target model and hub outputs with no correspondence between them.
 The chapter tests whether the matching term improves reconstruction over the leak alone.
-With a leak of \vf{90} rows, about ninety words, the matching term raises mean word-F1 on \vf{4{,}500} held-out NQ prompts from \vf{0.35} to \vf{0.77}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
+With a leak of \vf{90} rows, about \vf{90} words, the matching term raises mean word-F1 on \vf{4{,}500} held-out NQ prompts from \vf{0.35} to \vf{0.77}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
 

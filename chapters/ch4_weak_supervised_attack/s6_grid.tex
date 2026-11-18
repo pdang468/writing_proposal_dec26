@@ -29,7 +29,7 @@ The titles give the supervised fit on the same leak.}
 \subsection{The grid at 900 rows}\label{sec:attack:grid900}
 
 The advantage of matching remains at \vf{900} rows, but it is smaller than at \vf{90} rows (Figure~\ref{fig:attack:grid-size}).
-The grid is repeated on the selection prompts with the leak of nine rows from each of \vf{100} prompts. % src: configs/w46_{nq,legal128w,legal10w}_grid_L900.yaml; jobs 1601643, 1601644, 1601645
+The grid is repeated on the selection prompts with the leak of \vf{9} rows from each of \vf{100} prompts. % src: configs/w46_{nq,legal128w,legal10w}_grid_L900.yaml; jobs 1601643, 1601644, 1601645
 The best cell gains \vf{0.089} over the supervised fit on NQ, \vf{0.105} on legal10w, and \vf{0.118} on legal100t, against \vf{0.401}, \vf{0.379}, and \vf{0.206} for the setting at \vf{90} rows. % src: results/v7_2/main/mixed-w46-grid-L900.json seeds.1.cells (0.8323; b900/a1 0.7434); results/legal10w/v7_2/main/mixed-w46-grid-L900.json seeds.1.cells (a0.9 t0.0738 0.7594; a0.9 t0.1476 0.7437; b900/a1 0.6548); results/legal128w/v7_2/main/mixed-w46-grid-L900.json seeds.1.cells (a0.95 t0.06485 0.5963; a0.9 t0.1297 0.4960; b900/a1 0.4783); 90 rows: mixed-w46-std.json seeds.1.cells
 The setting of the main comparison remains the best cell on NQ and scores within \vf{0.015} of it on legal10w, and on legal100t the best cell moves to $\alpha = 0.95$, $\tau = d$.
 The best cell is chosen on the prompts that score it, so its gain is an upper estimate.
@@ -38,7 +38,7 @@ The best cell is chosen on the prompts that score it, so its gain is an upper es
 \centering
 \includegraphics[width=\textwidth]{ch4/grid_leak_size}
 \caption{At \vf{900} leaked rows the setting of the main comparison (solid outline) stays the best cell on NQ and within \vf{0.02} of it on legal10w, and on legal100t the best cell (dashed outline) moves to a higher supervision fraction and a lower temperature.
-Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns), for a leak of nine rows from each of \vf{100} prompts, \vf{500} selection prompts, $B = 8{,}192$.
+Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns), for a leak of \vf{9} rows from each of \vf{100} prompts, \vf{500} selection prompts, $B = 8{,}192$.
 The titles give the supervised fit on the same leak.}
 \label{fig:attack:grid-size}
 \end{figure}

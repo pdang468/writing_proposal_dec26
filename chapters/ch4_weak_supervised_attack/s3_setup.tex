@@ -5,11 +5,11 @@ The \vf{40{,}000} training prompts of a dataset are divided once, at random, int
 One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. 
 A leak draws its prompts at random from all \vf{40{,}000} training prompts. 
 
-\paragraph{The 90-row leak.} In the main experiment, the adversary obtains a leak of \vf{90} rows, the first nine rows of each of ten prompts.
+\paragraph{The 90-row leak.} In the main experiment, the adversary obtains a leak of \vf{90} rows, the first \vf{9} rows of each of \vf{10} prompts.
 The leak exposes the datasets to different degrees.
-On NQ, a prompt averages nine words, so nine rows expose almost the entire prompt.
-On legal10w, a prompt holds about \vf{13} rows, so nine rows again expose most of it. % src: results/legal10w/v7_2/main/v8_6-summary.json rows[*] (1, 3, 5, 10, 30, 100 prompts: 12, 34, 55, 125, 390, 1305 rows; E +0.0055, +0.2723, +0.300, +0.332, +0.220, +0.051; job 1595870, seed 1)
-On legal100t, a prompt is a window of about \vf{68} words, or \vf{86} rows, cut from a longer document, so the same nine rows expose only its opening words. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6); results/legal128w/v7_2/main/v8_6-summary.json rows[*].pairs (8612 rows for 100 prompts)
+On NQ, a prompt averages \vf{9} words, so \vf{9} rows expose almost the entire prompt.
+On legal10w, a prompt holds about \vf{13} rows, so \vf{9} rows again expose most of it. % src: results/legal10w/v7_2/main/v8_6-summary.json rows[*] (1, 3, 5, 10, 30, 100 prompts: 12, 34, 55, 125, 390, 1305 rows; E +0.0055, +0.2723, +0.300, +0.332, +0.220, +0.051; job 1595870, seed 1)
+On legal100t, a prompt is a window of about \vf{68} words, or \vf{86} rows, cut from a longer document, so the same \vf{9} rows expose only its opening words. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6); results/legal128w/v7_2/main/v8_6-summary.json rows[*].pairs (8612 rows for 100 prompts)
 The adversary's knowledge is therefore fixed at \vf{90} rows on every dataset, while the exposed fraction of each leaked prompt differs.
 
 \paragraph{Score.} Evaluation follows Section~\ref{sec:hub:eval}.
