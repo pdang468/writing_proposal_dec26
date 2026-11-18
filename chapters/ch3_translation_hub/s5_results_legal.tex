@@ -1,6 +1,6 @@
 \section{Results on Legal Text}\label{sec:hub:legal}
 
-Two legal datasets test H1 on text that differs from question prompts in vocabulary and in length.
+Two legal datasets test the hypothesis on text that differs from question prompts in vocabulary and in length.
 A separate hub is trained per dataset, with the architecture and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training}.
 
 \paragraph{Datasets.} Both datasets are cut from the same legal documents.
@@ -11,7 +11,7 @@ A window of that length averages \vf{68} words on the validation split. % src: a
 The name records a looser ceiling, \vf{128} tokens under every tokenizer, which the \vf{100}-token stop keeps out of reach. % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
 Each dataset has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
 
-\paragraph{Results.} Both legal hubs meet both criteria for H1 (Table~\ref{tab:hub:legal}).
+\paragraph{Results.} Both legal hubs meet both criteria (Table~\ref{tab:hub:legal}).
 Mean cross-model word-F1 is \vf{0.977} on each dataset, against mismatched-prompt controls of \vf{0.071} on legal10w and \vf{0.152} on legal128w. % src: results/legal{10w,128w}/v6_3/inversion.json cross_mean (hub 0.9767, 0.9769; shuffled 0.0706, 0.1519)
 Every cross-model direction exceeds \vf{0.90}; the lowest is Qwen $\to$ OLMo on legal128w, at \vf{0.955} (Figure~\ref{fig:hub:legal-directions}). % src: same files, directions (cross minima 0.9552, 0.9670)
 The lower scores into Qwen on NQ do not recur: the cross-model directions into Qwen score \vf{0.975} to \vf{0.986}. % src: same files, olmo->qwen and smollm->qwen (0.9842, 0.9784; 0.9858, 0.9752)

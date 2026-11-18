@@ -52,9 +52,9 @@ The scale is \vf{0.0576} on NQ, \vf{0.0738} on legal10w, and \vf{0.0648} on lega
 \paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates, each on \vf{512} rows of the leak and $B$ elements from each unpaired pool. % src: configs/v7_9_s4.yaml (training); src/v7/training.py (lr_multiplier); results/v7_2/main/mixed-v7_9-s5.json setting (paired_batch_rows 512)
 The map after the last update is evaluated, without checkpoint selection.
 
-\paragraph{Hypothesis H2: matching improves reconstruction from a small leak.}\label{sec:attack:hypotheses}
+\paragraph{Hypothesis: matching improves reconstruction from a small leak.}\label{sec:attack:hypotheses}
 With a leak of \vf{90} rows, word-F1 is higher under the hybrid fit than under the supervised fit.
 The criterion, written before the run, requires that on NQ and on legal128w the gain in word-F1 be at least \vf{0.10}, with the lower bound of its \vf{95} percent interval above \vf{0.05}. % src: w46/plan.md (prediction P1)
-H2 concerns word-F1, the word overlap between a reconstruction and the true prompt.
+The hypothesis concerns word-F1, the word overlap between a reconstruction and the true prompt.
 Exact match and decoded examples are reported beside it to separate word overlap from full recovery.
 

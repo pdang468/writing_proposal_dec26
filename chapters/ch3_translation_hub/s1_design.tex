@@ -30,7 +30,7 @@ The depth is a fixed choice and was not tuned.
 The effect of depth on reconstruction is left to future work (Chapter~\ref{ch:future}).
 A direction pairs a source model with a decoder, e.g., Qwen $\to$ hub $\to$ OLMo.
 Three models define nine directions: six cross-model directions and three self-reconstruction directions.
-In a cross-model direction the decoder reconstructs the prompt from another model's hidden states, so the cross-model results test H1.
+In a cross-model direction the decoder reconstructs the prompt from another model's hidden states, so the cross-model results test the hypothesis.
 In this setting, only the adapters, the backbone, and the projectors are trainable; the three language models remain frozen as both sources and decoders.
 
 \paragraph{Token-wise mapping.} The hub maps each token independently.
