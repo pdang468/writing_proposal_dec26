@@ -3,9 +3,7 @@
 This work asked whether an adversary who holds only a small leak can read the input of a model outside the hub through a lightweight affine map.
 A leak of \vf{90} rows supervises the map, and unpaired matching refines it on data that carry no correspondence.
 
-On NQ and legal10w, matching turns a reconstruction that misses most words into one that recovers most.
-Matching improves the reconstruction scores of unreliable prompts to the readable range.
-
+Matching raises the reconstruction from an unreadable text to a readable one, as the decoded NQ examples show (Table~\ref{tab:attack:examples}).
 On held-out NQ prompts the leak alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
 The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w and from \vf{0.102} to \vf{0.321} on legal128w. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
 Word-F1 more than doubles on every dataset, and the gains on NQ and legal128w, the two datasets that H2 names, meet its criterion.
