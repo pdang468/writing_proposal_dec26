@@ -6,9 +6,10 @@ A separate hub is trained per dataset, with the architecture and objective of Se
 
 \paragraph{Datasets.} Both datasets are cut from the same legal documents, and each prompt starts at a word drawn uniformly over its document. % src: documents/glossary.md (window corpus, piece corpus)
 A legal10w prompt holds ten consecutive words.
-A legal128w prompt grows word by word and stops at \vf{100} tokens under the tokenizer that yields the most tokens for it. % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
-Such a prompt averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
-The name records a looser ceiling, \vf{128} tokens under every tokenizer, which the \vf{100}-token stop keeps out of reach. % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
+A legal128w prompt is longer, and its length is limited in tokens.
+The prompt grows word by word until it reaches \vf{100} tokens under the tokenizer that yields the most tokens for it. % src: src/v7_8/corpus.py (SEGMENT_MAX_TOKENS 100; tokenizers pythia, olmo, qwen, smollm)
+At that limit a prompt averages \vf{68} words on the validation split. % src: artifacts/legal128w/v3/manifests/main-splits.jsonl window_words, validation split (mean 67.6, range 8 to 95)
+The \vf{128} in the name is a looser token limit that no prompt reaches, not a word count. % src: src/v7_8/corpus.py (MAX_TOKENS 128); token counts of the first 1,000 validation prompts (maximum 100 under each of the four tokenizers)
 Each dataset has \vf{40{,}000} training and \vf{5{,}000} validation prompts. % src: configs/v6_3_legal{128w,10w}.yaml (n_train, n_validation)
 
 \paragraph{Results.} Both legal hubs support the hypothesis (Table~\ref{tab:hub:legal}).
