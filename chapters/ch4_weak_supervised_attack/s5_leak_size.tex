@@ -12,7 +12,6 @@ The gain is small at the two ends of the curve for different reasons.
 At \vf{9} rows, a single prompt gives either fit too little to learn from.
 The hybrid fit then scores \vf{0.195} on NQ, a gain of \vf{0.036}, and on the two legal datasets it scores below the supervised fit, \vf{0.061} against \vf{0.081} on legal10w and \vf{0.021} against \vf{0.044} on legal128w. % src: mixed-w46-std-L9.json of each dataset (NQ hybrid 0.1951, supervised 0.1590; legal10w hybrid 0.0613, supervised 0.0814, control 0.027; legal128w hybrid 0.0207, supervised 0.0445, control 0.023)
 At \vf{900} rows, the leak alone carries the supervised fit to \vf{0.743} on NQ and \vf{0.655} on legal10w, and little remains for matching to add.
-The setting was selected at \vf{90} rows, and Section~\ref{sec:attack:grid} tests it at \vf{900} rows.
 
 \begin{figure}[ht]
 \centering

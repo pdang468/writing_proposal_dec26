@@ -1,7 +1,6 @@
 \section{Experimental Setup}\label{sec:attack:experiments}
 
 \paragraph{Datasets and pools.} The experiments run on the three datasets of Chapter~\ref{ch:hub}, NQ, legal10w, and legal128w, each with its own frozen hub.
-The grid search, the main comparison, and the leak-size comparison run on all three datasets.
 The \vf{40{,}000} training prompts of a dataset are divided once, at random, into two halves of \vf{20{,}000}.
 One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. 
 A leak draws its prompts at random from all \vf{40{,}000} training prompts. 
@@ -22,5 +21,5 @@ The hub reference is the word-F1 of the three decoders on the hub outputs of OLM
 
 \paragraph{Settings.} The hybrid fit has three settings, the supervision fraction $\alpha$, the temperature $\tau$, and the batch size $B$ of the matching term.
 The settings are chosen on \vf{500} validation prompts, the selection prompts, and the main comparison is scored on the other \vf{4{,}500}, the held-out prompts. % src: v7_run.py (subset_seed 20260903, dev_prompts 500); src/v7_2/context.py; results/v7_2/main/eval/confirmation/prompt_ids.json
-The main comparison and the leak-size comparison fix $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$ on every dataset, and each other supporting experiment states its setting with its result.
+The setting is $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$ on every dataset.
 
