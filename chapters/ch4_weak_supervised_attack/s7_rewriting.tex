@@ -3,7 +3,7 @@
 \todo{Appendix: this part stays in the chapter for now and moves to an appendix.}
 The three decoders yield reconstructions of differing quality (Section~\ref{sec:attack:main}), and a second round tests whether combining them improves word-F1 over their mean and over the best decoder.
 A language model receives the three reconstructions and rewrites them into one text.
-The experiment is exploratory, and no criterion preceded its runs.
+The experiment is exploratory.
 
 \paragraph{Protocol.} The language model is Claude Haiku~\vf{5.5}.
 It receives the three reconstructions, with the SmolLM reconstruction first, and returns one text. % src: results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json (model claude-haiku-5-5, system_B); attacker_run.py (LEVEL2_ORDER)

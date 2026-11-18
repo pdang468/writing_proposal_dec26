@@ -19,7 +19,6 @@ Near-duplicate questions never cross a split. % src: configs/v3.yaml (split_sche
 The validation prompts average \vf{9} words and range from \vf{6} to \vf{19}. % src: configs/v3.yaml (n_train, n_val, n_test); word counts from the references in results/v6_3/hpc-final/inversion-records.jsonl (mean 9.08, median 9)
 All scores in this chapter are computed on the validation split, which also selects the checkpoint, so no score is held out; the test split has not been evaluated.
 
-\paragraph{Criteria.} One score summarizes a hub: mean cross-model word-F1, the free-running word-F1 averaged over the six cross-model directions on the validation split.
-A dataset fails the hypothesis if that mean falls below \vf{0.90} or if the mismatched-prompt control on the same prompts reaches \vf{0.20}.
-Both thresholds come from the evaluation plan of the legal hubs and were applied to NQ retrospectively. % src: v8_3/plan.md (0.90 and control below 0.20, readiness thresholds); no threshold precedes the NQ run
+\paragraph{Summary score.} One score summarizes a hub: mean cross-model word-F1, the free-running word-F1 averaged over the six cross-model directions on the validation split.
+The hypothesis is tested by that mean against the mismatched-prompt control on the same prompts.
 

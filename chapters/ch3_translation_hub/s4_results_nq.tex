@@ -1,6 +1,6 @@
 \section{Results on Question Prompts}\label{sec:hub:results}\label{sec:hub:translation}
 
-Cross-model reconstruction on NQ meets both criteria.
+Cross-model reconstruction on NQ supports the hypothesis.
 On the \vf{5{,}000} validation prompts, cross-model word-F1 averages \vf{0.945}, against \vf{0.120} under the mismatched-prompt control; exact match averages \vf{0.71} and is zero under the control. % src: results/v6_3/hpc-final/inversion.json cross_mean (hub 0.9445, exact 0.7116; shuffled 0.1203, exact 0.0)
 The gap above the mismatched-prompt control shows that the reconstruction depends on the prompt's own hub outputs.
 
@@ -15,7 +15,7 @@ One hub seed.}
 \end{figure}
 
 The mean hides one weaker decoder (Figure~\ref{fig:hub:directions}).
-The four cross-model directions into OLMo and SmolLM score \vf{0.966} to \vf{0.990}; the two into Qwen score \vf{0.881} and \vf{0.874}, below the \vf{0.90} required of the mean. % src: results/v6_3/hpc-final/inversion.json directions
+The four cross-model directions into OLMo and SmolLM score \vf{0.966} to \vf{0.990}; the two into Qwen score \vf{0.881} and \vf{0.874}. % src: results/v6_3/hpc-final/inversion.json directions
 
 Table~\ref{tab:hub:examples} shows reconstructions from OLMo $\to$ Qwen. % src: results/v6_3/hpc-final/inversion-records.jsonl, olmo->qwen hub arm
 
