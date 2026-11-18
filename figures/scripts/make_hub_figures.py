@@ -50,7 +50,7 @@ def nq_cap32():
 def save(fig, name):
     import matplotlib.text, matplotlib.ticker
     def shown(s):  # names as the dissertation prints them: legal128w in result files is legal100t in the text
-        return s.replace("legal128w", "legal100t").replace(" (seed 1)", "")
+        return s.replace("legal128w", "legal100t").replace(" (seed 1)", "").replace(" (three seeds)", "")
     renamed = False
     for ax in fig.axes:
         for axis in (ax.xaxis, ax.yaxis):
