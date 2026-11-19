@@ -4,7 +4,7 @@ Both terms of the objective in Equation~\ref{eq:attack:loss} pull mapped states 
 The mapped states then form the soft prompt of a frozen decoder, and the decoder reconstructs the prompt one token at a time.
 The objective therefore measures agreement with hub outputs, while reconstruction depends on the decoder's predictions.
 
-To examine those predictions, each decoder runs under teacher forcing.
+To examine the correlation between mapped states and predictions, each decoder runs under teacher forcing.
 The decoder receives the true previous tokens and predicts the next token.
 Cross-entropy scores that prediction, and a lower value means a better prediction of the true token.
 
