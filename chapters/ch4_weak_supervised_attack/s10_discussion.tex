@@ -17,12 +17,10 @@ First, the gain depends on the size of the leak, with a peak at \vf{45} to \vf{9
 Second, the gain requires a temperature within the range where the matching term can tell its candidates apart.
 Third, matching does not replace the leak, since without one the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
 
-%% BIG CHANGE (2026-11-18): the paragraph follows the rerun of the decoder-predictions section at the setting of the main comparison; the sentence on KL training is cut with that step.
-A supporting experiment relates the objective to the decoder's predictions.
+    A supporting experiment relates the objective to the decoder's predictions.
 The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy measures how well the decoder predicts the true tokens.
 At the \vf{90}-row leak, matching lowers the excess cross-entropy on all three datasets, from \vf{7.73} to \vf{1.36} nats per content word on NQ and from \vf{5.58} to \vf{5.11} on legal100t. % src: teacher_forced-w46/summary.json of NQ and legal128w
 
-%% BIG CHANGE: new paragraph (2026-11-18) on second-round rewriting, stated with the one result at the chapter's setting; the reading in the last sentence is bounded to legal10w.
 The three decoders of the hub yield three reconstructions of each prompt.
 In a second round, a language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
 On legal10w with a leak of \vf{90} rows, rewriting lifts word-F1 from \vf{0.627}, the mean of the three decoders, to \vf{0.745}. % src: Section sec:attack:rewriting

@@ -12,8 +12,7 @@ The result covers \vf{22} blind maps, one target model, and one dataset, and it 
 
 \subsection{Composition of the leak}\label{sec:attack:leak}
 
-At a fixed number of rows, a leak spread over more prompts yields a higher word-F1 than a leak drawn from \vf{2} prompts (Figure~\ref{fig:attack:shape}).
-%% BIG CHANGE: new sentence (2026-11-17), why the composition comparison sits on legal128w.
+At a fixed number of rows, a leak spread over more prompts yields a higher word-F1 than a leak drawn from \vf{2} prompts (Figure~\ref{fig:attack:shape}).%% BIG CHANGE: new sentence (2026-11-17), why the composition comparison sits on legal128w.
 The comparison runs on legal100t, the one dataset whose prompts are long enough to vary the rows per prompt at a fixed number of rows.
 %% BIG CHANGE (2026-11-18): the comparison now runs at the setting of the main comparison (alpha 0.9, tau 2d); the scores changed (2 prompts 0.178 to 0.255, stop words 0.058 to 0.115).
 At the setting of the main comparison, the hybrid fit scores \vf{0.328} with \vf{1} row from each of \vf{90} prompts, \vf{0.299} with \vf{9} consecutive rows from each of \vf{10} prompts, and \vf{0.255} with \vf{90} rows from \vf{2} prompts. % src: results/legal128w/v7_2/main/mixed-w46-std-L90-composition.json seeds.1.cells (L90-random 0.3284, L90-prefix 0.2546; supervised 0.1084, 0.0487); mixed-w46-std.json seeds.1.cells (L90-span9 0.2993; supervised 0.0938)
