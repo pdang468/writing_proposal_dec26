@@ -1,36 +1,38 @@
 \section{Second-Round Rewriting}\label{sec:attack:rewriting}
 
-The three decoders yield reconstructions of differing quality (Section~\ref{sec:attack:main}), and a second round tests whether combining them improves word-F1 over their mean and over the best decoder.
+The three decoders yield reconstructions of differing quality (Section~\ref{sec:attack:main}), and a second round tests whether combining them improves on the best decoder.
 A language model receives the three reconstructions and rewrites them into one text.
-The experiment is exploratory and covers legal10w only.
+The experiment is exploratory.
 
 \paragraph{Protocol.} The language model is Claude Haiku~\vf{5.5}.
-It receives the three reconstructions of the hybrid fit at the \vf{90}-row leak, with the SmolLM reconstruction first, and returns one text. % src: results/legal10w/v7_2/main/framework/attacker/attacker-b90-a0.9-sq-m0-t0.1476-r1-B8192-L90-span9-s1-haiku.json (model claude-haiku-5-5, system_B); attacker_run.py (LEVEL2_ORDER)
-Its instruction reads ``You get three noisy copies of the same SEC filing excerpt. Copy 1 is the most reliable; start from it and apply majority rules where the copies disagree. Fix spelling, broken words and repeats. Reply with the text only, inside \texttt{<text></text>}.''
+It receives the three reconstructions of the hybrid fit at the \vf{90}-row leak, with the SmolLM reconstruction first, and returns one text. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/framework/attacker/attacker-b90-a0.9-sq-m0-t*-r1-B8192-L90-span9-s1-haiku.json (model claude-haiku-5-5, system_B); attacker_run.py (LEVEL2_ORDER)
+Its instruction reads ``You get three noisy copies of the same question. Copy 1 is the most reliable; start from it and apply majority rules where the copies disagree. Fix spelling, broken words and repeats. Reply with the text only, inside \texttt{<text></text>}.''
+On the two legal datasets the instruction says ``SEC filing excerpt'' in place of ``question''.
 The language model receives no hidden state and no part of the true prompt.
-The experiment covers \vf{450} of the \vf{500} selection prompts, and the instruction was selected on the other \vf{50}. % src: same file (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
-Word-F1 in this section is computed on lower-cased words without edge punctuation, so its values are not comparable with those of the other sections.
+The experiment covers \vf{450} of the \vf{500} selection prompts, and the instruction was selected on the other \vf{50}. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
 
-\paragraph{Result.} Rewriting three reconstructions raises word-F1 from \vf{0.627}, the mean of the three decoders, to \vf{0.745} (Figure~\ref{fig:attack:rewriting}). % src: same file, table."hybrid rung B".word_f1 (0.6273, 0.7446, +0.1173 [0.1041, 0.1303]); run 2026-11-17, 4,500 calls
-The gain is \vf{0.117}, with a \vf{95} percent interval of \vf{0.104} to \vf{0.130} from a paired bootstrap over prompts.
-The figure shows three comparisons beside that gain.
-SmolLM alone scores \vf{0.684}, so rewriting also exceeds the best single decoder, by \vf{0.06}, and that gain carries no interval. % src: per-decoder scores recomputed from the endpoint decoding on the 450 prompts (SmolLM 0.6839, OLMo 0.6176, Qwen 0.5804)
-Rewriting one reconstruction leaves word-F1 at \vf{0.63}, so the gain needs all three reconstructions. % src: same file, table."hybrid rung A".word_f1 (0.6273, 0.6305, +0.0032 [-0.0041, 0.0100])
-Under the mismatched-prompt control, word-F1 stays at \vf{0.08}, so the gain depends on the prompt's own reconstructions. % src: same file, table."wrong memory rung B".word_f1 (0.0783, 0.0817)
+\paragraph{Score.} The language model adds capital letters and punctuation that the prompts lack.
+Word-F1 in this section is therefore computed on lower-cased words without edge punctuation, for the decoders and for the rewrites alike.
+Under the word-F1 of the other sections, the added marks alone lower the rewrite on NQ by \vf{0.12}. % src: results/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.strict.mean vs metrics.folded.mean, rewrite of three (0.7771, 0.9000)
+
+\paragraph{Result.} The baseline is the best single decoder, SmolLM, since an adversary would keep the best reconstruction it holds.
+Rewriting the three reconstructions exceeds SmolLM alone on the two legal datasets and matches it on NQ (Figure~\ref{fig:attack:rewriting}).
+On legal100t, word-F1 rises from \vf{0.429} to \vf{0.546}, a gain of \vf{0.117} with a \vf{95} percent interval of \vf{0.101} to \vf{0.133} from a paired bootstrap over prompts. % src: results/legal128w/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (0.4290, 0.5456; +0.117 [0.101, 0.133]); scripts/rewriting_best_decoder.py
+On legal10w, word-F1 rises from \vf{0.684} to \vf{0.745}, a gain of \vf{0.061} with an interval of \vf{0.048} to \vf{0.074}. % src: results/legal10w/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (+0.061 [0.048, 0.074])
+On NQ, SmolLM alone already scores \vf{0.892}, and the gain is \vf{0.008} with an interval of \vf{0.001} to \vf{0.017}. % src: results/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (0.8918, 0.9000; +0.008 [0.001, 0.017])
+The gain is therefore largest where the best decoder is weakest.
+
+Two comparisons locate the gain.
+Rewriting the SmolLM reconstruction alone changes word-F1 by at most \vf{0.033}, so most of the gain arrives with the two further reconstructions. % src: same files, gain_rewrite_of_smollm_over_smollm (NQ -0.007, legal10w +0.006, legal128w +0.033)
+Under the mismatched-prompt control, rewriting adds at most \vf{0.021}, so the gain depends on the prompt's own reconstructions. % src: same files, gain_control_rewrite_over_control_smollm (+0.005, +0.004, +0.021)
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.8\textwidth]{ch4/rewriting}
-\caption{The second round raises word-F1 on legal10w from \vf{0.63}, the mean of the three decoders, to \vf{0.74}, above the best single decoder.
-Round 1 is the three decoders on the hybrid fit of the main comparison at the \vf{90}-row leak; round 2 is Claude Haiku~\vf{5.5} rewriting one reconstruction (averaged over the three decoders) or all three.
-The dotted line is the rewrite of all three reconstructions under the mismatched-prompt control.
-Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompts.}
+\includegraphics[width=0.85\textwidth]{ch4/rewriting}
+\caption{Rewriting all three reconstructions exceeds the best single decoder by \vf{0.12} word-F1 on legal100t and by \vf{0.06} on legal10w, and matches it on NQ.
+The number above each group is the gain of the rewrite of all three reconstructions over SmolLM alone.
+Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompts, hybrid fit of the main comparison at the \vf{90}-row leak, rewriting by Claude Haiku~\vf{5.5}.}
 \label{fig:attack:rewriting}
 \end{figure}
-
-% CUT 2026-11-18, pending a rerun at the 90-row leak and alpha 0.9 (the rows of the former table):
-% NQ, \vf{92} rows & \vf{0.727} & \vf{0.854} & \vf{0.861} & \vf{$+0.134$} [\vf{0.124}, \vf{0.145}] \\ % src: attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json table."hybrid rung B".word_f1 (0.7271, 0.8610, +0.1339 [0.1237, 0.1449]); SmolLM alone recomputed from the per-prompt records (0.8539)
-% legal100t, \vf{856} rows & \vf{0.539} & \vf{0.779} & \vf{0.802} & \vf{$+0.263$} [\vf{0.252}, \vf{0.273}] \\ % src: legal128w attacker-b10-...-haiku.json (0.5393, 0.8020, +0.2627 [0.2522, 0.2729]); SmolLM alone recomputed (0.7793)
-% legal100t, \vf{8{,}612} rows & \vf{0.772} & \vf{0.890} & \vf{0.896} & \vf{$+0.124$} [\vf{0.115}, \vf{0.135}] \\ % src: legal128w attacker-b100-...-haiku.json (0.7721, 0.8963, +0.1242 [0.1145, 0.1349]); SmolLM alone recomputed (0.8897)
 
 \paragraph{What the result does not show.} The comparison does not separate the contribution of the two further reconstructions from the instruction that names SmolLM as the most reliable copy.
