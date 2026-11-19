@@ -7,7 +7,7 @@ Its resources are the frozen hub, two unpaired pools from the domain under attac
 With that leak, the results support the hypothesis that unpaired matching improves reconstruction.
 On held-out prompts, the hybrid fit raises word-F1 over the supervised fit from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.192} to \vf{0.599} on legal10w, and from \vf{0.102} to \vf{0.321} on legal100t. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/w46-confirmation-s{1,2,3}.json
 The resulting gains are \vf{0.411}, \vf{0.407}, and \vf{0.219}.
-The gain is also highest at this leak size, with a peak at \vf{45} to \vf{90} rows.
+The gain also peaks near this leak size, at \vf{45} to \vf{90} rows.
 Despite those gains, full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
 
 The attack behind those gains is lightweight, since it trains only one affine map.
