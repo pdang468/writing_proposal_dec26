@@ -7,19 +7,18 @@ Its resources are the frozen hub, two unpaired pools from the domain under attac
 The results support the hypothesis that unpaired matching improves reconstruction from a small leak.
 On held-out prompts, the hybrid fit raises word-F1 over the supervised fit from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.192} to \vf{0.599} on legal10w, and from \vf{0.102} to \vf{0.321} on legal100t. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/w46-confirmation-s{1,2,3}.json
 The gains are \vf{0.411}, \vf{0.407}, and \vf{0.219}.
-Both fits train on the same leak, so the gains come from matching alone.
 Full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
 
 The attack is lightweight, since it trains only one affine map.
 The results suggest that such a map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
 
-The gain demonstrates that matching supplies what a small leak lacks.
+Both fits train on the same leak, so matching adds to what the supervised fit learns from it.
 The gain is largest at small leaks of \vf{45} to \vf{90} rows.
 
 A second round extends the attack with no further access to the target model.
 The three decoders of the hub yield three reconstructions of each prompt, and the reconstructions differ.
 A language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
-Against the best single decoder, the rewrite gains \vf{0.117} word-F1 on legal100t and \vf{0.061} on legal10w, and it matches the decoder on NQ. % src: Section sec:attack:rewriting
+Against the best single decoder, the rewrite raises word-F1 on legal10w and legal100t, and it matches the decoder on NQ. % src: Section sec:attack:rewriting
 Rewriting thus helps most where the decoders are weakest.
 
 \paragraph{Limitations.} Two limitations bound the claims.
