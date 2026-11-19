@@ -35,14 +35,16 @@ Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompt
 \label{fig:attack:rewriting}
 \end{figure}
 
-\paragraph{Examples.} Table~\ref{tab:attack:rewriting-examples} shows three legal10w prompts, taken at the \vf{95}th, \vf{75}th, and \vf{10}th percentile of the gain over SmolLM alone.
-In the first two, the rewrite starts from the SmolLM reconstruction and replaces its wrong words with words on which the other decoders agree.
-In the third, the rewrite appends a wrong word from the Qwen reconstruction and loses word-F1.
+\paragraph{Examples.} Two legal10w prompts show what the second round does (Table~\ref{tab:attack:rewriting-examples}).
+In the first, each decoder loses different words, and the rewrite keeps the words on which two decoders agree.
+Word-F1 rises from \vf{0.57} for SmolLM alone to \vf{0.90}.
+In the second, the rewrite takes the first word from Qwen, and it keeps a wrong date because two decoders agree on that date.
+Agreement between decoders therefore corrects an error of one decoder and preserves an error that two share.
 Over the \vf{450} prompts, rewriting raises word-F1 on \vf{52} percent, leaves \vf{34} percent unchanged, and lowers \vf{14} percent. % src: legal10w cache and endpoint decoding, per-prompt gain of the rewrite of three over SmolLM alone (0.518, 0.338, 0.144)
 
 \begin{table}[H]
-\caption{The rewrite keeps the words on which the reconstructions agree and can also copy a wrong word.
-Three legal10w prompts at the \vf{95}th, \vf{75}th, and \vf{10}th percentile of the gain over SmolLM alone, with the three reconstructions of round 1 and the rewrite of round 2.
+\caption{The rewrite keeps the words on which the reconstructions agree, including a wrong date that two decoders share.
+Two legal10w prompts at the \vf{95}th and \vf{75}th percentile of the gain over SmolLM alone, with the three reconstructions of round 1 and the rewrite of round 2.
 Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:attack:rewriting-examples}
 \centering
@@ -60,12 +62,6 @@ SmolLM, word-F1 \vf{0.70} & \miss{ye} \hit{Property Account (the Account) on Aug
 OLMo, word-F1 \vf{0.56} & \miss{Food} \hit{Account (Account (the} \miss{Account)} \hit{on August} \miss{19,} \\
 Qwen, word-F1 \vf{0.80} & \hit{Real Property Account (The Account) on August} \miss{14, 1903} \hit{by} \\
 Rewrite, word-F1 \vf{0.80} & \hit{Real Property Account (the Account) on August} \miss{19, 2012} \hit{by} \\ % src: legal10w cache, law-edgar-00012496-w38, gain percentile 75
-\midrule
-True prompt & Performance Measure. The number of Performance Units earned for the \\
-SmolLM, word-F1 \vf{0.90} & \hit{measure} \miss{Profile.} \hit{The number of Performance Units earned for the} \\
-OLMo, word-F1 \vf{0.70} & \miss{pros Factor.} \hit{The number of Performance} \miss{Points} \hit{earned for the} \\
-Qwen, word-F1 \vf{0.84} & \miss{period.} \hit{The number of Performance Units earned for the} \\
-Rewrite, word-F1 \vf{0.86} & \hit{measure} \miss{Profile.} \hit{The number of Performance Units earned for the} \miss{period.} \\ % src: legal10w cache, law-atticus_contracts-00005898-w615, gain percentile 10
 \bottomrule
 \end{tabular}
 \end{table}
