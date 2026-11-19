@@ -39,8 +39,8 @@ On the selection prompts, the hybrid fit scores \vf{0.768} against its mismatche
 On legal100t the supervised fit, at \vf{0.094}, is close to its control of \vf{0.059}, so \vf{90} rows alone yield little beyond the control. % src: results/legal128w/v7_2/main/mixed-w46-std.json seeds.1.cells (0.0938, 0.0594)
 
 \paragraph{Exact match and decoders.} On the held-out prompts, exact match distinguishes the word-overlap gain from full-prompt recovery.
-Under the hybrid fit, exact match is \vf{0.21} on NQ, against zero under the supervised fit, and it rounds to zero on legal100t. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl, field exact_match, three decoders and three seeds (NQ hybrid 0.2121: SmolLM 0.4153, OLMo 0.1676, Qwen 0.0534; supervised 0.0001; legal128w hybrid: SmolLM 0.0001, OLMo 0, Qwen 0)
-% TODO: exact match on legal10w (the held-out decoding file is on the cluster, not in the local results)
+Under the hybrid fit, exact match is \vf{0.21} on NQ and \vf{0.02} on legal10w, against zero under the supervised fit, and it rounds to zero on legal100t. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl, field exact_match, three decoders and three seeds (NQ hybrid 0.2121: SmolLM 0.4153, OLMo 0.1676, Qwen 0.0534; supervised 0.0001; legal128w hybrid: SmolLM 0.0001, OLMo 0, Qwen 0)
+% src: legal10w exact match from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl, three decoders and three fits (hybrid 0.0209: SmolLM 0.0268, Qwen 0.0233, OLMo 0.0125; supervised 0)
 The three decoders also differ.
 The hybrid fit scores \vf{0.886} through SmolLM, \vf{0.762} through OLMo, and \vf{0.650} through Qwen on NQ. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds (0.8859, 0.7622, 0.6495)
 On legal10w the same order holds, at \vf{0.655}, \vf{0.587}, and \vf{0.555}.
