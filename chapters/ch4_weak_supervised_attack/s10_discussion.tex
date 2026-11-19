@@ -12,10 +12,8 @@ Full recovery remains challenging: exact match under the hybrid fit is \vf{0.21}
 
 The attack is lightweight, since it trains only one affine map, and the results suggest that such a map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
 A second round extends the attack with no further access to the target model.
-The three decoders of the hub yield three reconstructions of each prompt, and the reconstructions differ.
-A language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
-Against the best single decoder, the rewrite raises word-F1 on legal10w and legal100t, and it matches the decoder on NQ. % src: Section sec:attack:rewriting
-Rewriting thus helps most where the decoders are weakest.
+In that round, a language model rewrites the three reconstructions of the hub's decoders into one text, without any hidden state.
+The rewrite raises word-F1 over the best single decoder on legal10w and legal100t, where the decoders are weakest, and matches it on NQ. % src: Section sec:attack:rewriting
 
 \paragraph{Limitations.} Two limitations bound the claims.
 \begin{itemize}
