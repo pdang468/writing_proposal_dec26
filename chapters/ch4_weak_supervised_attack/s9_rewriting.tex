@@ -17,20 +17,20 @@ Under the word-F1 of the other sections, the added marks alone lower the rewrite
 
 \paragraph{Result.} The baseline is the best single decoder, SmolLM, since an adversary would keep the best reconstruction it holds.
 Rewriting the three reconstructions exceeds SmolLM alone on the two legal datasets and matches it on NQ (Figure~\ref{fig:attack:rewriting}).
-On legal100t, word-F1 rises from \vf{0.429} to \vf{0.546}, a gain of \vf{0.117} with a \vf{95} percent interval of \vf{0.101} to \vf{0.133} from a paired bootstrap over prompts. % src: results/legal128w/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (0.4290, 0.5456; +0.117 [0.101, 0.133]); scripts/rewriting_best_decoder.py
-On legal10w, word-F1 rises from \vf{0.684} to \vf{0.745}, a gain of \vf{0.061} with an interval of \vf{0.048} to \vf{0.074}. % src: results/legal10w/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (+0.061 [0.048, 0.074])
-On NQ, SmolLM alone already scores \vf{0.892}, and the gain is \vf{0.008} with an interval of \vf{0.001} to \vf{0.017}. % src: results/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (0.8918, 0.9000; +0.008 [0.001, 0.017])
-The gain is therefore largest where the best decoder is weakest.
+On legal100t, word-F1 rises from \vf{0.429} to \vf{0.546}, an improvement of \vf{0.117} with a \vf{95} percent interval of \vf{0.101} to \vf{0.133} from a paired bootstrap over prompts. % src: results/legal128w/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (0.4290, 0.5456; +0.117 [0.101, 0.133]); scripts/rewriting_best_decoder.py
+On legal10w, word-F1 rises from \vf{0.684} to \vf{0.745}, an improvement of \vf{0.061} with an interval of \vf{0.048} to \vf{0.074}. % src: results/legal10w/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (+0.061 [0.048, 0.074])
+On NQ, SmolLM alone already scores \vf{0.892}, and the improvement is \vf{0.008} with an interval of \vf{0.001} to \vf{0.017}. % src: results/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (0.8918, 0.9000; +0.008 [0.001, 0.017])
+The improvement is therefore largest where the best decoder is weakest.
 
-Two comparisons locate the gain.
-Rewriting the SmolLM reconstruction alone changes word-F1 by at most \vf{0.033}, so most of the gain arrives with the two further reconstructions. % src: same files, gain_rewrite_of_smollm_over_smollm (NQ -0.007, legal10w +0.006, legal128w +0.033)
-Under the mismatched-prompt control, rewriting adds at most \vf{0.021}, so the gain depends on the prompt's own reconstructions. % src: same files, gain_control_rewrite_over_control_smollm (+0.005, +0.004, +0.021)
+Two comparisons locate the improvement.
+Rewriting the SmolLM reconstruction alone changes word-F1 by at most \vf{0.033}, so most of the improvement arrives with the two further reconstructions. % src: same files, gain_rewrite_of_smollm_over_smollm (NQ -0.007, legal10w +0.006, legal128w +0.033)
+Under the mismatched-prompt control, rewriting adds at most \vf{0.021}, so the improvement depends on the prompt's own reconstructions. % src: same files, gain_control_rewrite_over_control_smollm (+0.005, +0.004, +0.021)
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.85\textwidth]{ch4/rewriting}
 \caption{Rewriting all three reconstructions exceeds the best single decoder by \vf{0.12} word-F1 on legal100t and by \vf{0.06} on legal10w, and matches it on NQ.
-The number above each group is the gain of the rewrite of all three reconstructions over SmolLM alone.
+The number above each group is the improvement of the rewrite of all three reconstructions over SmolLM alone.
 Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompts, hybrid fit of the main comparison at the \vf{90}-row leak, rewriting by Claude Haiku~\vf{5.5}.}
 \label{fig:attack:rewriting}
 \end{figure}
@@ -44,7 +44,7 @@ Over the \vf{450} prompts, rewriting raises word-F1 on \vf{52} percent, leaves \
 
 \begin{table}[H]
 \caption{The rewrite keeps the words on which the reconstructions agree, including a wrong date that two decoders share.
-Two legal10w prompts at the \vf{95}th and \vf{75}th percentile of the gain over SmolLM alone, with the three reconstructions of round 1 and the rewrite of round 2.
+Two legal10w prompts at the \vf{95}th and \vf{75}th percentile of the improvement over SmolLM alone, with the three reconstructions of round 1 and the rewrite of round 2.
 Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:attack:rewriting-examples}
 \centering
