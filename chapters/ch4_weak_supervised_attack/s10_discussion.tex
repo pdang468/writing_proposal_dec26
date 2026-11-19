@@ -9,10 +9,10 @@ On held-out prompts, the hybrid fit raises word-F1 over the supervised fit from 
 The gains are \vf{0.411}, \vf{0.407}, and \vf{0.219}.
 Full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
 
-The attack is lightweight.
-It trains one affine map, and the hub and its decoders stay frozen.
-The gain suggests that such a map can align the hidden states of the target model with the hub, although the target model took no part in hub training.
-An alignment of that kind is consistent with the Platonic Representation Hypothesis.
+The attack is lightweight, since it trains only one affine map.
+The hub and its decoders stay frozen, so that map alone connects the target model to the hub.
+The gain therefore suggests that an affine map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
+Such an alignment is consistent with the Platonic Representation Hypothesis, the starting point of this work.
 
 Three conditions bound the gain.
 First, matching needs a leak.
