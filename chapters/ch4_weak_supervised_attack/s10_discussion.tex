@@ -20,6 +20,3 @@ The rewrite raises word-F1 over the best single decoder on legal10w and legal100
 \item \textbf{Settings chosen with known domain.} The supervision fraction and the temperature were selected by word-F1 on \vf{500} prompts of the known domain, and that score reads their text.
 \item \textbf{Models and layer.} The results cover one block of one target model of about one billion parameters and three hub models, without a defense or a deployed system.
 \end{itemize}
-
-Within these limits, a leak of \vf{90} rows, about \vf{90} words on NQ, and one affine map suffice for the result of the chapter.
-With them, the hub's frozen decoders reconstruct held-out NQ prompts of a model outside the hub at a word-F1 of \vf{0.766}, against \vf{0.354} without matching.
