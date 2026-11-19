@@ -196,33 +196,38 @@ def standard():
 
 
 def rewriting():
-    """Word-F1 before and after the second-round language model, 450 selection prompts, seed 1."""
-    files = [
-        ("NQ\n92 rows", "results/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1152-r1-B8192-s1-haiku.json"),
-        ("legal128w\n856 rows", "results/legal128w/v7_2/main/framework/attacker/attacker-b10-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
-        ("legal128w\n8,612 rows", "results/legal128w/v7_2/main/framework/attacker/attacker-b100-a0.95-sq-m0-t0.1297-r1-B8192-s1-haiku.json"),
+    """Word-F1 before and after the second-round language model on legal10w, 90-row leak, 450 selection prompts."""
+    d = load("results/legal10w/v7_2/main/framework/attacker/attacker-b90-a0.9-sq-m0-t0.1476-r1-B8192-L90-span9-s1-haiku.json")
+    assert d["prompts_reported"] == 450 and d["model"].startswith("claude-haiku")
+    t = d["table"]
+    smollm = 0.6839  # SmolLM alone, recomputed from the endpoint decoding on the same 450 prompts (not stored in the file)
+    groups = [
+        ("hybrid fit", [("decoders, mean of three", INK2, t["hybrid rung B"]["word_f1"]["before"]),
+                        ("SmolLM decoder alone", "#b9b8b3", smollm),
+                        ("rewrite of one reconstruction", BLUE, t["hybrid rung A"]["word_f1"]["after"]),
+                        ("rewrite of three reconstructions", ORANGE, t["hybrid rung B"]["word_f1"]["after"])]),
+        ("mismatched-prompt control", [("decoders, mean of three", INK2, t["wrong memory rung B"]["word_f1"]["before"]),
+                                       ("rewrite of one reconstruction", BLUE, t["wrong memory rung A"]["word_f1"]["after"]),
+                                       ("rewrite of three reconstructions", ORANGE, t["wrong memory rung B"]["word_f1"]["after"])]),
     ]
-    series = [("decoders, mean of three", INK2), ("rewrite of one reconstruction", BLUE), ("rewrite of three reconstructions", ORANGE)]
-    fig, ax = plt.subplots(figsize=(5.2, 2.9))
-    width = 0.26
-    for i, (name, rel) in enumerate(files):
-        d = load(rel)
-        assert d["prompts_reported"] == 450 and d["model"].startswith("claude-haiku")
-        a, b = d["table"]["hybrid rung A"]["word_f1"], d["table"]["hybrid rung B"]["word_f1"]
-        vals = [b["before"], a["after"], b["after"]]
-        for k, ((label, color), v) in enumerate(zip(series, vals)):
-            x = i + (k - 1) * width
-            ax.bar(x, v, width * 0.92, color=color, alpha=0.85, label=label if i == 0 else None)
+    fig, ax = plt.subplots(figsize=(5.4, 2.9))
+    width, centers, seen = 0.2, [], set()
+    for i, (name, barsg) in enumerate(groups):
+        x0 = i * 1.15
+        centers.append(x0)
+        for k, (label, color, v) in enumerate(barsg):
+            x = x0 + (k - (len(barsg) - 1) / 2) * width
+            ax.bar(x, v, width * 0.92, color=color, alpha=0.9, label=None if label in seen else label)
+            seen.add(label)
             ax.annotate(f"{v:.2f}", (x, v), xytext=(0, 2), textcoords="offset points", ha="center", fontsize=8)
-        print(name.replace("\n", " "), [round(v, 4) for v in vals])
-    ax.set_xticks(range(len(files)))
-    ax.set_xticklabels([f[0] for f in files])
-    ax.set_ylim(0, 1.38)
-    ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+        print(name, [round(v, 4) for _, _, v in barsg])
+    ax.set_xticks(centers)
+    ax.set_xticklabels([g[0] for g in groups])
+    ax.set_ylim(0, 1.0)
     ax.set_ylabel("word-F1")
     ax.grid(axis="y")
     ax.set_axisbelow(True)
-    ax.legend(loc="upper left", fontsize=7.5, ncol=1)
+    ax.legend(loc="upper right", fontsize=7.5)
     fig.tight_layout()
     save(fig, "ch4/rewriting")
 
@@ -236,7 +241,7 @@ def cross_entropy():
     ]
     fig, ax = plt.subplots(figsize=(5.6, 2.9))
     width, step = 0.26, 1.0
-    series = (("no soft prompt", "#b9b8b3"), ("supervised fit", SUPERVISED), ("hybrid fit", HYBRID))
+    series = (("unconditional baseline", "#b9b8b3"), ("supervised fit", SUPERVISED), ("hybrid fit", HYBRID))
     for i, (name, rel, tau) in enumerate(panels):
         arms = load(rel)["arms"]
         get = lambda key: arms[key]["classes"]["content"]["excess_per_word"]

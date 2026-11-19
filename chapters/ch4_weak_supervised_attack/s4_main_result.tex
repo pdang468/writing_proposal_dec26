@@ -3,7 +3,6 @@
 Unpaired matching more than doubles reconstruction word-F1 on all three datasets (Table~\ref{tab:attack:main}).
 On the \vf{4{,}500} held-out prompts, with a leak of \vf{90} rows, word-F1 on NQ rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit, a gain of \vf{0.411}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113) ; results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
 The gains on legal10w and legal100t are \vf{0.407} and \vf{0.219}.
-%% BIG CHANGE: new sentence (2026-11-17), the reading that orders the datasets; it restates the three gains and the exposure stated in the setup.
 The two datasets of short prompts gain about \vf{0.41}, and legal100t, where \vf{9} rows expose only the opening words of a prompt, gains about half as much.
 Both fits receive the same leak, so the gain comes from the two unpaired pools.
 
