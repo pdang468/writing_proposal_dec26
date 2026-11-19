@@ -12,12 +12,13 @@ Full recovery remains challenging: exact match under the hybrid fit is \vf{0.21}
 The attack is lightweight, since it trains only one affine map.
 The hub and its decoders stay frozen, so that map alone connects the target model to the hub.
 The gain therefore suggests that an affine map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
-Such an alignment is consistent with the Platonic Representation Hypothesis that motivates this work.
+Such an alignment is consistent with the Platonic Representation Hypothesis.
 
 The other experiments of the chapter study that gain.
 The gain peaks at \vf{45} to \vf{90} rows and falls to \vf{0.089} at \vf{900} rows on NQ and on legal10w, where the leak alone carries the supervised fit to \vf{0.743} and \vf{0.655}. % src: mixed-w46-std-L900.json of NQ and legal10w (gain 0.0889, 0.0889; supervised 0.7434, 0.6548)
 Matching still needs the leak, since without one the tested blind maps on NQ exceed their mismatched-prompt controls by at most \vf{0.025} word-F1. % src: Section sec:attack:blind
-The gain does not depend on where the \vf{90} rows come from, and on legal100t it stays near \vf{0.21} for leaks drawn from \vf{2}, \vf{10}, or \vf{90} prompts. % src: Section sec:attack:leak
+The gain does not depend on how the \vf{90} rows are spread over prompts.
+On legal100t, the \vf{90} rows were drawn from \vf{2}, \vf{10}, or \vf{90} prompts, and the gain stays near \vf{0.21} in all three cases.
 The gain does depend on the temperature, and at \vf{90} rows word-F1 peaks at $\tau = 2d$. % src: Section sec:attack:grid90
 The decoder's next-token predictions confirm the gain: under teacher forcing, the excess cross-entropy falls with matching on all three datasets, from \vf{7.73} to \vf{1.36} nats per content word on NQ. % src: teacher_forced-w46/summary.json of NQ
 
