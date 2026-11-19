@@ -196,40 +196,42 @@ def standard():
 
 
 def rewriting():
-    """Word-F1 before and after the second-round language model on legal10w, 90-row leak, 450 selection prompts."""
+    """Two rounds on legal10w, 90-row leak, 450 selection prompts: the three decoders, then the language model."""
     d = load("results/legal10w/v7_2/main/framework/attacker/attacker-b90-a0.9-sq-m0-t0.1476-r1-B8192-L90-span9-s1-haiku.json")
     assert d["prompts_reported"] == 450 and d["model"].startswith("claude-haiku")
     t = d["table"]
-    smollm = 0.6839  # SmolLM alone, recomputed from the endpoint decoding on the same 450 prompts (not stored in the file)
-    groups = [
-        ("hybrid fit", [("decoders, mean of three", INK2, t["hybrid rung B"]["word_f1"]["before"]),
-                        ("SmolLM decoder alone", "#b9b8b3", smollm),
-                        ("rewrite of one reconstruction", BLUE, t["hybrid rung A"]["word_f1"]["after"]),
-                        ("rewrite of three reconstructions", ORANGE, t["hybrid rung B"]["word_f1"]["after"])]),
-        ("mismatched-prompt control", [("decoders, mean of three", INK2, t["wrong memory rung B"]["word_f1"]["before"]),
-                                       ("rewrite of one reconstruction", BLUE, t["wrong memory rung A"]["word_f1"]["after"]),
-                                       ("rewrite of three reconstructions", ORANGE, t["wrong memory rung B"]["word_f1"]["after"])]),
-    ]
-    fig, ax = plt.subplots(figsize=(5.4, 2.9))
-    width, centers, seen = 0.2, [], set()
-    for i, (name, barsg) in enumerate(groups):
-        x0 = i * 1.15
-        centers.append(x0)
-        for k, (label, color, v) in enumerate(barsg):
-            x = x0 + (k - (len(barsg) - 1) / 2) * width
-            ax.bar(x, v, width * 0.92, color=color, alpha=0.9, label=None if label in seen else label)
-            seen.add(label)
-            ax.annotate(f"{v:.2f}", (x, v), xytext=(0, 2), textcoords="offset points", ha="center", fontsize=8)
-        print(name, [round(v, 4) for _, _, v in barsg])
-    ax.set_xticks(centers)
-    ax.set_xticklabels([g[0] for g in groups])
-    ax.set_ylim(0, 1.0)
+    # per-decoder scores recomputed from the endpoint decoding on the same 450 prompts (not stored in the file)
+    qwen, olmo, smollm = 0.5804, 0.6176, 0.6839
+    mean3 = t["hybrid rung B"]["word_f1"]["before"]
+    assert abs((qwen + olmo + smollm) / 3 - mean3) < 5e-4
+    one, three = t["hybrid rung A"]["word_f1"]["after"], t["hybrid rung B"]["word_f1"]["after"]
+    control = t["wrong memory rung B"]["word_f1"]["after"]
+    GREY = "#b9b8b3"
+    bars_ = [(0.0, qwen, GREY, "Qwen"), (1.0, olmo, GREY, "OLMo"), (2.0, smollm, GREY, "SmolLM"), (3.0, mean3, INK2, "mean of\nthree"),
+             (4.8, one, BLUE, "rewrite of\none"), (5.8, three, ORANGE, "rewrite of\nall three")]
+    fig, ax = plt.subplots(figsize=(5.8, 3.0))
+    for x, v, color, _ in bars_:
+        ax.bar(x, v, 0.78, color=color)
+        ax.annotate(f"{v:.2f}", (x, v), xytext=(0, 2), textcoords="offset points", ha="center", fontsize=8, color=INK)
+    ax.axvline(3.9, color=GRID, lw=1.0)
+    ax.text(1.5, 0.95, "Round 1: three decoders", ha="center", fontsize=9, color=INK)
+    ax.text(5.3, 0.95, "Round 2: language model", ha="center", fontsize=9, color=INK)
+    ax.annotate("", (5.8, three + 0.07), (3.0, three + 0.07), arrowprops=dict(arrowstyle="->", color=INK2, lw=0.8))
+    ax.plot([3.0, 3.0], [mean3 + 0.05, three + 0.07], color=INK2, lw=0.8)
+    ax.text(4.4, three + 0.085, f"+{three - mean3:.2f}", ha="center", fontsize=8, color=INK2)
+    ax.plot([-0.6, 6.4], [control, control], color=INK, lw=0.9, ls=":", zorder=5)
+    ax.text(6.45, control, f"control\n{control:.2f}", ha="left", va="center", fontsize=8, color=INK2)
+    ax.set_xticks([b[0] for b in bars_])
+    ax.set_xticklabels([b[3] for b in bars_], fontsize=8)
+    ax.set_xlim(-0.6, 7.1)
+    ax.set_ylim(0, 1.02)
+    ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8])
     ax.set_ylabel("word-F1")
     ax.grid(axis="y")
     ax.set_axisbelow(True)
-    ax.legend(loc="upper right", fontsize=7.5)
     fig.tight_layout()
     save(fig, "ch4/rewriting")
+    print("rewriting", qwen, olmo, smollm, round(mean3, 4), round(one, 4), round(three, 4), round(control, 4))
 
 
 def cross_entropy():

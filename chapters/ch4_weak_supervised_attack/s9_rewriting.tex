@@ -21,8 +21,10 @@ Under the mismatched-prompt control, word-F1 stays at \vf{0.08}, so the gain dep
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.8\textwidth]{ch4/rewriting}
-\caption{Rewriting three reconstructions raises word-F1 on legal10w from \vf{0.63} to \vf{0.74}, above the best single decoder, and adds nothing under the mismatched-prompt control.
-Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompts, hybrid fit of the main comparison at the \vf{90}-row leak, rewriting by Claude Haiku~\vf{5.5}.}
+\caption{The second round raises word-F1 on legal10w from \vf{0.63}, the mean of the three decoders, to \vf{0.74}, above the best single decoder.
+Round 1 is the three decoders on the hybrid fit of the main comparison at the \vf{90}-row leak; round 2 is Claude Haiku~\vf{5.5} rewriting one reconstruction (averaged over the three decoders) or all three.
+The dotted line is the rewrite of all three reconstructions under the mismatched-prompt control.
+Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompts.}
 \label{fig:attack:rewriting}
 \end{figure}
 
