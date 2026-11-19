@@ -14,7 +14,7 @@ The hub and its decoders stay frozen, so that map alone connects the target mode
 The gain therefore suggests that an affine map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
 Such an alignment is consistent with the Platonic Representation Hypothesis that motivates this work.
 
-The other experiments of the chapter describe that gain.
+The other experiments of the chapter study that gain.
 Matching contributes most when the leak is small.
 The gain peaks at \vf{45} to \vf{90} rows and falls to \vf{0.089} at \vf{900} rows on NQ and on legal10w, where the leak alone carries the supervised fit to \vf{0.743} and \vf{0.655}. % src: mixed-w46-std-L900.json of NQ and legal10w (gain 0.0889, 0.0889; supervised 0.7434, 0.6548)
 Matching still needs the leak, since without one the tested blind maps on NQ exceed their mismatched-prompt controls by at most \vf{0.025} word-F1. % src: Section sec:attack:blind
