@@ -1,25 +1,27 @@
 \section{Discussion and Limitations}\label{sec:attack:discussion}
 
-This chapter asked whether an adversary who holds only a small leak can read the input of a model outside the hub through a lightweight affine map.
-A leak of \vf{90} rows supervises the map, and unpaired matching refines it on data that carry no correspondence.
+This chapter asked whether an adversary can reconstruct prompts from the hidden states of a model outside the hub.
+The adversary is a server that receives those hidden states and cannot query the target model.
+Its resources are the frozen hub, two unpaired pools from the domain under attack, the tokenizer of the target model, and a leak of \vf{90} rows.
 
 The results support the hypothesis that unpaired matching improves reconstruction from a small leak.
-On held-out NQ prompts the supervised training on leaks alone reaches a word-F1 of \vf{0.354}, and with matching the same leak reaches \vf{0.766}, a gain of \vf{0.411}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json
-The same step raises word-F1 from \vf{0.192} to \vf{0.599} on legal10w, a gain of \vf{0.407}, and from \vf{0.102} to \vf{0.321} on legal100t, a gain of \vf{0.219}. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json
+On held-out prompts, the hybrid fit raises word-F1 over the supervised fit from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.192} to \vf{0.599} on legal10w, and from \vf{0.102} to \vf{0.321} on legal100t. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/w46-confirmation-s{1,2,3}.json
 Word-F1 thus more than doubles on every dataset.
+Full recovery is rarer: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
 
 The attack trains only the affine map, while the hub and its decoders stay frozen.
-The gain from matching therefore suggests that such a map can carry the structure of the target model's hidden states into the shared space of the hub.
-The Platonic Representation Hypothesis predicts this similarity between models, here for a target model that took no part in hub training.
+The frozen decoders recover words of the prompt from the mapped states, so staying outside hub training does not protect a model's prompts from partial recovery.
+The result is consistent with the Platonic Representation Hypothesis.
 
-Three findings bound the gain.
-First, the gain depends on the size of the leak, with a peak at \vf{45} to \vf{90} rows and a fall to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w, seed 1 (0.0889, 0.0889)
-Second, the gain requires a temperature within the range where the matching term can tell its candidates apart.
-Third, matching does not replace the leak, since without one the tested blind maps exceed their mismatched-prompt controls by at most \vf{0.025} word-F1.
+Four findings bound the gain.
+First, the gain peaks at \vf{45} to \vf{90} rows and falls to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w (0.0889, 0.0889)
+Second, at \vf{90} rows and $\alpha \le 0.95$, word-F1 peaks at $\tau = 2d$, and several cells at a lower temperature score below the supervised fit. % src: Section sec:attack:grid90
+Third, on legal100t the gain stays near \vf{0.21} whether the \vf{90} rows come from \vf{2}, \vf{10}, or \vf{90} prompts. % src: Section sec:attack:leak
+Fourth, without a leak, the tested blind maps on NQ exceed their mismatched-prompt controls by at most \vf{0.025} word-F1, so matching does not replace the leak. % src: Section sec:attack:blind
 
-    A supporting experiment relates the objective to the decoder's predictions.
-The objective measures agreement with hub outputs, whereas teacher-forced cross-entropy measures how well the decoder predicts the true tokens.
-At the \vf{90}-row leak, matching lowers the excess cross-entropy on all three datasets, from \vf{7.73} to \vf{1.36} nats per content word on NQ and from \vf{5.58} to \vf{5.11} on legal100t. % src: teacher_forced-w46/summary.json of NQ and legal128w
+Matching also improves the decoder's next-token predictions under teacher forcing.
+At the \vf{90}-row leak, the excess cross-entropy falls on all three datasets, from \vf{7.73} to \vf{1.36} nats per content word on NQ and from \vf{5.58} to \vf{5.11} on legal100t. % src: teacher_forced-w46/summary.json of NQ and legal128w
+On every dataset, the supervised fit is above the unconditional baseline, the decoder with no soft prompt, and the hybrid fit is below it.
 
 The three decoders of the hub yield three reconstructions of each prompt.
 In a second round, a language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
