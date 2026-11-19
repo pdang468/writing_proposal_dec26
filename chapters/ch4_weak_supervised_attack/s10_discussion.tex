@@ -10,9 +10,12 @@ The gains are \vf{0.411}, \vf{0.407}, and \vf{0.219}.
 Both fits train on the same leak, so the gains come from matching alone.
 Full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
 
-The attack is lightweight, and the results suggest that an affine map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
+The attack is lightweight, since it trains only one affine map.
+The results suggest that such a map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
 
-The gain demonstrates that matching supplies what a small leak lacks. Matching gain is more impressive at low leaks of \vf{45} to \vf{90} rows.
+The gain demonstrates that matching supplies what a small leak lacks.
+The gain is largest at small leaks of \vf{45} to \vf{90} rows.
+
 A second round extends the attack with no further access to the target model.
 The three decoders of the hub yield three reconstructions of each prompt, and the reconstructions differ.
 A language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
