@@ -25,7 +25,7 @@ On every dataset, the supervised fit is above the unconditional baseline, the de
 
 The three decoders of the hub yield three reconstructions of each prompt.
 In a second round, a language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
-On legal10w with a leak of \vf{90} rows, rewriting lifts word-F1 from \vf{0.627}, the mean of the three decoders, to \vf{0.745}. % src: Section sec:attack:rewriting
+Against the best single decoder, rewriting gains \vf{0.117} word-F1 on legal100t and \vf{0.061} on legal10w, and it matches the decoder on NQ. % src: Section sec:attack:rewriting
 The gain costs the adversary no further access to the target model.
 
 \paragraph{Limitations.} Two limitations bound the claims.
