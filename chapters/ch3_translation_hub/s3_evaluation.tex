@@ -16,8 +16,9 @@ Each decoder receives the hub outputs of another prompt, and its text is scored 
 Prompt $i$ receives the hub outputs of prompt $i+1$, and the last prompt receives those of the first. % src: src/v6_3/inversion.py (shuffled_indices: (i + 1) mod n); src/v8/projectors.py (wrong_partner: same rule)
 A score above the control shows that the decoder recovers words from the prompt's own hub outputs.
 
-\paragraph{Summary score.} One score summarizes a hub: mean cross-model word-F1, the free-running word-F1 averaged over the six cross-model directions on the validation split.
-The hypothesis is tested by that mean against the mismatched-prompt control on the same prompts.
-The same validation prompts also selected the checkpoint.
-The test split has not been evaluated, so every score in this chapter comes from prompts that took part in that selection.
+\paragraph{Summary score.} One score summarizes a hub, the mean cross-model word-F1.
+It is the free-running word-F1 averaged over the six cross-model directions on the validation prompts.
+The hypothesis is tested by comparing that mean with the mismatched-prompt control on the same prompts.
+The validation prompts also selected the checkpoint, so the scores in this chapter are validation scores.
+The NQ test split has not been evaluated.
 
