@@ -4,13 +4,15 @@ This chapter asked whether an adversary can reconstruct prompts from the hidden 
 The adversary is a server that receives those hidden states and cannot query the target model.
 Its resources are the frozen hub, two unpaired pools from the domain under attack, the tokenizer of the target model, and a leak of \vf{90} rows.
 
-The results support the hypothesis that unpaired matching improves reconstruction from a small leak.
+With that leak, the results support the hypothesis that unpaired matching improves reconstruction.
 On held-out prompts, the hybrid fit raises word-F1 over the supervised fit from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.192} to \vf{0.599} on legal10w, and from \vf{0.102} to \vf{0.321} on legal100t. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/w46-confirmation-s{1,2,3}.json
 The gains are \vf{0.411}, \vf{0.407}, and \vf{0.219}.
-The gain is largest at small leaks of \vf{45} to \vf{90} rows.
-Full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
+Across leak sizes, the gain is largest at \vf{45} to \vf{90} rows.
+Despite those gains, full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
 
-The attack is lightweight, since it trains only one affine map, and the results suggest that such a map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
+The attack is lightweight, since it trains only one affine map.
+Its gains suggest that such a map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
+
 A second round extends the attack with no further access to the target model.
 In that round, a language model rewrites the three reconstructions of the hub's decoders into one text, without any hidden state.
 The rewrite raises word-F1 over the best single decoder on legal10w and legal100t, where the decoders are weakest, and matches it on NQ. % src: Section sec:attack:rewriting
