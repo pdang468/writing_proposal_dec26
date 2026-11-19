@@ -17,5 +17,8 @@ Prompt $i$ receives the hub outputs of prompt $i+1$, and the last prompt receive
 A score above the control shows that the decoder recovers words from the prompt's own hub outputs.
 
 \paragraph{Evaluation metric.}
-The primary metric is mean cross-model word-F1, averaged over six transfer directions on the validation set. The hypothesis is evaluated against a mismatched-prompt baseline on the same set. Since the validation set also determines checkpoint selection, all reported results are validation scores. The NQ test set remains unevaluated.
+The primary metric is mean cross-model word-F1, averaged over the six cross-model directions on the validation set.
+The hypothesis is evaluated against the mismatched-prompt control on the same set.
+Since the validation set also determines checkpoint selection, all reported results are validation scores.
+The NQ test set remains unevaluated.
 
