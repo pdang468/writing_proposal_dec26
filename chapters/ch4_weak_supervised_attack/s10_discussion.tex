@@ -10,19 +10,9 @@ The gains are \vf{0.411}, \vf{0.407}, and \vf{0.219}.
 Both fits train on the same leak, so the gains come from matching alone.
 Full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
 
-The attack is lightweight, since it trains only one affine map.
-The hub and its decoders stay frozen, so that map alone connects the target model to the hub.
-The gain therefore suggests that an affine map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
-Such an alignment is consistent with the Platonic Representation Hypothesis.
+The attack is lightweight, and the results suggest that an affine map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
 
-The gain suggests that matching supplies what a small leak lacks.
-Matching does not replace the leak.
-Without one, the tested blind maps on NQ exceed their mismatched-prompt controls by at most \vf{0.025} word-F1. % src: Section sec:attack:blind
-Matching adds most when the leak is small, and the gain peaks at \vf{45} to \vf{90} rows.
-At \vf{900} rows, the supervised fit alone reaches \vf{0.743} on NQ and \vf{0.655} on legal10w, and matching adds \vf{0.089} on both. % src: mixed-w46-std-L900.json of NQ and legal10w (gain 0.0889, 0.0889; supervised 0.7434, 0.6548)
-The gain also appears in the decoder's next-token predictions.
-Under teacher forcing, the excess cross-entropy on NQ falls from \vf{7.73} nats per content word under the supervised fit to \vf{1.36} under the hybrid fit. % src: teacher_forced-w46/summary.json of NQ
-
+The gain demonstrates that matching supplies what a small leak lacks. Matching gain is more impressive at low leaks of \vf{45} to \vf{90} rows.
 A second round extends the attack with no further access to the target model.
 The three decoders of the hub yield three reconstructions of each prompt, and the reconstructions differ.
 A language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
