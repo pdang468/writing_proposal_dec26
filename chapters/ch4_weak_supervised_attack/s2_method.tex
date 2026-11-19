@@ -1,12 +1,12 @@
 \section{Method}\label{sec:attack:method}
 
 The attack trains a single affine map and leaves the hub frozen.
-The map sends each hidden state $s$ of the target model to a point $\hat m$ of the hub,
+The map sends each hidden state $s_t$ of the target model to a point $\hat m_t$ of the hub,
 \begin{equation}
-\hat m = W(s - \mu) + b ,
+\hat m_t = W(s_t - \mu) + c ,
 \label{eq:attack:map}
 \end{equation}
-where $\mu$ is the mean hidden state of the unpaired pool, $W$ is a matrix from \vf{2048} to \vf{512} dimensions, and $b$ is a bias. % src: src/v7/adapter.py; src/v7_2/preprocess.py (centering on pool U); configs/v7.yaml (width 2048, hub_dim 512)
+where $\mu$ is the mean hidden state of the unpaired pool, $W$ is a matrix from \vf{2048} to \vf{512} dimensions, and $c$ is a bias. % src: src/v7/adapter.py; src/v7_2/preprocess.py (centering on pool U); configs/v7.yaml (width 2048, hub_dim 512)
 The frozen projectors and decoders of the hub then reconstruct the prompt from the mapped states.
 Like the hub, the map acts on one hidden state at a time (Section~\ref{sec:hub:design}).
 
@@ -24,24 +24,28 @@ At $\alpha = 0$ only the matching term remains, and the result is a blind map.
 The constant $\rho_H$ is the root-mean-square distance of the pooled hub outputs from their mean, and the division makes the term independent of the scale of the hub. % src: src/v7_2/context.py (rho_H); src/v7/loss.py
 The ridge penalty $\mathcal{R}$ is the squared Frobenius norm of $W$ divided by $\rho_H^2$, with $\lambda = 1$. % src: configs/v7_9_s4.yaml (mixed.ridge_lambdas); src/v7_2/mixed.py
 
-\paragraph{Matching term.} $\mathcal{L}_{\text{match}}$ aligns a batch of $B$ mapped hidden states $\hat m_1 \ldots \hat m_B$ from the target model's pool with a batch of $B$ hub outputs $h_1 \ldots h_B$ from the hub's pool.
-The term scores a round trip, from a mapped state to the hub batch and back to the mapped states.
+\paragraph{Matching term.} $\mathcal{L}_{\text{match}}$ follows the approximate bijective correspondence loss of Murphy et al.~\cite{murphy2022abc}.
+The loss acts on two batches drawn independently: $B$ mapped hidden states $\hat m_1 \ldots \hat m_B$ from the target model's pool and $B$ hub outputs $m_1 \ldots m_B$ from the hub's pool.
+It scores a round trip, from a mapped state to the hub batch and back to the mapped states.
 The score of a pair is its negative squared distance, $\sigma(u, v) = -\lVert u - v\rVert^2 / \rho_H^2$.
-On the way out, each mapped state receives a weighted average of the hub batch, with weights that favor the nearest hub outputs,
+On the way out, each mapped state receives its soft nearest neighbor $\tilde m_i$, a weighted average of the hub batch whose weights concentrate on the nearest hub outputs,
 \begin{equation}
-\bar h_i = \sum_{j} p_{ij}\, h_j ,
+\tilde m_i = \sum_{j} p_{ij}\, m_j ,
 \qquad
-p_{ij} = \frac{\exp(\sigma(\hat m_i, h_j)/\tau)}{\sum_{k}\exp(\sigma(\hat m_i, h_k)/\tau)} .
+p_{ij} = \frac{\exp(\sigma(\hat m_i, m_j)/\tau)}{\sum_{k}\exp(\sigma(\hat m_i, m_k)/\tau)} .
 \label{eq:attack:match}
 \end{equation}
-On the way back, the weighted average $\bar h_i$ must identify the mapped state it came from among the $B$ mapped states of the batch,
+On the way back, the soft nearest neighbor $\tilde m_i$ must identify the mapped state it came from among the $B$ mapped states of the batch,
 \begin{equation}
-\ell_i = -\log\frac{\exp(\sigma(\bar h_i, \hat m_i)/\tau)}{\sum_{k}\exp(\sigma(\bar h_i, \hat m_k)/\tau)} .
+\ell_i = -\log\frac{\exp(\sigma(\tilde m_i, \hat m_i)/\tau)}{\sum_{k}\exp(\sigma(\tilde m_i, \hat m_k)/\tau)} .
 \label{eq:attack:return}
 \end{equation}
 $\mathcal{L}_{\text{match}}$ averages $\ell_i$ over the batch and adds the same loss with the two batches exchanged, each with weight one half. % src: src/v7_2/abc_sqdist.py (abc_sqdist_loss)
-The loss is low when each weighted average distinguishes its own mapped state from the other mapped states of the batch.
-The term therefore requires no correspondence between the hidden states of the target model and the hub outputs.
+The hub outputs are fixed, so both directions train only the map.
+The soft nearest neighbor supplies the positive pair of each mapped state, so the term requires no correspondence between the two pools.
+Taken over both directions, the loss measures how close the matching is to a bijection: two mapped states that share one soft nearest neighbor cannot both be identified by it.
+%% BIG CHANGE 2026-11-19: added sentence, the limit of the term and the role of the leak
+A bijection need not be the correct correspondence (Section~\ref{sec:attack:blind}), and the supervised term on the leak anchors it.
 
 \paragraph{Temperature.} The temperature $\tau$ sets the sharpness of both steps of the round trip, the weights $p_{ij}$ and the identification of Equation~\ref{eq:attack:return}.
 The temperature is expressed as a multiple of a scale $d$ measured on the hub alone.

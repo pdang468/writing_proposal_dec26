@@ -13,7 +13,7 @@ Shaded boxes are trainable modules, dashed boxes are frozen models, and the colu
 
 \paragraph{Into the hub.} The source adapter of model $a$ maps its hidden state $s_t$ to a common width of \vf{1024}; a shared backbone then produces the hub output $m_t$ of \vf{512} dimensions:
 \begin{equation}
-m_t = W_h\, R_0\big(R_a(W_a s_t + b_a)\big) + b_h,
+m_t = W_h\, R_0\big(R_a(W_a s_t + c_a)\big) + c_h,
 \qquad
 R(z) = z + V_2\,\mathrm{SiLU}\big(V_1\,\mathrm{LN}(z) + c_1\big) + c_2 .
 \label{eq:hub:map}

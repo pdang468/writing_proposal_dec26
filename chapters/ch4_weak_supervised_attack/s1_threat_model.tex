@@ -1,26 +1,24 @@
 \section{Threat Model}\label{sec:attack:threat}
 
-The adversary is the honest-but-curious server of a split inference system.
-The server follows the protocol and receives the hidden states that a client transmits to the cloud.
-The adversary's goal is to reconstruct a prompt from its sequence of hidden states.
-The adversary cannot query the target model, and for the prompt under attack it holds neither the text nor the token identities.
+In a split inference system, the server is also the adversary.
+The adversary is honest-but-curious, or semi-honest: it abides by the protocol and is interested in uncovering the prompts of a client.
+For each prompt, the client sends the server a sequence of hidden states from the target model.
+By observing those hidden states, the adversary aims to reconstruct the prompt.
+The adversary cannot query the target model, and it has no knowledge of the text or the token identities of that prompt.
 
 Four resources are available to the adversary.
 \begin{itemize}
 \item \textbf{The hub.} The frozen hub of Chapter~\ref{ch:hub} with its source adapters, its projectors, and its three decoders (Qwen, OLMo, SmolLM).
 \item \textbf{Two unpaired pools.} The first pool holds hidden states of the target model for prompts of the domain under attack, without their text.
-The second pool holds hub outputs of text from the same domain, computed by OLMo and its source adapter.
-No prompt of one pool is matched to a prompt of the other.
+The second holds hub outputs of OLMo for different prompts of the same domain.
 \item \textbf{A leak.} A small set of short text spans for which the adversary holds both the text and the target model's hidden states.
 The standard leak holds \vf{90} rows, the first \vf{9} rows of each of \vf{10} prompts, and the adversary holds nothing else of those prompts.
 \item \textbf{The tokenizer of the target model}, applied to the leaked spans only.
 \end{itemize}
 
-\paragraph{Rows.} OLMo turns the leak into paired data.
-For each leaked span, the adversary runs OLMo on the text and obtains the hub outputs of that span. % src: src/v6_4/pairs.py (build_pairs)
-The target model and OLMo split the text into different tokens, so the adversary groups their tokens by shared character boundaries, as in the token groups of Section~\ref{sec:hub:training}.
-Each group forms a row, a pair of vectors for one short span of text.
-The pair holds the average of the target model's hidden states and the average of the hub outputs, both weighted by character coverage and not normalized to unit length. % src: src/v6_4/pairs.py
-On NQ a row covers about \vf{1} word, so a prompt of \vf{9} words yields about \vf{9} rows. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
-The affine map is fitted on rows, so the size of a leak is counted in rows.
-
+\paragraph{Rows.} The adversary runs OLMo on each leaked span and obtains its hub outputs. % src: src/v6_4/pairs.py (build_pairs)
+The target model and OLMo tokenize the text differently, so their tokens are collected into token groups (Section~\ref{sec:hub:training}).
+Each token group yields a row: the average hidden state of the target model, paired with the average hub output of that group. % src: src/v6_4/pairs.py
+% CUT 2026-11-19 (implementation detail): both averages are weighted by character coverage and not normalized to unit length.
+The size of a leak is counted in rows.
+On NQ a row covers about \vf{1} word, so the standard leak of \vf{90} rows holds about \vf{90} words. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
