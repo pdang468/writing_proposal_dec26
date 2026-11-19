@@ -6,27 +6,34 @@ Its resources are the frozen hub, two unpaired pools from the domain under attac
 
 The results support the hypothesis that unpaired matching improves reconstruction from a small leak.
 On held-out prompts, the hybrid fit raises word-F1 over the supervised fit from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.192} to \vf{0.599} on legal10w, and from \vf{0.102} to \vf{0.321} on legal100t. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/w46-confirmation-s{1,2,3}.json
-Word-F1 thus more than doubles on every dataset.
-Full recovery is rare: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
+The gains are \vf{0.411}, \vf{0.407}, and \vf{0.219}.
+Full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
 
-The attack trains only the affine map, while the hub and its decoders stay frozen.
-The frozen decoders recover words of the prompt from the mapped states, so staying outside hub training does not protect a model's prompts from partial recovery.
-The result is consistent with the Platonic Representation Hypothesis.
+The attack is lightweight.
+It trains one affine map, and the hub and its decoders stay frozen.
+The gain suggests that such a map can align the hidden states of the target model with the hub, although the target model took no part in hub training.
+An alignment of that kind is consistent with the Platonic Representation Hypothesis.
 
-Four findings bound the gain.
-First, the gain peaks at \vf{45} to \vf{90} rows and falls to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w (0.0889, 0.0889)
-Second, at \vf{90} rows and $\alpha \le 0.95$, word-F1 peaks at $\tau = 2d$, and several cells at a lower temperature score below the supervised fit. % src: Section sec:attack:grid90
-Third, on legal100t the gain stays near \vf{0.21} whether the \vf{90} rows come from \vf{2}, \vf{10}, or \vf{90} prompts. % src: Section sec:attack:leak
-Fourth, without a leak, the tested blind maps on NQ exceed their mismatched-prompt controls by at most \vf{0.025} word-F1, so matching does not replace the leak. % src: Section sec:attack:blind
+Three conditions bound the gain.
+First, matching needs a leak.
+Without one, the tested blind maps on NQ exceed their mismatched-prompt controls by at most \vf{0.025} word-F1. % src: Section sec:attack:blind
+Second, the leak must be small.
+The gain peaks at \vf{45} to \vf{90} rows and falls to \vf{0.089} at \vf{900} rows on NQ and on legal10w. % src: mixed-w46-std-L900.json of NQ and legal10w (0.0889, 0.0889)
+Third, the temperature must stay near $2d$.
+At \vf{90} rows, word-F1 peaks at $\tau = 2d$, and several cells at a lower temperature score below the supervised fit. % src: Section sec:attack:grid90
+Within those conditions the gain is stable, and on legal100t it stays near \vf{0.21} whether the \vf{90} rows come from \vf{2}, \vf{10}, or \vf{90} prompts. % src: Section sec:attack:leak
 
-Matching also improves the decoder's next-token predictions under teacher forcing.
-At the \vf{90}-row leak, the excess cross-entropy falls on all three datasets, from \vf{7.73} to \vf{1.36} nats per content word on NQ and from \vf{5.58} to \vf{5.11} on legal100t. % src: teacher_forced-w46/summary.json of NQ and legal128w
-On every dataset, the supervised fit is above the unconditional baseline, the decoder with no soft prompt, and the hybrid fit is below it.
+Matching also changes what the decoder predicts.
+Word-F1 scores the generated text, whereas teacher-forced cross-entropy scores each next-token prediction.
+At the \vf{90}-row leak, the excess cross-entropy falls with matching on all three datasets, from \vf{7.73} to \vf{1.36} nats per content word on NQ and from \vf{5.58} to \vf{5.11} on legal100t. % src: teacher_forced-w46/summary.json of NQ and legal128w
+The unconditional baseline, the decoder with no soft prompt, lies between the two fits on every dataset.
+The supervised fit is therefore worse than no soft prompt, and the hybrid fit is better.
 
-The three decoders of the hub yield three reconstructions of each prompt.
-In a second round, a language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
-Against the best single decoder, rewriting gains \vf{0.117} word-F1 on legal100t and \vf{0.061} on legal10w, and it matches the decoder on NQ. % src: Section sec:attack:rewriting
-The gain costs the adversary no further access to the target model.
+A second round extends the attack with no further access to the target model.
+The three decoders of the hub yield three reconstructions of each prompt, and the reconstructions differ.
+A language model receives the three reconstructions, and no hidden state, and rewrites them into one text.
+Against the best single decoder, the rewrite gains \vf{0.117} word-F1 on legal100t and \vf{0.061} on legal10w, and it matches the decoder on NQ. % src: Section sec:attack:rewriting
+The gain is thus largest where the decoders are weakest.
 
 \paragraph{Limitations.} Two limitations bound the claims.
 \begin{itemize}
@@ -34,4 +41,6 @@ The gain costs the adversary no further access to the target model.
 \item \textbf{Models and layer.} The results cover one block of one target model of about one billion parameters and three hub models, without a defense or a deployed system.
 \end{itemize}
 
+Within these limits, the chapter reduces to one result.
+With about \vf{90} leaked words and one affine map, the hub's frozen decoders reconstruct held-out NQ prompts of a model outside the hub at a word-F1 of \vf{0.766}, against \vf{0.354} without matching.
 A second target model remains future work.
