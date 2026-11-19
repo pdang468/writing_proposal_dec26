@@ -7,7 +7,7 @@ Its resources are the frozen hub, two unpaired pools from the domain under attac
 The results support the hypothesis that unpaired matching improves reconstruction from a small leak.
 On held-out prompts, the hybrid fit raises word-F1 over the supervised fit from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.192} to \vf{0.599} on legal10w, and from \vf{0.102} to \vf{0.321} on legal100t. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/w46-confirmation-s{1,2,3}.json
 Word-F1 thus more than doubles on every dataset.
-Full recovery is rarer: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
+Full recovery is rare: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t. % src: Section sec:attack:main, exact match
 
 The attack trains only the affine map, while the hub and its decoders stay frozen.
 The frozen decoders recover words of the prompt from the mapped states, so staying outside hub training does not protect a model's prompts from partial recovery.
