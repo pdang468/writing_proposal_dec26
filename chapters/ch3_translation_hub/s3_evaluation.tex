@@ -18,5 +18,6 @@ A score above the control shows that the decoder recovers words from the prompt'
 
 \paragraph{Summary score.} One score summarizes a hub: mean cross-model word-F1, the free-running word-F1 averaged over the six cross-model directions on the validation split.
 The hypothesis is tested by that mean against the mismatched-prompt control on the same prompts.
-The validation split also selects the checkpoint, so no score in this chapter is held out, and the test split has not been evaluated.
+The same validation prompts also selected the checkpoint.
+The test split has not been evaluated, so every score in this chapter comes from prompts that took part in that selection.
 

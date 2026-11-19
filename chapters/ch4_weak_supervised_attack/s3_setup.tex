@@ -23,6 +23,8 @@ Exact match and decoded examples accompany word-F1 to separate word overlap from
 The hub reference is the word-F1 of the three decoders on the hub outputs of OLMo, with no map involved, \vf{0.947} on NQ and \vf{0.982} on each legal dataset. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/hub-dev-eval-m32.json olmo_source_mean.hub (0.9468, 0.9821, 0.9821), 500 selection prompts, generation cap rows+32
 
 \paragraph{Settings.} The hybrid fit has three settings, the supervision fraction $\alpha$, the temperature $\tau$, and the batch size $B$ of the matching term.
-The settings are chosen on \vf{500} validation prompts, the selection prompts, and the main comparison is scored on the other \vf{4{,}500}, the held-out prompts. % src: v7_run.py (subset_seed 20260903, dev_prompts 500); src/v7_2/context.py; results/v7_2/main/eval/confirmation/prompt_ids.json
+The \vf{5{,}000} validation prompts of a dataset are divided into two sets.
+The selection prompts, \vf{500} in number, serve to choose the settings.
+The evaluation prompts, the other \vf{4{,}500}, score the main comparison and take no part in that choice. % src: v7_run.py (subset_seed 20260903, dev_prompts 500); src/v7_2/context.py; results/v7_2/main/eval/confirmation/prompt_ids.json
 The setting is $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$ on every dataset (Section~\ref{sec:attack:grid}).
 
