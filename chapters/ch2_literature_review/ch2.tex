@@ -13,9 +13,9 @@ Pasquini et al.~\cite{pasquini2021unleashing} attack split learning, the trainin
 The attack is active and acts during training, whereas the adversary of this dissertation is passive and observes inference only.
 
 \paragraph{Attacks with the model's weights.} Several attacks on language models assume a white-box adversary, one that holds the weights of the blocks that produced the hidden states.
-Qu et al.~\cite{qu2025prompt} optimize an input embedding until its hidden states match the observed ones and then discretize the result into tokens; on the Skytrax dataset with Llama-65B the attack reaches a token accuracy of 88.4 percent, against 22.8 percent for the best baseline. % src: arXiv 2503.09022 abstract
-A grey-box variant, in which the adversary knows the base weights and only its own part of the fine-tuned weights, reaches 85.4 percent on Guanaco-65B. % src: arXiv 2503.09022 abstract, Table V
-Dong et al.~\cite{dong2025depth} invert both shallow and deep layers of six language models by a two-phase optimization, and report a token F1 of 86.88 on a medical prompt of 4,112 tokens from a middle layer of Llama-3. % src: arXiv 2507.16372 abstract
+Qu et al.~\cite{qu2025prompt} optimize an input embedding until its hidden states match the observed ones and then discretize the result into tokens; on the Skytrax dataset with Llama-65B the attack reaches a token accuracy of 88.4 percent, against 22.8 percent for the best baseline.
+A grey-box variant, in which the adversary knows the base weights and only its own part of the fine-tuned weights, reaches 85.4 percent on Guanaco-65B.
+Dong et al.~\cite{dong2025depth} invert both shallow and deep layers of six language models by a two-phase optimization, and report a token F1 of 86.88 on a medical prompt of 4,112 tokens from a middle layer of Llama-3.
 Thomas et al.~\cite{thomas2025hidden} compute the hidden states of candidate tokens from the vocabulary, match each observed hidden state against them, and recover prompts with nearly perfect accuracy, also when the hidden states are permuted.
 Nikolaou et al.~\cite{nikolaou2026language} prove that a decoder-only transformer maps different prompts to different hidden states almost surely, that is, with probability one over its random initialization.
 Their algorithm SipIt then recovers the exact prompt one token at a time, demonstrated on GPT-2 Small.
@@ -24,10 +24,10 @@ With the model in hand, the adversary can therefore compare candidate prompts wi
 
 \paragraph{Attacks with queries.} A weaker adversary holds no weights but can still query the model.
 Luo et al.~\cite{luo2025prompt} submit text to the model, collect the hidden states, and train token classifiers on those pairs.
-With unlimited queries and auxiliary data, their attacks exceed a token reconstruction accuracy of 90 percent; with a limited query budget and no auxiliary data, the accuracy is typically above 50 percent. % src: arXiv 2503.09291 abstract
+With unlimited queries and auxiliary data, their attacks exceed a token reconstruction accuracy of 90 percent; with a limited query budget and no auxiliary data, the accuracy is typically above 50 percent.
 The generation attack of Dong et al.~\cite{dong2025depth} likewise trains a sequence-to-sequence inverter on queried pairs of text and hidden states.
 In both attacks the model remains callable, and the queries supply the paired examples.
-A preprint by Cunningham~\cite{cunningham2026privacy} trains a small classifier directly on about 880 pairs of hidden state and token from Mistral 7B and recovers about 59 percent of the tokens after two layers and about 35 percent after eight, on a test set of 221 pairs. % src: arXiv 2602.16760
+A preprint by Cunningham~\cite{cunningham2026privacy} trains a small classifier directly on about 880 pairs of hidden state and token from Mistral 7B and recovers about 59 percent of the tokens after two layers and about 35 percent after eight, on a test set of 221 pairs.
 That classifier reads each hidden state alone and is evaluated without unpaired matching.
 
 \section{Inversion of Pooled Text Embeddings}\label{sec:lit:pooled}
@@ -35,7 +35,7 @@ That classifier reads each hidden state alone and is evaluated without unpaired 
 A second body of work inverts sentence embeddings, where an encoder pools a whole text into one vector.
 Song and Raghunathan~\cite{song2020information} recover between 50 and 70 percent of the words of a sentence from its embedding, as an unordered set, and Pan et al.~\cite{pan2020privacy} infer sensitive attributes, such as identity and health information, from the embeddings of eight language models.
 Li et al.~\cite{li2023sentence} move from words to sentences by conditioning a generative decoder on the embedding.
-Morris et al.~\cite{morris2023text} refine a hypothesis iteratively: the attack embeds its current guess, compares that embedding with the target, and corrects the guess, and it recovers 92 percent of 32-token inputs exactly from the embeddings of the GTR-base encoder. % src: arXiv 2310.06816 abstract, Table 1
+Morris et al.~\cite{morris2023text} refine a hypothesis iteratively: the attack embeds its current guess, compares that embedding with the target, and corrects the guess, and it recovers 92 percent of 32-token inputs exactly from the embeddings of the GTR-base encoder.
 Chen et al.~\cite{chen2024text} extend the attack to multilingual encoders, and Zhang et al.~\cite{zhang2025universal} replace the inverter trained per encoder with one guided search that applies to any encoder; zero-shot there means that no inverter is trained for the encoder, which is still queried.
 All of those attacks require access to the encoder, through its weights or through queries; they differ in whether the queries supply paired training examples, score candidate texts during the attack, or both.
 The object also differs from a split inference transmission: a pooled embedding is one vector per text, whereas a split model transmits one hidden state per token.
@@ -56,30 +56,29 @@ Maiorca et al.~\cite{maiorca2023latent} estimate a direct linear or orthogonal m
 For this dissertation the hypothesis is a motivation and not a guarantee: similar structure does not imply that one affine map preserves the identity of each token.
 
 \paragraph{Alignment with little or no supervision.} How many paired examples a map requires has a long history in bilingual word embeddings.
-Artetxe et al.~\cite{artetxe2017learning} start from a seed dictionary of 25 word pairs, fit a map, induce a larger dictionary from the mapped embeddings, and repeat; the results are comparable to those of systems with richer bilingual resources. % src: ACL P17-1042 abstract
+Artetxe et al.~\cite{artetxe2017learning} start from a seed dictionary of 25 word pairs, fit a map, induce a larger dictionary from the mapped embeddings, and repeat; the results are comparable to those of systems with richer bilingual resources.
 Conneau et al.~\cite{conneau2018word} and Artetxe et al.~\cite{artetxe2018robust} remove the seed dictionary, the first by adversarial training followed by Procrustes refinement, the second by an initialization from the similarity distributions of the two spaces.
 Ormazabal et al.~\cite{ormazabal2019analyzing} examine the limits of that approach: embeddings of two languages learned jointly are more isomorphic than embeddings trained separately and then mapped.
 The attack of Chapter~\ref{ch:attack} follows the same pattern, a small paired seed extended by unpaired matching, on the contextual hidden states of language models.
 Its matching term adapts the approximate bijective correspondence loss of Murphy et al.~\cite{murphy2022abc}, which learns image representations from set membership, without paired correspondences.
 
 \paragraph{Alignment as an inversion attack.} Three recent attacks apply alignment to sentence embeddings and need no queries.
-Huang et al.~\cite{huang2024transferable} train a surrogate encoder to imitate the victim encoder from 8,000 leaked pairs of text and embedding, and train the inverter on the surrogate. % src: ACL 2024.acl-long.230 Sec. 4
+Huang et al.~\cite{huang2024transferable} train a surrogate encoder to imitate the victim encoder from 8,000 leaked pairs of text and embedding, and train the inverter on the surrogate.
 Chen et al.~\cite{chen2025algen} fit a linear map from the victim's embedding space to the adversary's from leaked pairs and decode with the adversary's own generator.
-A single pair yields a ROUGE-L of about 10; the score rises sharply up to 1,000 pairs and changes little between 2,000 and 8,000. % src: ACL 2025.acl-long.1185 Sec. 5 and ablation
+A single pair yields a ROUGE-L of about 10; the score rises sharply up to 1,000 pairs and changes little between 2,000 and 8,000.
 Jha et al.~\cite{jha2025harnessing} remove the pairs entirely: adapters map the embeddings of each encoder into a shared space and are trained on unpaired embeddings with adversarial, reconstruction, cycle-consistency, and vector space preservation losses.
-The translated embeddings reach a cosine similarity of up to 0.92 with the true embeddings, and a zero-shot inverter~\cite{zhang2025universal} then extracts part of the text. % src: NeurIPS 2025 paper, results section (0.92); its introduction says 0.96
+The translated embeddings reach a cosine similarity of up to 0.92 with the true embeddings, and a zero-shot inverter~\cite{zhang2025universal} then extracts part of the text.
 Those three attacks define the range of supervision, from thousands of pairs to none, and all three act on pooled sentence embeddings.
 The matching term of Chapter~\ref{ch:attack} has neither the adversarial objective nor the cycle-consistency losses of Jha et al., so its failure without a leak (Section~\ref{sec:attack:blind}) says nothing about their method.
 
 \section{Defenses}\label{sec:lit:defense}
 
 Defenses for split inference change what the server receives.
-%% BIG CHANGE: noise family and NOIR added
 One family adds noise on the client under metric differential privacy~\cite{chatzikokolakis2013broadening}.
-Feyisetan et al.~\cite{feyisetan2020privacy}, Qu et al.~\cite{qu2021natural}, and Li et al.~\cite{li2023privacy} inject noise into the token embeddings of a prompt and replace each token with a randomized one. % src: NOIR (arXiv 2601.16354) Sec. 2 summary; the three originals not read
+Feyisetan et al.~\cite{feyisetan2020privacy}, Qu et al.~\cite{qu2021natural}, and Li et al.~\cite{li2023privacy} inject noise into the token embeddings of a prompt and replace each token with a randomized one.
 Mai et al.~\cite{mai2024split} add noise to the client's token embeddings under local differential privacy and denoise the model's output on the client.
-Nguyen et al.~\cite{nguyen2026noir} report that noise drawn for every prompt degrades generation; NOIR instead randomizes the token embeddings of the vocabulary once, so that a token keeps one embedding across prompts, and hides the token indices behind a secret tokenizer on the client. % src: arXiv 2601.16354 Sec. 1, 2, 4.2, Table 1
-NOIR is evaluated against the embedding inversion of Morris et al.~\cite{morris2023text} and against BiSR~\cite{chen2024unveiling}, an attack on split fine-tuning that reconstructs the client's data from the transmitted activations and the returned gradients with the pre-trained weights as prior knowledge. % src: NOIR Sec. 4.1, 5.1; arXiv 2409.00960 abstract
+Nguyen et al.~\cite{nguyen2026noir} report that noise drawn for every prompt degrades generation; NOIR instead randomizes the token embeddings of the vocabulary once, so that a token keeps one embedding across prompts, and hides the token indices behind a secret tokenizer on the client.
+NOIR is evaluated against the embedding inversion of Morris et al.~\cite{morris2023text} and against BiSR~\cite{chen2024unveiling}, an attack on split fine-tuning that reconstructs the client's data from the transmitted activations and the returned gradients with the pre-trained weights as prior knowledge.
 
 A second family hides the hidden states behind a secret permutation, as in PermLLM, STIP, and Centaur~\cite{zheng2024permllm,yuan2023secure,luo2025centaur}.
 Thomas et al.~\cite{thomas2025hidden} show that all three are insecure, since the matching of hidden states to vocabulary candidates can be made invariant to the permutation, and propose Cascade, which divides the token sequence among servers that must not collude.
@@ -122,8 +121,8 @@ To the author's knowledge, prior work has not evaluated query-free prompt recons
 
 Three properties separate the attack from the alignment attacks on pooled embeddings.
 First, it acts on per-token hidden states, the quantity that a split inference client transmits, and not on one vector per text.
-Second, its leak is small: \vf{90} rows from \vf{10} prompts, about \vf{90} words on NQ, whereas Huang et al. train on 8,000 leaked texts and the scores of Chen et al. rise up to 1,000. % src: ch4 s1 (90 rows, 10 prompts); Sec. 2.3 above
-Third, it is lightweight: the attack trains one affine map and leaves the hub and its decoders frozen, whereas Huang et al. train a surrogate encoder and an inverter, and Jha et al. train adapters under adversarial and cycle-consistency losses. % src: ch4 s2
+Second, its leak is small: \vf{90} rows from \vf{10} prompts, about \vf{90} words on NQ, whereas Huang et al. train on 8,000 leaked texts and the scores of Chen et al. rise up to 1,000.
+Third, it is lightweight: the attack trains one affine map and leaves the hub and its decoders frozen, whereas Huang et al. train a surrogate encoder and an inverter, and Jha et al. train adapters under adversarial and cycle-consistency losses.
 Jha et al. need no pairs at all, but they evaluate pooled embeddings only.
 The dissertation asks a different question: how much of a prompt a leak of \vf{90} rows reconstructs from per-token hidden states, and how much unpaired matching adds to that leak.
 Three qualifications bound the comparison.

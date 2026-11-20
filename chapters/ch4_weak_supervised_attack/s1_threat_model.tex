@@ -16,9 +16,8 @@ The standard leak holds \vf{90} rows, the first \vf{9} rows of each of \vf{10} p
 \item \textbf{The tokenizer of the target model}, applied to the leaked spans only.
 \end{itemize}
 
-\paragraph{Rows.} The adversary runs OLMo on each leaked span and obtains its hub outputs. % src: src/v6_4/pairs.py (build_pairs)
+\paragraph{Rows.} The adversary runs OLMo on each leaked span and obtains its hub outputs.
 The target model and OLMo tokenize the text differently, so their tokens are collected into token groups (Section~\ref{sec:hub:training}).
-Each token group yields a row: the average hidden state of the target model, paired with the average hub output of that group. % src: src/v6_4/pairs.py
-% CUT 2026-11-19 (implementation detail): both averages are weighted by character coverage and not normalized to unit length.
+Each token group yields a row: the average hidden state of the target model, paired with the average hub output of that group.
 The size of a leak is counted in rows.
-On NQ a row covers about \vf{1} word, so the standard leak of \vf{90} rows holds about \vf{90} words. % src: results/v7_2/main/mixed-oct_w5b-A.json anchor_counts (10 prompts, 92 rows)
+On NQ a row covers about \vf{1} word, so the standard leak of \vf{90} rows holds about \vf{90} words.

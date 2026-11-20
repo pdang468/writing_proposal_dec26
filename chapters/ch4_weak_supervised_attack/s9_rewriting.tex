@@ -5,26 +5,26 @@ A language model receives the three reconstructions and rewrites them into one t
 The experiment is exploratory.
 
 \paragraph{Protocol.} The language model is Claude Haiku~\vf{5.5}.
-It receives the three reconstructions of the hybrid fit at the \vf{90}-row leak, with the SmolLM reconstruction first, and returns one text. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/framework/attacker/attacker-b90-a0.9-sq-m0-t*-r1-B8192-L90-span9-s1-haiku.json (model claude-haiku-5-5, system_B); attacker_run.py (LEVEL2_ORDER)
+It receives the three reconstructions of the hybrid fit at the \vf{90}-row leak, with the SmolLM reconstruction first, and returns one text.
 Its instruction reads ``You get three noisy copies of the same question. Copy 1 is the most reliable; start from it and apply majority rules where the copies disagree. Fix spelling, broken words and repeats. Reply with the text only, inside \texttt{<text></text>}.''
 On the two legal datasets the instruction says ``SEC filing excerpt'' in place of ``question''.
 The language model receives no hidden state and no part of the true prompt.
-The results are reported on \vf{450} selection prompts that played no part in choosing the instruction. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
+The results are reported on \vf{450} selection prompts that played no part in choosing the instruction.
 
 \paragraph{Score.} The language model can change capital letters and punctuation.
 Word-F1 in this section is therefore computed on lower-cased words without edge punctuation, for the decoders and for the rewrites alike.
-Under the word-F1 of the other sections, the added marks alone lower the rewrite on NQ by \vf{0.12}. % src: results/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.strict.mean vs metrics.folded.mean, rewrite of three (0.7771, 0.9000)
+Under the word-F1 of the other sections, the added marks alone lower the rewrite on NQ by \vf{0.12}.
 
 \paragraph{Result.} The baseline is the best single decoder, SmolLM, since an adversary would keep the best reconstruction it holds.
 Rewriting the three reconstructions exceeds SmolLM alone on the two legal datasets and matches it on NQ (Figure~\ref{fig:attack:rewriting}).
-On legal100t, word-F1 rises from \vf{0.429} to \vf{0.546}, an improvement of \vf{0.117} with a \vf{95} percent interval of \vf{0.101} to \vf{0.133} from a paired bootstrap over prompts. % src: results/legal128w/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (0.4290, 0.5456; +0.117 [0.101, 0.133]); scripts/rewriting_best_decoder.py
-On legal10w, word-F1 rises from \vf{0.684} to \vf{0.745}, an improvement of \vf{0.061} with an interval of \vf{0.048} to \vf{0.074}. % src: results/legal10w/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (+0.061 [0.048, 0.074])
-On NQ, SmolLM alone already scores \vf{0.892}, and the improvement is \vf{0.008} with an interval of \vf{0.001} to \vf{0.017}. % src: results/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.folded (0.8918, 0.9000; +0.008 [0.001, 0.017])
+On legal100t, word-F1 rises from \vf{0.429} to \vf{0.546}, an improvement of \vf{0.117} with a \vf{95} percent interval of \vf{0.101} to \vf{0.133} from a paired bootstrap over prompts.
+On legal10w, word-F1 rises from \vf{0.684} to \vf{0.745}, an improvement of \vf{0.061} with an interval of \vf{0.048} to \vf{0.074}.
+On NQ, SmolLM alone already scores \vf{0.892}, and the improvement is \vf{0.008} with an interval of \vf{0.001} to \vf{0.017}.
 The improvement is therefore largest where the best decoder is weakest.
 
 Two comparisons locate the improvement.
-Rewriting the SmolLM reconstruction alone changes word-F1 by at most \vf{0.033}, so most of the improvement arrives with the two further reconstructions. % src: same files, gain_rewrite_of_smollm_over_smollm (NQ -0.007, legal10w +0.006, legal128w +0.033)
-Under the mismatched-prompt control, rewriting adds at most \vf{0.021}, so the improvement depends on the prompt's own reconstructions. % src: same files, gain_control_rewrite_over_control_smollm (+0.005, +0.004, +0.021)
+Rewriting the SmolLM reconstruction alone changes word-F1 by at most \vf{0.033}, so most of the improvement arrives with the two further reconstructions.
+Under the mismatched-prompt control, rewriting adds at most \vf{0.021}, so the improvement depends on the prompt's own reconstructions.
 
 \begin{figure}[ht]
 \centering
@@ -40,7 +40,7 @@ In the first, each decoder loses different words, and the rewrite keeps the word
 Word-F1 rises from \vf{0.57} for SmolLM alone to \vf{0.90}.
 In the second, the rewrite takes the first word from Qwen, and it keeps the wrong day \emph{19}, on which two decoders agree, with the wrong year of SmolLM.
 Agreement between decoders therefore corrects an error of one decoder and preserves an error that two share.
-Over the \vf{450} prompts, rewriting raises word-F1 on \vf{51} percent, leaves \vf{34} percent unchanged, and lowers \vf{14} percent. % src: legal10w cache and endpoint decoding, per-prompt gain of the rewrite of three over SmolLM alone (231, 154, 65 of 450 prompts: 0.513, 0.342, 0.144; differences below 1e-9 count as unchanged)
+Over the \vf{450} prompts, rewriting raises word-F1 on \vf{51} percent, leaves \vf{34} percent unchanged, and lowers \vf{14} percent.
 
 \begin{table}[H]
 \caption{The rewrite keeps the words on which the reconstructions agree, including a wrong day that two decoders share.
@@ -58,13 +58,13 @@ True prompt & Value greater than One Hundred Thousand Dollars (\$100,000), the p
 SmolLM & \miss{Ibid equal} \hit{than One Hundred} \miss{Twenty-five Dollar Cents} \hit{(\$100,000), the portion} & \vf{0.57} \\
 OLMo & \miss{by Less} \hit{than One Hundred Thousand} \miss{Dollar Dollar} & \vf{0.44} \\
 Qwen & \miss{be} \hit{greater than One Hundred Thousand} \miss{Dollar} \hit{(\$100,000), the portion} & \vf{0.80} \\
-Rewrite & \miss{be} \hit{greater than One Hundred Thousand Dollars (\$100,000), the portion} & \vf{0.90} \\ % src: legal10w cache, law-atticus_contracts-00011586-w1167, gain percentile 95
+Rewrite & \miss{be} \hit{greater than One Hundred Thousand Dollars (\$100,000), the portion} & \vf{0.90} \\
 \midrule
 True prompt & Real Property Account (the ''Account'') on August 27, 1986 by & \\
 SmolLM & \miss{ye} \hit{Property Account (the Account) on August} \miss{19, 2012} \hit{by} & \vf{0.70} \\
 OLMo & \miss{Food} \hit{Account (Account (the} \miss{Account)} \hit{on August} \miss{19,} & \vf{0.56} \\
 Qwen & \hit{Real Property Account (The Account) on August} \miss{14, 1903} \hit{by} & \vf{0.80} \\
-Rewrite & \hit{Real Property Account (the Account) on August} \miss{19, 2012} \hit{by} & \vf{0.80} \\ % src: legal10w cache, law-edgar-00012496-w38, gain percentile 75
+Rewrite & \hit{Real Property Account (the Account) on August} \miss{19, 2012} \hit{by} & \vf{0.80} \\
 \bottomrule
 \end{tabular}
 \end{table}

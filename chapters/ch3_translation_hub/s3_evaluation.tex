@@ -3,7 +3,7 @@
 \paragraph{Free-running decoding.} The hypothesis is tested under free-running decoding.
 % Teacher forcing would hand the decoder the true previous tokens, and that prefix carries information about the next token.
 Each decoder conditions on the soft prompt and on its own generated prefix.
-Greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap of the length of the soft prompt plus \vf{32} tokens. % src: results/v7_2/main/hub-val-eval-m32.json setting.cap_margin 32 (NQ); legal hub configs (32)
+Greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap of the length of the soft prompt plus \vf{32} tokens.
 
 \paragraph{Metrics.} Two metrics score a reconstruction against its source prompt.
 Word-F1 counts the words that the two texts share, repeats included, ignores their order, and averages the resulting score over prompts.
@@ -13,7 +13,7 @@ Exact match is the fraction of reconstructions identical to their source prompt 
 A decoder can therefore match some words of a prompt with no information about that prompt.
 The mismatched-prompt control measures that match.
 Each decoder receives the hub outputs of another prompt, and its text is scored against the original prompt.
-Prompt $i$ receives the hub outputs of prompt $i+1$, and the last prompt receives those of the first. % src: src/v6_3/inversion.py (shuffled_indices: (i + 1) mod n); src/v8/projectors.py (wrong_partner: same rule)
+Prompt $i$ receives the hub outputs of prompt $i+1$, and the last prompt receives those of the first.
 A score above the control shows that the decoder recovers words from the prompt's own hub outputs.
 
 \paragraph{Evaluation metric.}

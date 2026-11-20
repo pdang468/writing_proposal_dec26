@@ -1,15 +1,15 @@
 \section{Size of the Leak}\label{sec:attack:budget}
 
 Across the six leak sizes tested, the gain from matching rises with the leak, is largest at \vf{45} or \vf{90} rows, and falls as the leak grows further (Figure~\ref{fig:attack:budget}).
-The comparison repeats the main comparison at six leak sizes, the first \vf{9} rows of \vf{1}, \vf{3}, \vf{5}, \vf{10}, \vf{30}, and \vf{100} prompts, or \vf{9} to \vf{900} rows. % src: configs/w46_{nq,legal128w,legal10w}_std_L{9,27,45,270,900}.yaml; src/v7_2/anchors_linear.py span_start_pairs
+The comparison repeats the main comparison at six leak sizes, the first \vf{9} rows of \vf{1}, \vf{3}, \vf{5}, \vf{10}, \vf{30}, and \vf{100} prompts, or \vf{9} to \vf{900} rows.
 The setting stays at $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$, and each fit is scored on the selection prompts.
-On NQ, the gain is \vf{0.354} at \vf{27} rows, peaks at \vf{0.418} at \vf{45} rows, and falls to \vf{0.089} at \vf{900} rows. % src: results/v7_2/main/mixed-w46-std-L{27,45,270,900}.json seeds.1.cells (hybrid 0.6093, 0.7217, 0.7956, 0.8323; supervised 0.2549, 0.3037, 0.5255, 0.7434); job 1601532; 90 rows: results/v7_2/main/mixed-w46-std.json seeds.1.cells (0.7679, 0.3671, gain 0.401)
-The gain on legal10w follows the same course, with a peak of \vf{0.379} at \vf{90} rows and a fall to \vf{0.089} at \vf{900} rows. % src: results/legal10w/v7_2/main/mixed-w46-std-L{27,45,270,900}.json (hybrid 0.3799, 0.5163, 0.6880, 0.7437; supervised 0.1365, 0.1686, 0.3737, 0.6548; gain at 45 rows 0.348); job 1601534; 90 rows: mixed-w46-std.json (0.6040, 0.2251)
-The gain on legal100t peaks lower, at \vf{0.206} at \vf{90} rows, and falls to \vf{0.018} at \vf{900} rows. % src: results/legal128w/v7_2/main/mixed-w46-std-L{27,45,270,900}.json seeds.1.cells (hybrid 0.1483, 0.2571, 0.3878, 0.4960; supervised 0.0586, 0.0593, 0.2144, 0.4783); job 1601533; 90 rows: mixed-w46-std.json (0.2993, 0.0938); gains at 27, 45, 270 rows 0.090, 0.198, 0.173
+On NQ, the gain is \vf{0.354} at \vf{27} rows, peaks at \vf{0.418} at \vf{45} rows, and falls to \vf{0.089} at \vf{900} rows.
+The gain on legal10w follows the same course, with a peak of \vf{0.379} at \vf{90} rows and a fall to \vf{0.089} at \vf{900} rows.
+The gain on legal100t peaks lower, at \vf{0.206} at \vf{90} rows, and falls to \vf{0.018} at \vf{900} rows.
 
 The gain is small at the two ends of the curve for different reasons.
 At \vf{9} rows, a single prompt gives either fit too little to learn from.
-The hybrid fit then scores \vf{0.195} on NQ, a gain of \vf{0.036}, and on the two legal datasets it scores below the supervised fit, \vf{0.061} against \vf{0.081} on legal10w and \vf{0.021} against \vf{0.044} on legal100t. % src: mixed-w46-std-L9.json of each dataset (NQ hybrid 0.1951, supervised 0.1590; legal10w hybrid 0.0613, supervised 0.0814, control 0.027; legal128w hybrid 0.0207, supervised 0.0445, control 0.023)
+The hybrid fit then scores \vf{0.195} on NQ, a gain of \vf{0.036}, and on the two legal datasets it scores below the supervised fit, \vf{0.061} against \vf{0.081} on legal10w and \vf{0.021} against \vf{0.044} on legal100t.
 At \vf{900} rows, the leak alone carries the supervised fit to \vf{0.743} on NQ and \vf{0.655} on legal10w, and little remains for matching to add.
 
 \begin{figure}[ht]

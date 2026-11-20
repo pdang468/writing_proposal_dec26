@@ -6,7 +6,7 @@ The map sends each hidden state $s_t$ of the target model to a point $\hat m_t$ 
 \hat m_t = W(s_t - \mu) + c ,
 \label{eq:attack:map}
 \end{equation}
-where $\mu$ is the mean hidden state of the unpaired pool, $W$ is a matrix from \vf{2048} to \vf{512} dimensions, and $c$ is a bias. % src: src/v7/adapter.py; src/v7_2/preprocess.py (centering on pool U); configs/v7.yaml (width 2048, hub_dim 512)
+where $\mu$ is the mean hidden state of the unpaired pool, $W$ is a matrix from \vf{2048} to \vf{512} dimensions, and $c$ is a bias.
 The frozen projectors and decoders of the hub then reconstruct the prompt from the mapped states.
 Like the hub, the map acts on one hidden state at a time (Section~\ref{sec:hub:design}).
 
@@ -25,14 +25,14 @@ The shaded box is the only trained module, and dashed boxes are frozen.}
 \mathcal{L}(\alpha) = \alpha\,\big(\mathcal{L}_{\text{sup}} + \lambda\,\mathcal{R}\big) + (1-\alpha)\,\mathcal{L}_{\text{match}} ,
 \label{eq:attack:loss}
 \end{equation}
-where the supervision fraction $\alpha$ weights the two terms and does not depend on the size of the leak. % src: results/v7_2/main/mixed-v7_9-s5.json (definition)
+where the supervision fraction $\alpha$ weights the two terms and does not depend on the size of the leak.
 At $\alpha = 1$ only the supervised term and its ridge penalty remain, and the result is the supervised fit.
 At $0 < \alpha < 1$ both terms act, and the result is the hybrid fit.
 At $\alpha = 0$ only the matching term remains, and the result is a blind map.
 
 \paragraph{Supervised term.} $\mathcal{L}_{\text{sup}}$ is the mean squared distance between the mapped hidden state and the hub output of the same row, divided by $\rho_H^2$.
-The constant $\rho_H$ is the root-mean-square distance of the pooled hub outputs from their mean, and the division makes the term independent of the scale of the hub. % src: src/v7_2/context.py (rho_H); src/v7/loss.py
-The ridge penalty $\mathcal{R}$ is the squared Frobenius norm of $W$ divided by $\rho_H^2$, with $\lambda = 1$. % src: configs/v7_9_s4.yaml (mixed.ridge_lambdas); src/v7_2/mixed.py
+The constant $\rho_H$ is the root-mean-square distance of the pooled hub outputs from their mean, and the division makes the term independent of the scale of the hub.
+The ridge penalty $\mathcal{R}$ is the squared Frobenius norm of $W$ divided by $\rho_H^2$, with $\lambda = 1$.
 
 \paragraph{Matching term.} $\mathcal{L}_{\text{match}}$ follows the approximate bijective correspondence loss of Murphy et al.~\cite{murphy2022abc}.
 The loss acts on two batches drawn independently: $B$ mapped hidden states $\hat m_1 \ldots \hat m_B$ from the target model's pool and $B$ hub outputs $m_1 \ldots m_B$ from the hub's pool.
@@ -50,7 +50,7 @@ On the way back, the soft nearest neighbor $\tilde m_i$ must identify the mapped
 \ell_i = -\log\frac{\exp(\sigma(\tilde m_i, \hat m_i)/\tau)}{\sum_{k}\exp(\sigma(\tilde m_i, \hat m_k)/\tau)} .
 \label{eq:attack:return}
 \end{equation}
-$\mathcal{L}_{\text{match}}$ averages $\ell_i$ over the batch and adds the same loss with the two batches exchanged, each with weight one half. % src: src/v7_2/abc_sqdist.py (abc_sqdist_loss)
+$\mathcal{L}_{\text{match}}$ averages $\ell_i$ over the batch and adds the same loss with the two batches exchanged, each with weight one half.
 The hub outputs are fixed, so both directions train only the map.
 The soft nearest neighbor supplies the positive pair of each mapped state, so the term requires no correspondence between the two pools.
 Taken over both directions, the loss measures how close the matching is to a bijection: two mapped states that share one soft nearest neighbor cannot both be identified by it.
@@ -59,8 +59,7 @@ A bijection need not be the correct correspondence (Section~\ref{sec:attack:blin
 \paragraph{Temperature.} The temperature $\tau$ sets the sharpness of both steps of the round trip, the weights $p_{ij}$ and the identification of Equation~\ref{eq:attack:return}.
 The temperature is expressed as a multiple of a scale $d$ measured on the hub alone.
 For each hub output, the gap is the difference between its highest and second-highest scores against the other hub outputs of its batch.
-The scale $d$ is the median gap over \vf{100} batches of \vf{512} hub outputs. % src: src/v7_2/gap.py; results/*/v7_2/main/mixed-v7_9-s0.json gap
-% CUT 2026-11-18 (per-dataset values): The scale is \vf{0.0576} on NQ, \vf{0.0738} on legal10w, and \vf{0.0648} on legal100t. % src: results/v7_2/main/mixed-v7_9-s0.json gap.sqdist.median (0.05761); results/legal10w/v7_2/main/mixed-v7_9-s0.json (0.07380); results/legal128w/v7_2/main/mixed-v7_9-s0.json (0.06485)
+The scale $d$ is the median gap over \vf{100} batches of \vf{512} hub outputs.
 
-\paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates, each on \vf{512} rows drawn from the leak with replacement and $B$ elements from each unpaired pool. % src: configs/v7_9_s4.yaml (training); src/v7/training.py (lr_multiplier); results/v7_2/main/mixed-v7_9-s5.json setting (paired_batch_rows 512)
+\paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates, each on \vf{512} rows drawn from the leak with replacement and $B$ elements from each unpaired pool.
 The map after the last update is evaluated, without checkpoint selection.

@@ -1,7 +1,7 @@
 \section{Matching Improves Reconstruction from a Small Leak}\label{sec:attack:hybrid}\label{sec:attack:main}
 
 Unpaired matching raises reconstruction word-F1 on all three datasets (Figure~\ref{fig:attack:standard}).
-With a leak of \vf{90} rows, word-F1 on the \vf{4{,}500} evaluation prompts of NQ rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit, a gain of \vf{0.411}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json; results/legal128w/v7_2/main/w46-confirmation-s{1,2,3}.json (means of three seeds); interval computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113) ; results/legal10w/v7_2/main/w46-confirmation-s{1,2,3}.json (supervised 0.1917, hybrid 0.5991; per seed 0.2229, 0.1989, 0.1532 and 0.6028, 0.5952, 0.5993); interval computed from results/legal10w/v7_2/main/mixed-v7_9/confirmation/*/decoding.jsonl (per-prompt word-F1 averaged over three decoders and three seeds; paired bootstrap over 4,500 prompts, 2,000 resamples, seed 20261113: +0.4074 [0.4033, 0.4118])
+With a leak of \vf{90} rows, word-F1 on the \vf{4{,}500} evaluation prompts of NQ rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit, a gain of \vf{0.411}.
 The gains on legal10w and legal100t are \vf{0.407} and \vf{0.219}, the smallest on the dataset of long prompts.
 Both fits receive the same leak, and only the hybrid fit reads the two unpaired pools.
 
@@ -16,20 +16,20 @@ The evaluation prompts selected no setting of the attack.}
 \end{figure}
 
 \paragraph{Control.} The hybrid scores depend on the prompt's own hidden states.
-On the selection prompts, the hybrid fit scores \vf{0.768} against its mismatched-prompt control of \vf{0.108} on NQ, \vf{0.604} against \vf{0.074} on legal10w, and \vf{0.299} against \vf{0.073} on legal100t. % src: mixed-w46-std.json of each dataset, seeds.1.cells.*.final.macro_f1 and wrong_memory.macro_f1 (NQ 0.7679, 0.1081; legal10w 0.6040, 0.0739; legal128w 0.2993, 0.0725)
-The supervised fit on legal100t, at \vf{0.094}, is close to its control of \vf{0.059}, so \vf{90} rows alone yield little beyond the control. % src: results/legal128w/v7_2/main/mixed-w46-std.json seeds.1.cells (0.0938, 0.0594)
+On the selection prompts, the hybrid fit scores \vf{0.768} against its mismatched-prompt control of \vf{0.108} on NQ, \vf{0.604} against \vf{0.074} on legal10w, and \vf{0.299} against \vf{0.073} on legal100t.
+The supervised fit on legal100t, at \vf{0.094}, is close to its control of \vf{0.059}, so \vf{90} rows alone yield little beyond the control.
 
 \paragraph{Exact match and decoders.} On the evaluation prompts, exact match distinguishes the word-overlap gain from full-prompt recovery (Figure~\ref{fig:attack:decoders}).
-Under the hybrid fit, exact match is \vf{0.21} on NQ and \vf{0.02} on legal10w, against zero under the supervised fit, and it rounds to zero on legal100t. % src: computed from results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl, field exact_match, three decoders and three seeds (hybrid means 0.2121, 0.0209, 0.0000; supervised 0.0001, 0, 0)
+Under the hybrid fit, exact match is \vf{0.21} on NQ and \vf{0.02} on legal10w, against zero under the supervised fit, and it rounds to zero on legal100t.
 The three decoders also differ.
-SmolLM scores the highest word-F1 on every dataset, and on legal100t the OLMo decoder falls to \vf{0.160}. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/w46-confirmation-s{1,2,3}.json cells.*.per_decoder, means of three seeds
+SmolLM scores the highest word-F1 on every dataset, and on legal100t the OLMo decoder falls to \vf{0.160}.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.8\textwidth]{ch4/decoders}
 \caption{Under the hybrid fit, SmolLM is the strongest decoder on every dataset, and full-prompt recovery occurs mainly through SmolLM on NQ.
 Word-F1 of the hybrid fit by decoder on the \vf{4{,}500} evaluation prompts at the \vf{90}-row leak; the hatched base of each bar is exact match, the share of prompts decoded verbatim.
-Exact match is at most \vf{0.03} on legal10w and rounds to zero on legal100t.} % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/b90-a0.9-*/decoding.jsonl, fields word_f1 and exact_match (NQ 0.8859, 0.7622, 0.6495 and 0.4153, 0.1676, 0.0534; legal10w 0.6554, 0.5865, 0.5553 and 0.0268, 0.0125, 0.0233; legal128w 0.4303, 0.1602, 0.3722 and 0.0001, 0, 0); figures/scripts/make_figures.py (decoders)
+Exact match is at most \vf{0.03} on legal10w and rounds to zero on legal100t.}
 \label{fig:attack:decoders}
 \end{figure}
 
@@ -53,15 +53,15 @@ Decoded words that match the true prompt are green; the others are orange and bo
  & & Word-F1 \\
 \midrule
 True prompt & when did kindergarten start in the united states & \\
-Hybrid fit & \hit{when did kindergarten start in the united states} & \vf{1.00} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a0.9-sq-m0-t0.11522-r1-B8192-L90-span9/decoding.jsonl, nq-00000406, smollm
-Supervised fit & \hit{when did} \miss{semay faqum fell} \hit{in the} \miss{nile greece} & \vf{0.47} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a1-r1-L90-span9/decoding.jsonl, nq-00000406, smollm
+Hybrid fit & \hit{when did kindergarten start in the united states} & \vf{1.00} \\
+Supervised fit & \hit{when did} \miss{semay faqum fell} \hit{in the} \miss{nile greece} & \vf{0.47} \\
 \midrule
 True prompt & who played sweet daddy williams on good times & \\
-Hybrid fit & \hit{who played} \miss{sweetheart} \hit{williams on good times} & \vf{0.80} \\ % src: same files, nq-00001253
+Hybrid fit & \hit{who played} \miss{sweetheart} \hit{williams on good times} & \vf{0.80} \\
 Supervised fit & \hit{who} \miss{sang sing choi will ton ghiam xo} & \vf{0.13} \\
 \midrule
 True prompt & who played robin on once upon a time & \\
-Hybrid fit & \hit{who played} \miss{roon} \hit{on} \miss{one after another} & \vf{0.40} \\ % src: same files, nq-00020139
+Hybrid fit & \hit{who played} \miss{roon} \hit{on} \miss{one after another} & \vf{0.40} \\
 Supervised fit & \hit{who} \miss{won homer in many times until he won} & \vf{0.12} \\
 \bottomrule
 \end{tabular}

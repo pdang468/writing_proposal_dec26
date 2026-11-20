@@ -44,11 +44,11 @@ A map trained on the leak alone is the supervised fit, and a map trained on the 
 
 \paragraph{Results.} Both steps are evaluated on NQ, the query strings of Natural Questions, and on two datasets of legal text.
 The score is word-F1, the overlap between the words of the reconstruction and the words of the prompt, without regard to their order.
-The hub supports reconstruction across models: mean cross-model word-F1 is \vf{0.944} on NQ and \vf{0.977} on each legal dataset, against mismatched-prompt controls of at most \vf{0.152}. % src: ch3 s4, s5, s6
-For the target model, a leak of \vf{90} rows on NQ gives the supervised fit a word-F1 of \vf{0.35} and the hybrid fit \vf{0.77}. % src: ch4 s0, s4
-On the legal datasets the matching term raises word-F1 from \vf{0.19} to \vf{0.60} and from \vf{0.10} to \vf{0.32}. % src: ch4 s0
-Without a leak, the matching term reaches a word-F1 of \vf{0.061} on NQ, against \vf{0.067} for its mismatched-prompt control. % src: ch4 s7
-Reconstruction is also partial: exact match under the hybrid fit is \vf{0.21} on NQ and near zero on the legal datasets. % src: ch4 s4
+The hub supports reconstruction across models: mean cross-model word-F1 is \vf{0.944} on NQ and \vf{0.977} on each legal dataset, against mismatched-prompt controls of at most \vf{0.152}.
+For the target model, a leak of \vf{90} rows on NQ gives the supervised fit a word-F1 of \vf{0.35} and the hybrid fit \vf{0.77}.
+On the legal datasets the matching term raises word-F1 from \vf{0.19} to \vf{0.60} and from \vf{0.10} to \vf{0.32}.
+Without a leak, the matching term reaches a word-F1 of \vf{0.061} on NQ, against \vf{0.067} for its mismatched-prompt control.
+Reconstruction is also partial: exact match under the hybrid fit is \vf{0.21} on NQ and near zero on the legal datasets.
 
 \paragraph{Contributions.} The dissertation makes three contributions.
 \begin{itemize}

@@ -4,12 +4,12 @@ The setting of the main comparison comes from a grid over the supervision fracti
 
 \subsection{The grid at 90 rows}\label{sec:attack:grid90}
 
-The grid runs on the \vf{90}-row leak and the \vf{500} selection prompts of each dataset (Figure~\ref{fig:attack:grid}). % src: results/v7_2/main/mixed-w46-grid.json; results/legal128w/v7_2/main/mixed-w46-grid.json; w46-selection.json
-The selection rule takes the cell with the highest mean word-F1 over NQ and legal100t. % src: w46/plan.md; w46-selection.json rule
-That cell is $\alpha = 0.9$, $\tau = 2d$, with a mean of \vf{0.534}. % src: w46-selection.json best (0.5336)
-The cell is the best on NQ, at \vf{0.768}. % src: results/v7_2/main/mixed-w46-grid.json seeds.1.cells (0.7679)
-On legal10w, which the selection rule leaves out, the same cell is again the best, at \vf{0.604}. % src: results/legal10w/v7_2/main/mixed-w46-grid.json seeds.1.cells (a0.9, t0.1476: 0.6040; next a0.8, t0.1476: 0.580; supervised 0.2251); job 1600092
-On legal100t the cell is close to the best, \vf{0.299} against \vf{0.314} at $\alpha = 0.8$, $\tau = 2d$. % src: results/legal128w/v7_2/main/mixed-w46-grid.json seeds.1.cells (0.2993, 0.3144)
+The grid runs on the \vf{90}-row leak and the \vf{500} selection prompts of each dataset (Figure~\ref{fig:attack:grid}).
+The selection rule takes the cell with the highest mean word-F1 over NQ and legal100t.
+That cell is $\alpha = 0.9$, $\tau = 2d$, with a mean of \vf{0.534}.
+The cell is the best on NQ, at \vf{0.768}.
+On legal10w, which the selection rule leaves out, the same cell is again the best, at \vf{0.604}.
+On legal100t the cell is close to the best, \vf{0.299} against \vf{0.314} at $\alpha = 0.8$, $\tau = 2d$.
 
 All three datasets show the same dependence on temperature.
 For $\alpha \le 0.95$, word-F1 peaks at $\tau = 2d$ and falls on either side, and several cells at a low temperature score below the supervised fit.
@@ -28,8 +28,8 @@ The titles give the supervised fit on the same leak.}
 \subsection{The grid at 900 rows}\label{sec:attack:grid900}
 
 The advantage of matching remains at \vf{900} rows, but it is smaller than at \vf{90} rows (Figure~\ref{fig:attack:grid-size}).
-The grid is repeated on the selection prompts with the leak of \vf{9} rows from each of \vf{100} prompts. % src: configs/w46_{nq,legal128w,legal10w}_grid_L900.yaml; jobs 1601643, 1601644, 1601645
-The best cell gains \vf{0.089} over the supervised fit on NQ, \vf{0.104} on legal10w, and \vf{0.118} on legal100t, against \vf{0.401}, \vf{0.379}, and \vf{0.206} for the setting at \vf{90} rows. % src: results/v7_2/main/mixed-w46-grid-L900.json seeds.1.cells (0.8323; b900/a1 0.7434); results/legal10w/v7_2/main/mixed-w46-grid-L900.json seeds.1.cells (a0.9 t0.0738 0.7588; a0.9 t0.1476 0.7437; b900/a1 0.6548); results/legal128w/v7_2/main/mixed-w46-grid-L900.json seeds.1.cells (a0.95 t0.06485 0.5963; a0.9 t0.1297 0.4960; b900/a1 0.4783); 90 rows: mixed-w46-std.json seeds.1.cells
+The grid is repeated on the selection prompts with the leak of \vf{9} rows from each of \vf{100} prompts.
+The best cell gains \vf{0.089} over the supervised fit on NQ, \vf{0.104} on legal10w, and \vf{0.118} on legal100t, against \vf{0.401}, \vf{0.379}, and \vf{0.206} for the setting at \vf{90} rows.
 The setting of the main comparison remains the best cell on NQ and scores about \vf{0.015} below it on legal10w, and on legal100t the best cell moves to $\alpha = 0.95$, $\tau = d$.
 The best cell is chosen on the prompts that score it, so its gain is an upper estimate.
 

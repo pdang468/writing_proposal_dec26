@@ -12,11 +12,10 @@ Cross-entropy scores that prediction against the true token, and a lower value m
 Each decoder is evaluated under three conditions that differ only in the soft prompt.
 In the reference condition, the soft prompt comes from the hub outputs of OLMo.
 In the mapped condition, it comes from the mapped states of the target model, under the supervised fit or the hybrid fit.
-In the language-model baseline, the decoder receives no soft prompt and predicts each token from the previous tokens alone. % src: teacher_forced_run.py (arm no_memory: empty prefix, start token then true tokens)
+In the language-model baseline, the decoder receives no soft prompt and predicts each token from the previous tokens alone.
 
 The excess cross-entropy compares a condition with the reference condition: it is the cross-entropy of the condition minus the cross-entropy of the reference condition.
-% CUT 2026-11-19 (KL divergence, a second metric with the same order): The KL divergence compares the next-token distributions of the two conditions over all candidate tokens, not only the true one.
-The excess is averaged over content words, the words outside a stop-word list. % src: teacher_forced_run.py (lines 62-68: -logp at the true token; KL(reference || mapped) = sum q (log q - log p)); teacher_forced_summary.py (lines 82-136: per-word sums, content words, pooling over prompts, decoders, seeds)
+The excess is averaged over content words, the words outside a stop-word list.
 The excess cross-entropy of the language-model baseline marks the level that a soft prompt must beat: a fit above that level predicts the true tokens worse than no soft prompt.
 
 \begin{figure}[!htb]
@@ -29,22 +28,19 @@ Hybrid fit of the main comparison ($\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$).}
 \end{figure}
 
 \paragraph{Matching lowers the excess cross-entropy.} At the \vf{90}-row leak, the hybrid fit has the lower excess cross-entropy on all three datasets (Figure~\ref{fig:attack:ce}).
-The excess falls from \vf{7.73} nats per content word under the supervised fit to \vf{1.36} under the hybrid fit on NQ, from \vf{10.41} to \vf{3.35} on legal10w, and from \vf{5.58} to \vf{5.11} on legal100t. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/framework/teacher_forced-w46/summary.json arms.{b90-a1-r1-L90-span9, b90-a0.9-sq-m0-t*-r1-B8192-L90-span9}.classes.content.excess_per_word (7.7341, 1.3621; 10.4136, 3.3521; 5.5825, 5.1133), 500 selection prompts, three fits pooled
-% CUT 2026-11-19 (KL divergence): The KL divergence gives the same order, with a fall from \vf{7.48} to \vf{1.36} on NQ, from \vf{10.35} to \vf{3.35} on legal10w, and from \vf{5.56} to \vf{5.10} on legal100t. % src: same files, kl_per_word (7.482, 1.362; 10.351, 3.349; 5.564, 5.101)
+The excess falls from \vf{7.73} nats per content word under the supervised fit to \vf{1.36} under the hybrid fit on NQ, from \vf{10.41} to \vf{3.35} on legal10w, and from \vf{5.58} to \vf{5.11} on legal100t.
 The language-model baseline separates the two fits.
-Its excess is \vf{6.08} nats on NQ, \vf{9.56} on legal10w, and \vf{5.29} on legal100t. % src: same files, arms.no_memory (6.0751, 9.5643, 5.2908)
+Its excess is \vf{6.08} nats on NQ, \vf{9.56} on legal10w, and \vf{5.29} on legal100t.
 The supervised fit is above that level on every dataset, so its soft prompt predicts the true tokens worse than no soft prompt.
 The hybrid fit is below that level on every dataset, by \vf{4.71} nats on NQ, \vf{6.21} on legal10w, and \vf{0.18} on legal100t.
 The matching term therefore improves the decoder's next-token predictions on every dataset, and least on legal100t, where word-F1 is also lowest.
 
 
-% CUT 2026-11-18, pending a rerun at the setting of the main comparison: the KL-training step below ran at alpha 0.99, tau d, on leaks of 856 to 8,612 rows.
 % \paragraph{Training the map on the decoder's predictions.}\label{sec:attack:decoderkl} A further step places the decoder inside the objective.
-% Starting from a hybrid fit on legal100t ($\alpha = 0.99$, $\tau = d$), the step trains the affine map through the frozen SmolLM decoder on the prompts of the leak, with the KL divergence defined above as its training loss. % src: oct_w4/plan.md; results/legal128w/v7_2/main/oct_w4-summary.json budgets.*.selected (kl/beta0)
+% Starting from a hybrid fit on legal100t ($\alpha = 0.99$, $\tau = d$), the step trains the affine map through the frozen SmolLM decoder on the prompts of the leak, with the KL divergence defined above as its training loss.
 % On the \vf{4{,}500} held-out prompts, the KL divergence and the cross-entropy of SmolLM both fall at every leak size (Table~\ref{tab:attack:decoderkl}).
 % The cross-entropy falls by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at leaks of \vf{856}, \vf{2{,}569}, and \vf{8{,}612} rows.
-% Word-F1 rises by at most \vf{0.023} at the same leak sizes. % src: oct_w4-summary.json budgets.*.confirmation.gain_vs_start.kl/beta0.ce; confirmation.f1_gain_vs_start.kl/beta0.f1 (+0.0092 [0.0062, 0.0123]; +0.0111 [0.0090, 0.0134]; +0.0233 [0.0212, 0.0254])
-% %% BIG CHANGE: the author's reading (2026-11-15): the training loss falls, cross-entropy and KL divergence fall with it, and word-F1 gains little.
+% Word-F1 rises by at most \vf{0.023} at the same leak sizes.
 % A lower training loss thus lowers the cross-entropy and the KL divergence but adds little word-F1.
 %
 % \begin{table}[H]
@@ -57,9 +53,9 @@ The matching term therefore improves the decoder's next-token predictions on eve
 % \toprule
 % Leak (rows) & Cross-entropy, before to after & KL divergence, before to after & Gain in word-F1 \\
 % \midrule
-% \vf{856} & \vf{1.48} to \vf{1.29} & \vf{1.45} to \vf{1.25} & \vf{$+0.009$} [\vf{0.006}, \vf{0.012}] \\ % src: results/legal128w/v7_2/main/oct_w4-summary.json budgets.10.confirmation.table.{start,kl/beta0} (1.4842, 1.2896; 1.4464, 1.2503); f1_gain_vs_start (+0.0092 [0.0062, 0.0123])
-% \vf{2{,}569} & \vf{1.02} to \vf{0.87} & \vf{1.00} to \vf{0.84} & \vf{$+0.011$} [\vf{0.009}, \vf{0.013}] \\ % src: same, budgets.30 (1.0236, 0.8709; 0.9966, 0.8432; +0.0111 [0.0090, 0.0134])
-% \vf{8{,}612} & \vf{0.77} to \vf{0.51} & \vf{0.75} to \vf{0.50} & \vf{$+0.023$} [\vf{0.021}, \vf{0.025}] \\ % src: same, budgets.100 (0.7703, 0.5131; 0.7520, 0.4962; +0.0233 [0.0212, 0.0254])
+% \vf{856} & \vf{1.48} to \vf{1.29} & \vf{1.45} to \vf{1.25} & \vf{$+0.009$} [\vf{0.006}, \vf{0.012}] \\
+% \vf{2{,}569} & \vf{1.02} to \vf{0.87} & \vf{1.00} to \vf{0.84} & \vf{$+0.011$} [\vf{0.009}, \vf{0.013}] \\
+% \vf{8{,}612} & \vf{0.77} to \vf{0.51} & \vf{0.75} to \vf{0.50} & \vf{$+0.023$} [\vf{0.021}, \vf{0.025}] \\
 % \bottomrule
 % \end{tabular}
 % \end{table}

@@ -19,13 +19,13 @@ R(z) = z + V_2\,\mathrm{SiLU}\big(V_1\,\mathrm{LN}(z) + c_1\big) + c_2 .
 \label{eq:hub:map}
 \end{equation}
 Here $W_a$ is the linear layer of model $a$'s adapter, $R_a$ its residual block, $R_0$ the residual block of the shared backbone, and $W_h$ the shared linear layer from \vf{1024} to \vf{512}.
-Each residual block $R$ applies layer normalization (LN) and a SiLU activation, widens to \vf{2048}, and returns to \vf{1024}. % src: src/v3/bridge.py (SourceAdapter, ResidualMLP); src/v6_2/bridge.py (H3BridgeBundle); configs/v6_3.yaml (architecture)
+Each residual block $R$ applies layer normalization (LN) and a SiLU activation, widens to \vf{2048}, and returns to \vf{1024}.
 
 \paragraph{Out of the hub.} A model-specific affine projector maps each hub output $m_t$ to the input width of a frozen language model, the decoder.
 The projected vectors form a soft prompt, and the decoder generates the reconstructed prompt after its start token.
 
 \paragraph{Models and directions.} The three models are Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B.
-Each contributes hidden states from the block at three quarters of its depth: block \vf{18} of \vf{24} in Qwen (width \vf{1024}), block \vf{12} of \vf{16} in OLMo (width \vf{2048}), and block \vf{18} of \vf{24} in SmolLM (width \vf{2048}). % src: configs/v6_3.yaml (d3_block, width); configs/v3.yaml (blocks, depth_fractions)
+Each contributes hidden states from the block at three quarters of its depth: block \vf{18} of \vf{24} in Qwen (width \vf{1024}), block \vf{12} of \vf{16} in OLMo (width \vf{2048}), and block \vf{18} of \vf{24} in SmolLM (width \vf{2048}).
 A direction pairs a source model with a decoder, e.g., Qwen $\to$ hub $\to$ OLMo.
 Three models define nine directions: six cross-model directions and three self-reconstruction directions.
 In a cross-model direction the decoder reconstructs the prompt from another model's hidden states, so the cross-model results test the hypothesis.

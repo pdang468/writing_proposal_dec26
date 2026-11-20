@@ -6,8 +6,8 @@ Two sources of information train the map.
 First, a small leak, a set of short text spans with both their text and the target model's hidden states, supervises the map directly.
 Second, a matching term aligns unpaired hidden states of the target model and hub outputs with no correspondence between them.
 The chapter tests whether the matching term improves reconstruction over the leak alone.
-With a leak of \vf{90} rows, the matching term raises mean word-F1 on NQ from \vf{0.35} to \vf{0.77}. % src: results/v7_2/main/w46-confirmation-s{1,2,3}.json (0.3544, 0.7659)
-On the two legal datasets, mean word-F1 rises from \vf{0.19} to \vf{0.60} on legal10w and from \vf{0.10} to \vf{0.32} on legal100t. % src: results/{legal10w,legal128w}/v7_2/main/w46-confirmation-s{1,2,3}.json (0.1917, 0.5991; 0.1021, 0.3209)
+With a leak of \vf{90} rows, the matching term raises mean word-F1 on NQ from \vf{0.35} to \vf{0.77}.
+On the two legal datasets, mean word-F1 rises from \vf{0.19} to \vf{0.60} on legal10w and from \vf{0.10} to \vf{0.32} on legal100t.
 
 \paragraph{Hypothesis: matching improves reconstruction from a small leak.}\label{sec:attack:hypotheses}
 With a leak of \vf{90} rows, a map trained on the leak and the matching term achieves a higher word-F1 than a map trained on the leak alone.
