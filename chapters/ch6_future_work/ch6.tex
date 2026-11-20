@@ -16,8 +16,7 @@ That work therefore has to state which blocks the adversary observes, and it has
 Yet each hidden state is computed from the tokens before it, so neighboring hidden states carry overlapping information about one token.
 A map that reads a window of hidden states could draw on that overlap where a single hidden state leaves a token ambiguous.
 The examples of Chapter~\ref{ch:attack} show wrong names, dates, and numbers inside otherwise correct reconstructions, and those tokens are the natural target.
-The client already transmits the hidden states of a prompt in order, so the adversary needs no new access for this direction.
-Because word-F1 ignores the order of words, the evaluation also needs a measure that respects position: token accuracy, the share of positions where the reconstructed token equals the true one, reported beside word-F1 and exact match.
+That information is already present in the transmitted hidden states, and the current attack does not exploit it.
 
 \paragraph{Representations and privacy.} The hub shows that one shared space holds the prompt information of several models, and it does not show where in a hidden state that information sits.
 The open question is which components of a hidden state carry the identity of a token, and which carry only what the server's blocks need to continue the computation.
