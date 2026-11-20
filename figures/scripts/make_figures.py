@@ -184,7 +184,7 @@ def standard():
         means = [sum(per[k]) / 3 for k in ("supervised fit", "hybrid fit")]
         gap(ax, i + width + 0.05, means[0], means[1])
     ax.set_xticks(range(len(MAIN)))
-    ax.set_xticklabels([c[0] for c in MAIN])
+    ax.set_xticklabels([c[0].replace("legal128w", "legal100t") for c in MAIN])  # tick labels escape the rename in save()
     ax.set_xlim(-0.5, len(MAIN) - 0.25)
     ax.set_ylim(0, 1.0)
     ax.set_ylabel("word-F1 (mean of three decoders)")
@@ -419,6 +419,48 @@ def leak_size_span9():
                  color="#c0392b", alpha=0.35, rotation=12)
     fig.tight_layout()
     save(fig, "ch4/leak_size_three")
+
+
+def decoders():
+    """Hybrid fit by decoder at the 90-row leak, 4,500 evaluation prompts, three fits pooled: word-F1 as the bar,
+    with the share of prompts decoded verbatim (exact match) as its hatched base. A verbatim prompt scores word-F1 1,
+    so the base is the part of the mean that verbatim prompts contribute."""
+    import glob
+    from matplotlib.patches import Patch
+    series = [("SmolLM", "smollm", "#1baf7a"), ("OLMo", "olmo", "#6250d6"), ("Qwen", "qwen", "#eda100")]
+    plt.rcParams["hatch.linewidth"] = 0.6
+    fig, ax = plt.subplots(figsize=(6.0, 3.0))
+    width = 0.26
+    for i, (name, root) in enumerate(MAIN):
+        f1 = {k: [] for _, k, _ in series}
+        em = {k: [] for _, k, _ in series}
+        dirs = sorted(glob.glob(str(ROOT / root / "mixed-v7_9/confirmation/b90-a0.9-*")))
+        assert len(dirs) == 3
+        for d in dirs:
+            for line in open(d + "/decoding.jsonl"):
+                r = json.loads(line)
+                f1[r["decoder"]].append(r["word_f1"]); em[r["decoder"]].append(float(r["exact_match"]))
+        for k, (label, key, color) in enumerate(series):
+            assert len(f1[key]) == 3 * 4500
+            x, v, e = i + (k - 1) * width, sum(f1[key]) / len(f1[key]), sum(em[key]) / len(em[key])
+            ax.bar(x, v, width * 0.92, color=color)
+            ax.bar(x, e, width * 0.92, color=color, hatch="////", edgecolor=INK, linewidth=0)
+            ax.annotate(f"{v:.2f}", (x, v), xytext=(0, 2), textcoords="offset points", ha="center", fontsize=8, color=INK)
+            if e >= 0.04:
+                ax.annotate(f"{e:.2f}", (x, e), xytext=(0, 3), textcoords="offset points", ha="center", va="bottom", fontsize=7.5,
+                            color=INK, bbox=dict(boxstyle="round,pad=0.12", fc="white", ec="none"))
+            print(name, label, round(v, 4), round(e, 4))
+    ax.set_xticks(range(len(MAIN)))
+    ax.set_xticklabels([c[0].replace("legal128w", "legal100t") for c in MAIN])
+    ax.set_ylim(0, 1.0)
+    ax.set_ylabel("word-F1")
+    ax.grid(axis="y")
+    ax.set_axisbelow(True)
+    handles = [Patch(color=c, label=f"{l} decoder") for l, _, c in series]
+    handles.append(Patch(facecolor="white", hatch="////", edgecolor=INK, linewidth=0, label="share decoded verbatim (exact match)"))
+    ax.legend(handles=handles, loc="upper right", fontsize=7.5)
+    fig.tight_layout()
+    save(fig, "ch4/decoders")
 
 
 leak_size_span9()
