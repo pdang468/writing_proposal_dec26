@@ -40,7 +40,7 @@ In the first, each decoder loses different words, and the rewrite keeps the word
 Word-F1 rises from \vf{0.57} for SmolLM alone to \vf{0.90}.
 In the second, the rewrite takes the first word from Qwen, and it keeps the wrong day \emph{19}, on which two decoders agree, with the wrong year of SmolLM.
 Agreement between decoders therefore corrects an error of one decoder and preserves an error that two share.
-Over the \vf{450} prompts, rewriting raises word-F1 on \vf{51} percent, leaves \vf{34} percent unchanged, and lowers \vf{14} percent.
+Over the \vf{450} legal10w prompts, rewriting raises word-F1 on \vf{51} percent, leaves \vf{34} percent unchanged, and lowers \vf{14} percent.
 
 \begin{table}[H]
 \caption{The rewrite keeps the words on which the reconstructions agree, including a wrong day that two decoders share.
@@ -65,6 +65,35 @@ SmolLM & \miss{ye} \hit{Property Account (the Account) on August} \miss{19, 2012
 OLMo & \miss{Food} \hit{Account (Account (the} \miss{Account)} \hit{on August} \miss{19,} & \vf{0.56} \\
 Qwen & \hit{Real Property Account (The Account) on August} \miss{14, 1903} \hit{by} & \vf{0.80} \\
 Rewrite & \hit{Real Property Account (the Account) on August} \miss{19, 2012} \hit{by} & \vf{0.80} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On legal100t the prompts are longer, and one prompt shows how far the second round carries a reconstruction (Table~\ref{tab:attack:rewriting-example-long}).
+The prompt is a certification of \vf{63} words.
+SmolLM repeats one clause until the length limit, OLMo scores \vf{0.31}, and Qwen follows the prompt to its end with wrong numbers.
+The rewrite removes the repetition and continues with the text of Qwen where SmolLM breaks off, and word-F1 rises from \vf{0.63} for SmolLM alone to \vf{0.96}.
+The rewrite also restores the section number \emph{906}, the year \emph{2002}, and the reference \emph{15(d)}, which appear in none of the three reconstructions.
+The language model supplies those three from its own knowledge of the statute, and it keeps the wrong month of Qwen.
+Over the \vf{450} legal100t prompts, rewriting raises word-F1 on \vf{75} percent, leaves \vf{8} percent unchanged, and lowers \vf{16} percent.
+
+\begin{table}[H]
+\caption{On a legal100t prompt, the rewrite removes the repetition of SmolLM, completes the text from Qwen, and restores three numbers that no decoder produced.
+One prompt at the \vf{87}th percentile of the improvement over SmolLM alone; [...] marks a reconstruction cut for display.
+Decoded words that match the true prompt are green; the others are orange and bold.}
+\label{tab:attack:rewriting-example-long}
+\centering
+\ssp\small % single-spaced inside the table, so a wrapped line stays with its row
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.69\textwidth}r@{}}
+\toprule
+ & & Word-F1 \\
+\midrule
+True prompt & adopted pursuant to \S{} 906 of the Sarbanes-Oxley Act of 2002, to the best of my knowledge and belief, that: The Report fully complies with the requirements of section 13(a) or 15(d) of the Securities Exchange Act of 1934; and The information contained in the Report fairly presents, in all material respects, the financial condition and results of operations of the Company. Date:February & \\
+SmolLM & \hit{adopted pursuant to} \miss{\S{}136} \hit{of} \miss{Sarbano-Saxonia} \hit{Act of} \miss{1962,} \hit{to the best of my knowledge and belief, that: The Report fully complies with the requirements of section 13(a) or} \miss{13(b)} \hit{of the Securities Exchange Act of} \miss{1933, to the best of my knowledge and belief, that: The Report} [...] & \vf{0.63} \\
+OLMo & \miss{abadly approdated,} \hit{pursuant to the} \miss{Sarbanated by} \hit{the best} \miss{complied} \hit{with my} \miss{compliance with Sarbanated pursuant} \hit{to the Report fully} \miss{complying with my compliance,} [...] & \vf{0.31} \\
+Qwen & \hit{to} \miss{acceptorized} \hit{pursuant to} \miss{\S{}1306} \hit{of the Sarbanes-Oxley Act of} \miss{2006, to} \hit{the best of my knowledge and belief, that the Report fully complies with the requirements of section} \miss{1306} \hit{or} \miss{1505} \hit{of the Securities Exchange Act of 1934, and} \miss{that} \hit{the information contained in the Report fairly presents, in all material respects, the financial condition and results of operations of the Company.} \miss{Date July} & \vf{0.88} \\
+Rewrite & \hit{Adopted pursuant to \S{}906 of the Sarbanes-Oxley Act of 2002, to the best of my knowledge and belief, that the Report fully complies with the requirements of section 13(a) or 15(d) of the Securities Exchange Act of 1934, and} \miss{that} \hit{the information contained in the Report fairly presents, in all material respects, the financial condition and results of operations of the Company.} \miss{Date: July} & \vf{0.96} \\
 \bottomrule
 \end{tabular}
 \end{table}
