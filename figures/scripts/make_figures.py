@@ -428,7 +428,9 @@ def decoders():
     import glob
     from matplotlib.patches import Patch
     series = [("SmolLM", "smollm", "#1baf7a"), ("OLMo", "olmo", "#6250d6"), ("Qwen", "qwen", "#eda100")]
-    plt.rcParams["hatch.linewidth"] = 0.6
+    from matplotlib.colors import to_rgb
+    plt.rcParams["hatch.linewidth"] = 1.3
+    dark = lambda c: tuple(0.55 * v for v in to_rgb(c))  # the verbatim base: the decoder's hue darkened, white hatch
     fig, ax = plt.subplots(figsize=(6.0, 3.0))
     width = 0.26
     for i, (name, root) in enumerate(MAIN):
@@ -444,7 +446,7 @@ def decoders():
             assert len(f1[key]) == 3 * 4500
             x, v, e = i + (k - 1) * width, sum(f1[key]) / len(f1[key]), sum(em[key]) / len(em[key])
             ax.bar(x, v, width * 0.92, color=color)
-            ax.bar(x, e, width * 0.92, color=color, hatch="////", edgecolor=INK, linewidth=0)
+            ax.bar(x, e, width * 0.92, facecolor=dark(color), hatch="////", edgecolor="white", linewidth=0)
             ax.annotate(f"{v:.2f}", (x, v), xytext=(0, 2), textcoords="offset points", ha="center", fontsize=8, color=INK)
             if e >= 0.04:
                 ax.annotate(f"{e:.2f}", (x, e), xytext=(0, 3), textcoords="offset points", ha="center", va="bottom", fontsize=7.5,
@@ -457,7 +459,7 @@ def decoders():
     ax.grid(axis="y")
     ax.set_axisbelow(True)
     handles = [Patch(color=c, label=f"{l} decoder") for l, _, c in series]
-    handles.append(Patch(facecolor="white", hatch="////", edgecolor=INK, linewidth=0, label="share decoded verbatim (exact match)"))
+    handles.append(Patch(facecolor=INK2, hatch="////", edgecolor="white", linewidth=0, label="share decoded verbatim (exact match)"))
     ax.legend(handles=handles, loc="upper right", fontsize=7.5)
     fig.tight_layout()
     save(fig, "ch4/decoders")
