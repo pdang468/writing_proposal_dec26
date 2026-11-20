@@ -12,7 +12,7 @@ Four resources are available to the adversary.
 \item \textbf{Two unpaired pools.} The first pool holds hidden states of the target model for prompts of the domain under attack, without their text.
 The second holds hub outputs of OLMo for different prompts of the same domain.
 \item \textbf{A leak.} A small set of short text spans for which the adversary holds both the text and the target model's hidden states.
-The standard leak holds \vf{90} rows, the first \vf{9} rows of each of \vf{10} prompts, and the adversary holds nothing else of those prompts.
+The standard leak holds \vf{90} rows, the first \vf{9} rows of each of \vf{10} prompts, and the adversary holds no other text of those prompts.
 \item \textbf{The tokenizer of the target model}, applied to the leaked spans only.
 \end{itemize}
 

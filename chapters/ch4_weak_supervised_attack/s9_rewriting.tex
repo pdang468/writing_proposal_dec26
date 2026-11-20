@@ -11,7 +11,7 @@ On the two legal datasets the instruction says ``SEC filing excerpt'' in place o
 The language model receives no hidden state and no part of the true prompt.
 The results are reported on \vf{450} selection prompts that played no part in choosing the instruction. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
 
-\paragraph{Score.} The language model adds capital letters and punctuation that the prompts lack.
+\paragraph{Score.} The language model can change capital letters and punctuation.
 Word-F1 in this section is therefore computed on lower-cased words without edge punctuation, for the decoders and for the rewrites alike.
 Under the word-F1 of the other sections, the added marks alone lower the rewrite on NQ by \vf{0.12}. % src: results/v7_2/main/framework/attacker/rewriting-best-decoder.json metrics.strict.mean vs metrics.folded.mean, rewrite of three (0.7771, 0.9000)
 
@@ -38,12 +38,12 @@ Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompt
 \paragraph{Examples.} Two legal10w prompts show what the second round does (Table~\ref{tab:attack:rewriting-examples}).
 In the first, each decoder loses different words, and the rewrite keeps the words on which two decoders agree.
 Word-F1 rises from \vf{0.57} for SmolLM alone to \vf{0.90}.
-In the second, the rewrite takes the first word from Qwen, and it keeps a wrong date because two decoders agree on that date.
+In the second, the rewrite takes the first word from Qwen, and it keeps the wrong day \emph{19}, on which two decoders agree, with the wrong year of SmolLM.
 Agreement between decoders therefore corrects an error of one decoder and preserves an error that two share.
-Over the \vf{450} prompts, rewriting raises word-F1 on \vf{52} percent, leaves \vf{34} percent unchanged, and lowers \vf{14} percent. % src: legal10w cache and endpoint decoding, per-prompt gain of the rewrite of three over SmolLM alone (0.518, 0.338, 0.144)
+Over the \vf{450} prompts, rewriting raises word-F1 on \vf{51} percent, leaves \vf{34} percent unchanged, and lowers \vf{14} percent. % src: legal10w cache and endpoint decoding, per-prompt gain of the rewrite of three over SmolLM alone (231, 154, 65 of 450 prompts: 0.513, 0.342, 0.144; differences below 1e-9 count as unchanged)
 
 \begin{table}[H]
-\caption{The rewrite keeps the words on which the reconstructions agree, including a wrong date that two decoders share.
+\caption{The rewrite keeps the words on which the reconstructions agree, including a wrong day that two decoders share.
 Two legal10w prompts at the \vf{95}th and \vf{75}th percentile of the improvement over SmolLM alone, with the three reconstructions of round 1 and the rewrite of round 2.
 Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:attack:rewriting-examples}

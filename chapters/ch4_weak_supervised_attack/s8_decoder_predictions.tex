@@ -1,8 +1,8 @@
 \section{The Training Objective and the Decoder's Predictions}\label{sec:attack:teacher}
 
-Both terms of the objective in Equation~\ref{eq:attack:loss} pull mapped states toward hub outputs.
+Both terms of the objective in Equation~\ref{eq:attack:loss} compare mapped states with hub outputs.
 Those mapped states then form the soft prompt of a frozen decoder, and the decoder reconstructs the prompt one token at a time.
-The objective therefore rewards closeness to hub outputs, while reconstruction depends on what the decoder predicts from the soft prompt.
+The objective therefore rewards agreement with hub outputs, while reconstruction depends on what the decoder predicts from the soft prompt.
 This section measures those predictions directly.
 
 The measurement runs each decoder under teacher forcing.

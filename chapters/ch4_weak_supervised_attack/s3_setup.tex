@@ -18,8 +18,8 @@ The score is word-F1, averaged over prompts and over the three decoders, and wor
 Exact match and decoded examples accompany word-F1 to separate word overlap from full recovery. 
 
 \paragraph{Control and hub reference.} The mismatched-prompt control gives each decoder the mapped states of another prompt and scores the output against the original prompt.
-The hub reference is the word-F1 of the three decoders on the hub outputs of OLMo, with no map involved, \vf{0.947} on NQ and \vf{0.982} on each legal dataset. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/hub-dev-eval-m32.json olmo_source_mean.hub (0.9468, 0.9821, 0.9821), 500 selection prompts, generation cap rows+32
-Under the control, the same hub outputs score \vf{0.121} on NQ, \vf{0.069} on legal10w, and \vf{0.148} on legal100t. % src: same files, olmo_source_mean.wrong (0.1212, 0.0694, 0.1484), 500 selection prompts
+The hub reference is the word-F1 of the three decoders on the hub outputs of OLMo, with no map involved: \vf{0.947} on NQ and \vf{0.982} on each legal dataset, measured on the \vf{500} selection prompts. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/hub-dev-eval-m32.json olmo_source_mean.hub (0.9468, 0.9821, 0.9821), 500 selection prompts, generation cap rows+32
+When each decoder instead receives the hub outputs of another prompt, the same control scores \vf{0.121} on NQ, \vf{0.069} on legal10w, and \vf{0.148} on legal100t. % src: same files, olmo_source_mean.wrong (0.1212, 0.0694, 0.1484), 500 selection prompts
 
 \paragraph{Settings.} The hybrid fit has three settings, the supervision fraction $\alpha$, the temperature $\tau$, and the batch size $B$ of the matching term.
 The \vf{5{,}000} validation prompts of a dataset are divided into two sets.

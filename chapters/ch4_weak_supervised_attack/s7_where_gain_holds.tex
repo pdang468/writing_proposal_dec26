@@ -6,13 +6,13 @@ They vary the presence of the leak and its composition.
 \subsection{Matching without a leak}\label{sec:attack:blind}
 
 Matching alone, without any leaked row, yields little word-F1 beyond the mismatched-prompt controls.
-On NQ, the blind maps tested score at most \vf{0.153} word-F1, and none exceeds its mismatched-prompt control by more than \vf{0.025} (interval \vf{0.019} to \vf{0.030}). % src: results/v7_2/main/gw.json (highest blind word-F1 0.1528, control 0.1414); results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304]); also results/v7/main-different_text-pythia/results.json and results/v7_2/main/mixed-v7_9-s1.json (alpha 0 cells)
+On NQ, the blind maps tested score at most \vf{0.153} word-F1, and none exceeds its mismatched-prompt control by more than \vf{0.025}. % src: results/v7_2/main/gw.json (highest blind word-F1 0.1528, control 0.1414); results/v7_2/main/neighbourhood.json seeds.1.comparison.factorial (0.0801, 0.0555, +0.0247 [0.0187, 0.0304]); also results/v7/main-different_text-pythia/results.json and results/v7_2/main/mixed-v7_9-s1.json (alpha 0 cells)
 These margins remain small compared with the gain from matching on a small leak.
 The result covers \vf{22} blind maps, one target model, and one dataset, and it does not show that no unpaired method can connect a target model. % src: 9 + 1 + 6 + 6 maps in the four files above
 
 \subsection{Composition of the leak}\label{sec:attack:leak}
 
-On legal100t, a leak of \vf{90} rows yields a higher word-F1 when it is spread over more prompts, and the gain from matching stays near \vf{0.21} however the rows are spread (Figure~\ref{fig:attack:shape}).
+On legal100t, a leak of \vf{90} rows yields a higher word-F1 when it is spread over more prompts, and the gain from matching stays near \vf{0.21} on the three leaks tested (Figure~\ref{fig:attack:shape}).
 Three leaks take \vf{90} rows from \vf{2} prompts, \vf{9} rows from each of \vf{10} prompts, and \vf{1} row from each of \vf{90} prompts; only legal100t has prompts long enough for the first.
 On the three leaks, the supervised fit scores \vf{0.049}, \vf{0.094}, and \vf{0.108}, and the hybrid fit scores \vf{0.255}, \vf{0.299}, and \vf{0.328}. % src: results/legal128w/v7_2/main/mixed-w46-std-L90-composition.json seeds.1.cells (L90-random 0.3284, L90-prefix 0.2546; supervised 0.1084, 0.0487); mixed-w46-std.json seeds.1.cells (L90-span9 0.2993; supervised 0.0938)
 

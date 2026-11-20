@@ -177,7 +177,6 @@ def standard():
             x = i + (k - 0.5) * width
             mean = sum(vals) / 3
             ax.bar(x, mean, width * 0.92, color=color, label=label if i == 0 else None)
-            ax.scatter([x] * 3, vals, s=9, color=INK, zorder=3, linewidths=0)
             ax.annotate(f"{mean:.2f}", (x, max(vals)), xytext=(0, 5), textcoords="offset points",
                         ha="center", fontsize=8, color=INK)
             print(name, label, round(mean, 4), [round(v, 4) for v in vals])
