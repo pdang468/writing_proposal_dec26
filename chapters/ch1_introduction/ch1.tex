@@ -54,7 +54,7 @@ Reconstruction is also partial: exact match under the hybrid fit is \vf{0.21} on
 \begin{itemize}
 \item \textbf{A translation hub for cross-model inversion.} One shared space holds the prompt information of three open-weight models, and each frozen model reconstructs prompts from the hidden states of the others.
 \item \textbf{An inversion attack without the target model.} An adversary with no weights of the target model and no query access reconstructs prompts through one affine map, trained on a leak of \vf{90} rows and on unpaired hidden states.
-\item \textbf{A measurement of what unpaired matching adds.} At the same leak, the matching term raises word-F1 on all three datasets; the gain is largest at leaks of \vf{45} to \vf{90} rows and shrinks as the leak grows, and matching without a leak fails in the tested NQ setting.
+\item \textbf{A measurement of what unpaired matching adds.} At a leak of \vf{90} rows, the matching term raises word-F1 on all three datasets; the gain is largest at leaks of \vf{45} to \vf{90} rows and small at \vf{9} and \vf{900} rows, and matching without a leak fails in the tested NQ setting.
 \end{itemize}
 These results are a first measurement, not a general break of split inference: the evidence covers one target model observed at one block, the settings of the attack were selected on prompts with known text outside the leak, and no defended system is evaluated.
 

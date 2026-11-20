@@ -3,7 +3,7 @@
 Unpaired matching raises reconstruction word-F1 on all three datasets (Figure~\ref{fig:attack:standard}).
 With a leak of \vf{90} rows, word-F1 on the \vf{4{,}500} evaluation prompts of NQ rises from \vf{0.354} under the supervised fit to \vf{0.766} under the hybrid fit, a gain of \vf{0.411}.
 The gains on legal10w and legal100t are \vf{0.407} and \vf{0.219}, the smallest on the dataset of long prompts.
-Both fits receive the same leak, and only the hybrid fit reads the two unpaired pools.
+Both fits receive the same leak, and only the hybrid fit trains on the two unpaired pools; both fits share the mean and the scale computed from those pools.
 
 
 \begin{figure}[ht]

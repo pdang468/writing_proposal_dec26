@@ -113,7 +113,7 @@ def architecture():
         arrow(bar_x + bar_w, 19, 69, y)
         arrow(82, y, 86, y)
     ax.text(8.5, 38, "hidden state $s_t$", ha="center", fontsize=7.5, color=INK2)
-    ax.text(93, 38, "memory rows", ha="center", fontsize=7.5, color=INK2)
+    ax.text(93, 38, "soft prompt", ha="center", fontsize=7.5, color=INK2)
     fig.subplots_adjust(0.01, 0.02, 0.99, 0.98)
     save(fig, "hub_architecture")
 

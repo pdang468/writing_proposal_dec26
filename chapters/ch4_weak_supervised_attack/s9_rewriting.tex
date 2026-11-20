@@ -16,7 +16,7 @@ Word-F1 in this section is therefore computed on lower-cased words without edge 
 Under the word-F1 of the other sections, the added marks alone lower the rewrite on NQ by \vf{0.12}.
 
 \paragraph{Result.} The baseline is the best single decoder, SmolLM, since an adversary would keep the best reconstruction it holds.
-Rewriting the three reconstructions exceeds SmolLM alone on the two legal datasets and matches it on NQ (Figure~\ref{fig:attack:rewriting}).
+Rewriting the three reconstructions exceeds SmolLM alone on the two legal datasets and adds \vf{0.008} on NQ (Figure~\ref{fig:attack:rewriting}).
 On legal100t, word-F1 rises from \vf{0.429} to \vf{0.546}, an improvement of \vf{0.117} with a \vf{95} percent interval of \vf{0.101} to \vf{0.133} from a paired bootstrap over prompts.
 On legal10w, word-F1 rises from \vf{0.684} to \vf{0.745}, an improvement of \vf{0.061} with an interval of \vf{0.048} to \vf{0.074}.
 On NQ, SmolLM alone already scores \vf{0.892}, and the improvement is \vf{0.008} with an interval of \vf{0.001} to \vf{0.017}.
@@ -29,7 +29,7 @@ Under the mismatched-prompt control, rewriting adds at most \vf{0.021}, so the i
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.85\textwidth]{ch4/rewriting}
-\caption{Rewriting all three reconstructions exceeds the best single decoder by \vf{0.12} word-F1 on legal100t and by \vf{0.06} on legal10w, and matches it on NQ.
+\caption{Rewriting all three reconstructions exceeds the best single decoder by \vf{0.12} word-F1 on legal100t and by \vf{0.06} on legal10w, and by \vf{0.01} on NQ.
 The number above each group is the improvement of the rewrite of all three reconstructions over SmolLM alone.
 Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompts, hybrid fit of the main comparison at the \vf{90}-row leak, rewriting by Claude Haiku~\vf{5.5}.}
 \label{fig:attack:rewriting}
@@ -74,7 +74,7 @@ The prompt is a certification of \vf{63} words.
 SmolLM repeats one clause until the length limit, OLMo scores \vf{0.31}, and Qwen follows the prompt to its end with wrong numbers.
 The rewrite removes the repetition and continues with the text of Qwen where SmolLM breaks off, and word-F1 rises from \vf{0.63} for SmolLM alone to \vf{0.96}.
 The rewrite also restores the section number \emph{906}, the year \emph{2002}, and the reference \emph{15(d)}, which appear in none of the three reconstructions.
-The language model supplies those three from its own knowledge of the statute, and it keeps the wrong month of Qwen.
+Those three are consistent with the language model's own knowledge of the statute, and the rewrite keeps the wrong month of Qwen.
 Over the \vf{450} legal100t prompts, rewriting raises word-F1 on \vf{75} percent, leaves \vf{8} percent unchanged, and lowers \vf{16} percent.
 
 \begin{table}[H]
