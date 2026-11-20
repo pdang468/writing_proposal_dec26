@@ -32,9 +32,9 @@ legal100t & \vf{0.102} & \vf{0.321} & \vf{$+0.219$} \\ % src: results/legal128w/
 % \label{fig:attack:standard}
 % \end{figure}
 
-\paragraph{Control and reference.} The hybrid scores depend on the prompt's own hidden states and remain below the hub references of Section~\ref{sec:attack:experiments}.
+\paragraph{Control.} The hybrid scores depend on the prompt's own hidden states.
 On the selection prompts, the hybrid fit scores \vf{0.768} against its mismatched-prompt control of \vf{0.108} on NQ, \vf{0.604} against \vf{0.074} on legal10w, and \vf{0.299} against \vf{0.073} on legal100t. % src: mixed-w46-std.json of each dataset, seeds.1.cells.*.final.macro_f1 and wrong_memory.macro_f1 (NQ 0.7679, 0.1081; legal10w 0.6040, 0.0739; legal128w 0.2993, 0.0725)
-On legal100t the supervised fit, at \vf{0.094}, is close to its control of \vf{0.059}, so \vf{90} rows alone yield little beyond the control. % src: results/legal128w/v7_2/main/mixed-w46-std.json seeds.1.cells (0.0938, 0.0594)
+The supervised fit on legal100t, at \vf{0.094}, is close to its control of \vf{0.059}, so \vf{90} rows alone yield little beyond the control. % src: results/legal128w/v7_2/main/mixed-w46-std.json seeds.1.cells (0.0938, 0.0594)
 
 \paragraph{Exact match and decoders.} On the evaluation prompts, exact match distinguishes the word-overlap gain from full-prompt recovery.
 Under the hybrid fit, exact match is \vf{0.21} on NQ and \vf{0.02} on legal10w, against zero under the supervised fit, and it rounds to zero on legal100t. % src: computed from results/{v7_2,legal128w/v7_2}/main/mixed-v7_9/confirmation/*/decoding.jsonl, field exact_match, three decoders and three seeds (NQ hybrid 0.2121: SmolLM 0.4153, OLMo 0.1676, Qwen 0.0534; supervised 0.0001; legal128w hybrid: SmolLM 0.0001, OLMo 0, Qwen 0)
