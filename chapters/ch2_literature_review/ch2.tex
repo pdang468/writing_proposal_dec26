@@ -27,8 +27,6 @@ Luo et al.~\cite{luo2025prompt} submit text to the model, collect the hidden sta
 With unlimited queries and auxiliary data, their attacks exceed a token reconstruction accuracy of 90 percent; with a limited query budget and no auxiliary data, the accuracy is typically above 50 percent.
 The generation attack of Dong et al.~\cite{dong2025depth} likewise trains a sequence-to-sequence inverter on queried pairs of text and hidden states.
 In both attacks the model remains callable, and the queries supply the paired examples.
-A preprint by Cunningham~\cite{cunningham2026privacy} trains a small classifier directly on about 880 pairs of hidden state and token from Mistral 7B and recovers about 59 percent of the tokens after two layers and about 35 percent after eight, on a test set of 221 pairs.
-That classifier reads each hidden state alone and is evaluated without unpaired matching.
 
 \section{Inversion of Pooled Text Embeddings}\label{sec:lit:pooled}
 
