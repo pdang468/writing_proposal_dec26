@@ -64,8 +64,9 @@ Reconstructions through the SmolLM decoder for three NQ evaluation prompts, chos
 Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:attack:examples}
 \centering
-\small
-\begin{tabular}{@{}p{0.16\textwidth}p{0.66\textwidth}r@{}}
+\ssp\small % single-spaced inside the table, so a wrapped line stays with its row
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.68\textwidth}r@{}}
 \toprule
  & & Word-F1 \\
 \midrule

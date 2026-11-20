@@ -25,8 +25,9 @@ Reconstructions from OLMo $\to$ Qwen on NQ validation prompts, selected at high,
 Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:hub:examples}
 \centering
-\small
-\begin{tabular}{@{}p{0.20\textwidth}p{0.62\textwidth}r@{}}
+\ssp\small % single-spaced inside the table, so a wrapped line stays with its row
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.61\textwidth}r@{}}
 \toprule
  & & Word-F1 \\
 \midrule

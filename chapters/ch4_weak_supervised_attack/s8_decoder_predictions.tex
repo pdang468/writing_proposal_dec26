@@ -1,21 +1,24 @@
 \section{The Training Objective and the Decoder's Predictions}\label{sec:attack:teacher}
 
 Both terms of the objective in Equation~\ref{eq:attack:loss} pull mapped states toward hub outputs.
-The mapped states then form the soft prompt of a frozen decoder, and the decoder reconstructs the prompt one token at a time.
-The objective therefore measures agreement with hub outputs, while reconstruction depends on the decoder's predictions.
+Those mapped states then form the soft prompt of a frozen decoder, and the decoder reconstructs the prompt one token at a time.
+The objective therefore rewards closeness to hub outputs, while reconstruction depends on what the decoder predicts from the soft prompt.
+This section measures those predictions directly.
 
-To examine the correlation between mapped states and predictions, each decoder runs under teacher forcing.
-The decoder receives the true previous tokens and predicts the next token.
-Cross-entropy scores that prediction, and a lower value means a better prediction of the true token.
+The measurement runs each decoder under teacher forcing.
+The decoder receives the soft prompt and the true previous tokens, and it predicts the next token.
+Cross-entropy scores that prediction against the true token, and a lower value means a better prediction.
 
-Two metrics compare a mapped run with a reference run.
+Three runs differ only in the soft prompt.
 In the reference run, the soft prompt comes from the hub outputs of OLMo.
-In a mapped run, the soft prompt comes from the mapped states of the target model, under the supervised fit or the hybrid fit.
-The excess cross-entropy is the cross-entropy of the mapped run minus that of the reference run.
-The KL divergence from the reference run to the mapped run compares the two next-token distributions over all candidate tokens, not only the true one.
+In a mapped run, it comes from the mapped states of the target model, under the supervised fit or the hybrid fit.
+In the unconditional baseline, the decoder receives no soft prompt and acts as a plain language model. % src: teacher_forced_run.py (arm no_memory: empty prefix, start token then true tokens)
+
+Two metrics compare a run with the reference run.
+The excess cross-entropy is the cross-entropy of the run minus that of the reference run, so the reference run itself has an excess of zero.
+The KL divergence from the reference run to the run compares their next-token distributions over all candidate tokens, not only the true one.
 Both metrics are averaged over content words, the words outside a stop-word list. % src: teacher_forced_run.py (lines 62-68: -logp at the true token; KL(reference || mapped) = sum q (log q - log p)); teacher_forced_summary.py (lines 82-136: per-word sums, content words, pooling over prompts, decoders, seeds)
-A third run sets the scale for both metrics.
-In the unconditional baseline, the decoder has no soft prompt and acts as a plain language model, so its score marks the level that a soft prompt must beat. % src: teacher_forced_run.py (arm no_memory: empty prefix, start token then true tokens)
+The excess of the unconditional baseline marks the level that a soft prompt must beat: a fit above that level predicts the true tokens worse than no soft prompt.
 
 \begin{figure}[!htb]
 \centering
@@ -27,11 +30,12 @@ Hybrid fit of the main comparison ($\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$).}
 \end{figure}
 
 \paragraph{Matching lowers the excess cross-entropy.} At the \vf{90}-row leak, the hybrid fit has the lower excess cross-entropy on all three datasets (Figure~\ref{fig:attack:ce}).
-The excess falls from \vf{7.73} nats per content word under the supervised fit to \vf{1.36} on NQ, from \vf{10.41} to \vf{3.35} on legal10w, and from \vf{5.58} to \vf{5.11} on legal100t. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/framework/teacher_forced-w46/summary.json arms.{b90-a1-r1-L90-span9, b90-a0.9-sq-m0-t*-r1-B8192-L90-span9}.classes.content.excess_per_word (7.7341, 1.3621; 10.4136, 3.3521; 5.5825, 5.1133), 500 selection prompts, three fits pooled
+The excess falls from \vf{7.73} nats per content word under the supervised fit to \vf{1.36} under the hybrid fit on NQ, from \vf{10.41} to \vf{3.35} on legal10w, and from \vf{5.58} to \vf{5.11} on legal100t. % src: results/{v7_2,legal10w/v7_2,legal128w/v7_2}/main/framework/teacher_forced-w46/summary.json arms.{b90-a1-r1-L90-span9, b90-a0.9-sq-m0-t*-r1-B8192-L90-span9}.classes.content.excess_per_word (7.7341, 1.3621; 10.4136, 3.3521; 5.5825, 5.1133), 500 selection prompts, three fits pooled
 The KL divergence gives the same order, with a fall from \vf{7.48} to \vf{1.36} on NQ, from \vf{10.35} to \vf{3.35} on legal10w, and from \vf{5.56} to \vf{5.10} on legal100t. % src: same files, kl_per_word (7.482, 1.362; 10.351, 3.349; 5.564, 5.101)
 The unconditional baseline separates the two fits.
-The supervised fit is above the baseline on every dataset, so its soft prompt predicts the true tokens worse than no soft prompt. % src: same files, arms.no_memory (6.0751, 9.5643, 5.2908)
-The hybrid fit is below the baseline on every dataset, by a wide margin on NQ and legal10w and by \vf{0.18} nats on legal100t.
+Its excess is \vf{6.08} nats on NQ, \vf{9.56} on legal10w, and \vf{5.29} on legal100t. % src: same files, arms.no_memory (6.0751, 9.5643, 5.2908)
+The supervised fit is above that level on every dataset, so its soft prompt predicts the true tokens worse than no soft prompt.
+The hybrid fit is below that level on every dataset, by \vf{4.71} nats on NQ, \vf{6.21} on legal10w, and \vf{0.18} on legal100t.
 The matching term therefore improves the decoder's next-token predictions on every dataset, and least on legal100t, where word-F1 is also lowest.
 
 

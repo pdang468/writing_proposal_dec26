@@ -48,8 +48,9 @@ Two legal10w prompts at the \vf{95}th and \vf{75}th percentile of the improvemen
 Decoded words that match the true prompt are green; the others are orange and bold.}
 \label{tab:attack:rewriting-examples}
 \centering
-\small
-\begin{tabular}{@{}p{0.13\textwidth}p{0.69\textwidth}r@{}}
+\ssp\small % single-spaced inside the table, so a wrapped line stays with its row
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.69\textwidth}r@{}}
 \toprule
  & & Word-F1 \\
 \midrule
