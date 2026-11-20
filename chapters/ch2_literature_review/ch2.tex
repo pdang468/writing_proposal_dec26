@@ -74,7 +74,12 @@ The matching term of Chapter~\ref{ch:attack} has neither the adversarial objecti
 \section{Defenses}\label{sec:lit:defense}
 
 Defenses for split inference change what the server receives.
+%% BIG CHANGE: noise family and NOIR added
+One family adds noise on the client under metric differential privacy~\cite{chatzikokolakis2013broadening}.
+Feyisetan et al.~\cite{feyisetan2020privacy}, Qu et al.~\cite{qu2021natural}, and Li et al.~\cite{li2023privacy} inject noise into the token embeddings of a prompt and replace each token with a randomized one. % src: NOIR (arXiv 2601.16354) Sec. 2 summary; the three originals not read
 Mai et al.~\cite{mai2024split} add noise to the client's token embeddings under local differential privacy and denoise the model's output on the client.
+Nguyen et al.~\cite{nguyen2026noir} report that noise drawn for every prompt degrades generation; NOIR instead randomizes the token embeddings of the vocabulary once, so that a token keeps one embedding across prompts, and hides the token indices behind a secret tokenizer on the client. % src: arXiv 2601.16354 Sec. 1, 2, 4.2, Table 1
+NOIR is evaluated against the embedding inversion of Morris et al.~\cite{morris2023text} and against BiSR~\cite{chen2024unveiling}, an attack on split fine-tuning that reconstructs the client's data from the transmitted activations and the returned gradients with the pre-trained weights as prior knowledge. % src: NOIR Sec. 4.1, 5.1; arXiv 2409.00960 abstract
 A second family hides the hidden states behind a secret permutation, as in PermLLM, STIP, and Centaur~\cite{zheng2024permllm,yuan2023secure,luo2025centaur}.
 Thomas et al.~\cite{thomas2025hidden} show that all three are insecure, since the matching of hidden states to vocabulary candidates can be made invariant to the permutation, and propose Cascade, which divides the token sequence among servers that must not collude.
 Dong et al.~\cite{dong2025depth} test four defenses, among them quantization and differential privacy, and report that none fully prevents their inversion.
