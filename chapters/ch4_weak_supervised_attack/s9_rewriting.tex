@@ -49,19 +49,21 @@ Decoded words that match the true prompt are green; the others are orange and bo
 \label{tab:attack:rewriting-examples}
 \centering
 \small
-\begin{tabular}{@{}p{0.24\textwidth}p{0.71\textwidth}@{}}
+\begin{tabular}{@{}p{0.13\textwidth}p{0.69\textwidth}r@{}}
 \toprule
-True prompt & Value greater than One Hundred Thousand Dollars (\$100,000), the portion \\
-SmolLM, word-F1 \vf{0.57} & \miss{Ibid equal} \hit{than One Hundred} \miss{Twenty-five Dollar Cents} \hit{(\$100,000), the portion} \\
-OLMo, word-F1 \vf{0.44} & \miss{by Less} \hit{than One Hundred Thousand} \miss{Dollar Dollar} \\
-Qwen, word-F1 \vf{0.80} & \miss{be} \hit{greater than One Hundred Thousand} \miss{Dollar} \hit{(\$100,000), the portion} \\
-Rewrite, word-F1 \vf{0.90} & \miss{be} \hit{greater than One Hundred Thousand Dollars (\$100,000), the portion} \\ % src: legal10w cache, law-atticus_contracts-00011586-w1167, gain percentile 95
+ & & Word-F1 \\
 \midrule
-True prompt & Real Property Account (the ''Account'') on August 27, 1986 by \\
-SmolLM, word-F1 \vf{0.70} & \miss{ye} \hit{Property Account (the Account) on August} \miss{19, 2012} \hit{by} \\
-OLMo, word-F1 \vf{0.56} & \miss{Food} \hit{Account (Account (the} \miss{Account)} \hit{on August} \miss{19,} \\
-Qwen, word-F1 \vf{0.80} & \hit{Real Property Account (The Account) on August} \miss{14, 1903} \hit{by} \\
-Rewrite, word-F1 \vf{0.80} & \hit{Real Property Account (the Account) on August} \miss{19, 2012} \hit{by} \\ % src: legal10w cache, law-edgar-00012496-w38, gain percentile 75
+True prompt & Value greater than One Hundred Thousand Dollars (\$100,000), the portion & \\
+SmolLM & \miss{Ibid equal} \hit{than One Hundred} \miss{Twenty-five Dollar Cents} \hit{(\$100,000), the portion} & \vf{0.57} \\
+OLMo & \miss{by Less} \hit{than One Hundred Thousand} \miss{Dollar Dollar} & \vf{0.44} \\
+Qwen & \miss{be} \hit{greater than One Hundred Thousand} \miss{Dollar} \hit{(\$100,000), the portion} & \vf{0.80} \\
+Rewrite & \miss{be} \hit{greater than One Hundred Thousand Dollars (\$100,000), the portion} & \vf{0.90} \\ % src: legal10w cache, law-atticus_contracts-00011586-w1167, gain percentile 95
+\midrule
+True prompt & Real Property Account (the ''Account'') on August 27, 1986 by & \\
+SmolLM & \miss{ye} \hit{Property Account (the Account) on August} \miss{19, 2012} \hit{by} & \vf{0.70} \\
+OLMo & \miss{Food} \hit{Account (Account (the} \miss{Account)} \hit{on August} \miss{19,} & \vf{0.56} \\
+Qwen & \hit{Real Property Account (The Account) on August} \miss{14, 1903} \hit{by} & \vf{0.80} \\
+Rewrite & \hit{Real Property Account (the Account) on August} \miss{19, 2012} \hit{by} & \vf{0.80} \\ % src: legal10w cache, law-edgar-00012496-w38, gain percentile 75
 \bottomrule
 \end{tabular}
 \end{table}

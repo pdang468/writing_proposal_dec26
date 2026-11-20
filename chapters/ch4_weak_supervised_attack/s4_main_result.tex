@@ -51,9 +51,12 @@ Exact match is at most \vf{0.03} on legal10w and rounds to zero on legal100t.} %
 \label{fig:attack:decoders}
 \end{figure}
 
-\paragraph{Decoded examples.} The hybrid fit recovers content words that the supervised fit loses, as three NQ evaluation prompts through the SmolLM decoder illustrate (Table~\ref{tab:attack:examples}).
-At a word-F1 of \vf{0.80} the hybrid fit changes one name, and at \vf{0.40} it keeps the question frame and loses the title.
-The supervised fit on the same leak keeps the question word and loses the content of all three prompts.
+\paragraph{Decoded examples.} The hybrid fit preserves content words that the supervised fit loses (Table~\ref{tab:attack:examples}).
+Three NQ evaluation prompts, decoded through SmolLM, span high, intermediate, and low word-F1 of the hybrid fit.
+The first prompt survives verbatim.
+In the second, at a word-F1 of \vf{0.80}, one name degrades, from \emph{sweet daddy} to \emph{sweetheart}.
+In the third, at \vf{0.40}, the opening \emph{who played} survives, while the name and the title of the show are lost.
+Under the supervised fit, on the same leak, the opening question words survive and the content words of all three prompts are lost.
 
 \begin{table}[H]
 \caption{With the same \vf{90} rows, the hybrid fit reconstructs content words that the supervised fit loses.
@@ -62,19 +65,21 @@ Decoded words that match the true prompt are green; the others are orange and bo
 \label{tab:attack:examples}
 \centering
 \small
-\begin{tabular}{@{}p{0.27\textwidth}p{0.68\textwidth}@{}}
+\begin{tabular}{@{}p{0.16\textwidth}p{0.66\textwidth}r@{}}
 \toprule
-True prompt & when did kindergarten start in the united states \\
-Hybrid fit, word-F1 \vf{1.00} & \hit{when did kindergarten start in the united states} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a0.9-sq-m0-t0.11522-r1-B8192-L90-span9/decoding.jsonl, nq-00000406, smollm
-Supervised fit, word-F1 \vf{0.47} & \hit{when did} \miss{semay faqum fell} \hit{in the} \miss{nile greece} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a1-r1-L90-span9/decoding.jsonl, nq-00000406, smollm
+ & & Word-F1 \\
 \midrule
-True prompt & who played sweet daddy williams on good times \\
-Hybrid fit, word-F1 \vf{0.80} & \hit{who played} \miss{sweetheart} \hit{williams on good times} \\ % src: same files, nq-00001253
-Supervised fit, word-F1 \vf{0.13} & \hit{who} \miss{sang sing choi will ton ghiam xo} \\
+True prompt & when did kindergarten start in the united states & \\
+Hybrid fit & \hit{when did kindergarten start in the united states} & \vf{1.00} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a0.9-sq-m0-t0.11522-r1-B8192-L90-span9/decoding.jsonl, nq-00000406, smollm
+Supervised fit & \hit{when did} \miss{semay faqum fell} \hit{in the} \miss{nile greece} & \vf{0.47} \\ % src: results/v7_2/main/mixed-v7_9/confirmation/b90-a1-r1-L90-span9/decoding.jsonl, nq-00000406, smollm
 \midrule
-True prompt & who played robin on once upon a time \\
-Hybrid fit, word-F1 \vf{0.40} & \hit{who played} \miss{roon} \hit{on} \miss{one after another} \\ % src: same files, nq-00020139
-Supervised fit, word-F1 \vf{0.12} & \hit{who} \miss{won homer in many times until he won} \\
+True prompt & who played sweet daddy williams on good times & \\
+Hybrid fit & \hit{who played} \miss{sweetheart} \hit{williams on good times} & \vf{0.80} \\ % src: same files, nq-00001253
+Supervised fit & \hit{who} \miss{sang sing choi will ton ghiam xo} & \vf{0.13} \\
+\midrule
+True prompt & who played robin on once upon a time & \\
+Hybrid fit & \hit{who played} \miss{roon} \hit{on} \miss{one after another} & \vf{0.40} \\ % src: same files, nq-00020139
+Supervised fit & \hit{who} \miss{won homer in many times until he won} & \vf{0.12} \\
 \bottomrule
 \end{tabular}
 \end{table}

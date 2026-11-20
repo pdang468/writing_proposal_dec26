@@ -26,19 +26,21 @@ Decoded words that match the true prompt are green; the others are orange and bo
 \label{tab:hub:examples}
 \centering
 \small
-\begin{tabular}{@{}p{0.27\textwidth}p{0.68\textwidth}@{}}
+\begin{tabular}{@{}p{0.20\textwidth}p{0.62\textwidth}r@{}}
 \toprule
-True prompt & who played uncle in only fools and horses \\
-Decoded, word-F1 \vf{1.00} & \hit{who played uncle in only fools and horses} \\
+ & & Word-F1 \\
 \midrule
-True prompt & who has sang most songs in the world \\
-Decoded, word-F1 \vf{0.88} & \hit{who has} \miss{sung} \hit{most songs in the world} \\
+True prompt & who played uncle in only fools and horses & \\
+Decoded & \hit{who played uncle in only fools and horses} & \vf{1.00} \\
 \midrule
-True prompt & is floral park in queens or long island \\
-Decoded, word-F1 \vf{0.50} & \hit{is} \miss{flower} \hit{park in} \miss{king} \hit{or} \miss{queen parks} \\
+True prompt & who has sang most songs in the world & \\
+Decoded & \hit{who has} \miss{sung} \hit{most songs in the world} & \vf{0.88} \\
 \midrule
-True prompt & who played uncle in only fools and horses \\
-Mismatched prompt, word-F1 \vf{0.25} & \hit{who} \miss{plays the girl jinx} \hit{in} \miss{suicide squad} \\
+True prompt & is floral park in queens or long island & \\
+Decoded & \hit{is} \miss{flower} \hit{park in} \miss{king} \hit{or} \miss{queen parks} & \vf{0.50} \\
+\midrule
+True prompt & who played uncle in only fools and horses & \\
+Mismatched prompt & \hit{who} \miss{plays the girl jinx} \hit{in} \miss{suicide squad} & \vf{0.25} \\
 \bottomrule
 \end{tabular}
 \end{table}
