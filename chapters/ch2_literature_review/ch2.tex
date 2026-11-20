@@ -89,10 +89,10 @@ The evaluations of Thomas et al. and Dong et al. assume an adversary that holds 
 
 \section{Position of the Dissertation}\label{sec:lit:position}
 
-Table~\ref{tab:lit:position} summarizes the access that each group of attacks assumes.
+Table~\ref{tab:lit:position} summarizes the access that each group of attacks assumes and what each attack trains for the target.
 The attacks on language models listed in the table fall into two groups.
-In the first, the adversary holds or queries the model that produced the per-token hidden states.
-In the second, the attacks act on pooled sentence embeddings, with queries to the encoder or, through alignment, without them.
+In the first, the attacks act on pooled sentence embeddings, with queries to the encoder or, through alignment, without them.
+In the second, the adversary holds or queries the model that produced the per-token hidden states.
 
 \begin{table}[ht]
 \caption{The listed attacks hold or query the target model, or act on pooled embeddings; the dissertation fits a map from per-token hidden states without the target model's weights and without queries.
@@ -100,24 +100,31 @@ The settings of the dissertation's attack were selected on additional prompts wi
 \label{tab:lit:position}
 \centering
 \ssp\small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}lcc>{\raggedright\arraybackslash}p{0.22\textwidth}@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.27\textwidth}cc>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}@{}}
 \toprule
-Attack & Representation & Weights & Queries & Paired examples \\
+Attack & Weights & Queries & Leaked pairs & Trained for the target \\
 \midrule
-Qu, Thomas, Nikolaou et al.~\cite{qu2025prompt,thomas2025hidden,nikolaou2026language} & per token & yes & no & none \\
-Luo, Dong et al.~\cite{luo2025prompt,dong2025depth} & per token & no & yes & from queries \\
-Morris et al.~\cite{morris2023text} & pooled & no & yes & from queries \\
-Huang et al.~\cite{huang2024transferable} & pooled & no & no & 8,000 leaked \\
-Chen et al.~\cite{chen2025algen} & pooled & no & no & 1 to 8,000 leaked \\
-Jha et al.~\cite{jha2025harnessing} & pooled & no & no & none \\
-This dissertation & per token & no & no & \vf{90} leaked rows \\
+\multicolumn{5}{@{}l}{\textit{Pooled sentence embeddings, one vector per text}} \\
+Morris et al.~\cite{morris2023text} & no & yes & from queries & inverter \\
+Huang et al.~\cite{huang2024transferable} & no & no & 8,000 & surrogate encoder and inverter \\
+Chen et al.~\cite{chen2025algen} & no & no & 1 to 8,000 & linear map \\
+Jha et al.~\cite{jha2025harnessing} & no & no & none & adapters under adversarial training \\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Per-token hidden states, the quantity a split inference client transmits}} \\
+Qu, Thomas, Nikolaou et al.~\cite{qu2025prompt,thomas2025hidden,nikolaou2026language} & yes & no & none & nothing; search per prompt \\
+Luo, Dong et al.~\cite{luo2025prompt,dong2025depth} & no & yes & from queries & inverter \\
+This dissertation & no & no & \vf{90} rows & one affine map \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 To the author's knowledge, prior work has not evaluated query-free prompt reconstruction from per-token hidden states of a language model by fitting a map on a counted leak together with unpaired matching.
-Each part of that setting has precedent: per-token hidden states are inverted with weights or queries, sentence embeddings are inverted from a few leaked pairs, and embedding spaces are aligned without pairs.
-The dissertation combines them, and it measures what the unpaired matching adds to a fixed leak.
-Two qualifications bound the statement.
+%% BIG CHANGE: three differences stated; leak size and training cost added
+Three properties separate the attack from the alignment attacks on pooled embeddings.
+First, it acts on per-token hidden states, the quantity that a split inference client transmits, and not on one vector per text.
+Second, its leak is small: \vf{90} rows from \vf{10} prompts, about \vf{90} words on NQ, whereas Huang et al. train on 8,000 leaked texts and the scores of Chen et al. rise up to 1,000. % src: ch4 s1 (90 rows, 10 prompts); Sec. 2.3 above
+Third, it is lightweight: the attack trains one affine map and leaves the hub and its decoders frozen, whereas Huang et al. train a surrogate encoder and an inverter, and Jha et al. train adapters under adversarial and cycle-consistency losses. % src: ch4 s2
+Jha et al. need no pairs at all, yet their evaluation covers pooled embeddings only; the dissertation measures instead how far a counted leak carries reconstruction, and what unpaired matching adds to it.
+Two qualifications bound those statements.
 A row is a token group of a leaked text span, not an isolated pair of hidden state and token, and the settings of the attack were selected on prompts with known text outside the leak.
 The adversary of Chapter~\ref{ch:attack} also holds the hub trained on public models, the tokenizer of the target model, and unpaired data from the domain under attack.
