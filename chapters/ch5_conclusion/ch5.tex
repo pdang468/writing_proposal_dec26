@@ -18,9 +18,9 @@ That gain holds on both legal datasets as well.
 It depends on the size of the leak: it shrinks as the leak grows, and without a leak the matching term stays at the level of its control in the tested NQ setting.
 Unpaired matching thus extends a small leak and does not replace it.
 
-Three properties set the attack apart.
-It acts on per-token hidden states, the quantity that a split inference client transmits, without the weights of the target model and without queries.
-It needs little: a leak of \vf{90} rows, public models, and one affine map as the only trained module.
-It also measures what unpaired matching adds to a fixed leak, a question that prior alignment attacks leave open.
+Three properties distinguish the attack from prior work.
+First, it operates on per-token hidden states, the representation that a split inference client transmits, and it requires neither white-box nor query access to the target model.
+Second, it is lightweight: it requires a leak of \vf{90} rows, public models, and one affine map as the only trained module.
+Third, it quantifies what unpaired matching adds to a fixed leak, a question that prior alignment attacks leave open.
 Full recovery remains challenging, with an exact match of \vf{0.21} on NQ, and the evidence covers one undefended target model observed at one block; Chapter~\ref{ch:future} takes up both.
 The results therefore shift where the privacy of split inference rests: on what the representations of different models share, and not only on who holds the weights.
