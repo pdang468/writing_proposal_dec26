@@ -237,7 +237,7 @@ def cross_entropy():
     ]
     fig, ax = plt.subplots(figsize=(5.6, 2.9))
     width, step = 0.26, 1.0
-    series = (("unconditional baseline", "#b9b8b3"), ("supervised fit", SUPERVISED), ("hybrid fit", HYBRID))
+    series = (("language-model baseline", "#b9b8b3"), ("supervised fit", SUPERVISED), ("hybrid fit", HYBRID))
     for i, (name, rel, tau) in enumerate(panels):
         arms = load(rel)["arms"]
         get = lambda key: arms[key]["classes"]["content"]["excess_per_word"]
