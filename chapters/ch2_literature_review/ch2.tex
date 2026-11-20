@@ -51,7 +51,7 @@ Those attacks observe the output of the full model and no hidden state, so they 
 \section{Cross-Model Representation Alignment}\label{sec:lit:align}
 
 The attacks with weights and the attacks with queries require access that the adversary lacks when the client keeps its blocks private.
-Alignment offers another route: the adversary maps the representations of the unknown model into the space of a model it holds, and inverts there.
+Alignment offers another route: the adversary maps the representations of the target model into the space of a model it holds, and inverts there.
 
 \paragraph{Shared structure across models.} That route presumes that independently trained models produce related representations.
 Huh et al.~\cite{huh2024platonic} hypothesize that they do: as vision models and language models grow, they measure the distance between inputs in increasingly similar ways.
@@ -67,8 +67,8 @@ The attack of Chapter~\ref{ch:attack} follows the same pattern, a small paired s
 Its matching term adapts the approximate bijective correspondence loss of Murphy et al.~\cite{murphy2022abc}, which learns image representations from set membership, without paired correspondences.
 
 \paragraph{Alignment as an inversion attack.} Three recent attacks apply alignment to sentence embeddings and need no queries.
-Huang et al.~\cite{huang2024transferable} train a surrogate encoder to imitate the victim encoder from 8,000 leaked pairs of text and embedding, and train the inverter on the surrogate. % src: ACL 2024.acl-long.230 Sec. 4
-Chen et al.~\cite{chen2025algen} fit a linear map from the victim's embedding space to the adversary's from leaked pairs and decode with the adversary's own generator.
+Huang et al.~\cite{huang2024transferable} train a surrogate encoder to imitate the target encoder from 8,000 leaked pairs of text and embedding, and train the inverter on the surrogate. % src: ACL 2024.acl-long.230 Sec. 4
+Chen et al.~\cite{chen2025algen} fit a linear map from the target encoder's embedding space to the adversary's from leaked pairs and decode with the adversary's own generator.
 A single pair yields a ROUGE-L of about 10; the score rises sharply up to 1,000 pairs and changes little between 2,000 and 8,000. % src: ACL 2025.acl-long.1185 Sec. 5 and ablation
 Jha et al.~\cite{jha2025harnessing} remove the pairs entirely: adapters map the embeddings of each encoder into a shared space and are trained on unpaired embeddings with adversarial, reconstruction, cycle-consistency, and vector space preservation losses.
 The translated embeddings reach a cosine similarity of up to 0.92 with the true embeddings, and a zero-shot inverter~\cite{zhang2025universal} then extracts part of the text. % src: NeurIPS 2025 paper, results section (0.92); its introduction says 0.96

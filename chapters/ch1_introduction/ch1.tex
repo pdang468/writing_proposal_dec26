@@ -2,33 +2,34 @@
 \chapter{Introduction}\label{ch:intro}
 
 A client that sends its prompts to a language model in the cloud exposes their text to the service provider.
-Split inference partitions the model between the client and the server, so that the client transmits hidden states instead of the text of the prompt~\cite{he2019model,mai2024split,nguyen2026noir}.
+To keep that text on the client, split inference partitions the model between the client and the server~\cite{he2019model,mai2024split,nguyen2026noir}.
 The client runs the first blocks of the model on its own device and sends the server the hidden states that those blocks produce, one vector per token.
 The server runs the remaining blocks on those hidden states.
-In some designs the client also runs the last blocks, so that the server sees neither the prompt nor the generated text~\cite{nguyen2026noir}.
-The server therefore receives hidden states in place of tokens.
-In NOIR, the client also fine-tunes its blocks locally and keeps their updated weights private~\cite{nguyen2026noir}.
+In some designs the client also runs and fine-tunes the last blocks, so that the server sees neither the prompt nor the generated text~\cite{nguyen2026noir}.
+In each of these designs, the server receives hidden states in place of tokens.
 
-Hidden states are not text, yet each one is computed from the prompt.
-The absence of transmitted text therefore does not establish the absence of leakage.
-A server that is honest-but-curious follows the protocol and still tries to learn what the client wrote.
-Its attack is inversion: the reconstruction of a prompt from the hidden states that the prompt produced.
-The privacy of split inference rests on how difficult inversion is, and on what the adversary must hold to carry it out.
+However, what split inference protects depends on what the transmitted hidden states reveal.
+The server, which is also the adversary, is honest-but-curious: it follows the protocol and still tries to learn what the client wrote.
+By observing the hidden states, the server aims to reconstruct the prompt that produced them, an attack known as inversion.
+Thus, inversion poses a privacy risk to split inference, and that risk depends on how difficult inversion is and on what the adversary must hold to carry it out.
 
 \paragraph{Prior attacks.} Existing inversion attacks succeed when the adversary has access to the model that produced the hidden states.
 With the weights of that model, the adversary optimizes a candidate prompt until its hidden states match the observed ones, or tests vocabulary tokens one position at a time~\cite{qu2025prompt,dong2025depth,thomas2025hidden,nikolaou2026language}.
 With query access, the adversary submits its own text, collects the resulting hidden states, and trains an inverter on those pairs~\cite{luo2025prompt,dong2025depth}.
+
 A second line of work inverts sentence embeddings, one pooled vector per text, and again relies on queries to the encoder~\cite{song2020information,li2023sentence,morris2023text}.
-Recent attacks on sentence embeddings remove the queries: they align the embeddings of the unknown encoder with those of an encoder the adversary holds, from thousands of leaked pairs~\cite{huang2024transferable}, from a few~\cite{chen2025algen}, or from none~\cite{jha2025harnessing}.
+Recent attacks on sentence embeddings remove the queries: they align the embeddings of the target encoder with those of an encoder the adversary holds, from thousands of leaked pairs~\cite{huang2024transferable}, from a few~\cite{chen2025algen}, or from none~\cite{jha2025harnessing}.
 Those attacks apply to pooled vectors.
 To the author's knowledge, no attack of that kind has been evaluated on the per-token hidden states of a language model, the quantity that a split inference client transmits.
 
 \paragraph{Research question.} This dissertation studies an adversary with neither form of access: it holds no weights of the client's blocks and has no means to query them.
 The question is how much of a prompt such an adversary reconstructs from the hidden states alone, given a small leak of text.
-The approach draws on the Platonic Representation Hypothesis, which proposes that models trained on similar data converge toward similar representations~\cite{huh2024platonic}.
-If the hypothesis holds for language models, a simple map may relate the hidden states of an unknown model to those of public models.
-An adversary could then build an inverter entirely from public models and connect the unknown model to it afterwards.
-Similar representations do not by themselves expose a prompt: similarity of meaning does not distinguish two prompts that differ in a name, a date, or a negation.
+Because prior attacks rest on access, it is tempting to conclude that a client that keeps its blocks private also keeps its prompts private.
+Yet the Platonic Representation Hypothesis proposes that models trained on similar data converge toward similar representations~\cite{huh2024platonic}.
+The approach draws on that hypothesis: if it holds for language models, a simple map may relate the hidden states of a target model to those of public models.
+An adversary could then build an inverter entirely from public models and connect the target model to it afterwards.
+%% BIG CHANGE: second half reworded
+Similar representations do not by themselves expose a prompt: a map can preserve the meaning of a prompt and still lose its exact words, such as a name, a date, or a negation.
 Prompt reconstruction is therefore a direct test of what survives the map between models.
 The dissertation argues that representations shared across models support inversion across models, and that unpaired matching improves reconstruction when a small leak supplies the correspondences.
 
