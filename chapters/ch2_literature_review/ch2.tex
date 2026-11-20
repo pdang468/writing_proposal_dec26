@@ -119,12 +119,14 @@ This dissertation & no & no & \vf{90} rows & one affine map \\
 \end{table}
 
 To the author's knowledge, prior work has not evaluated query-free prompt reconstruction from per-token hidden states of a language model by fitting a map on a counted leak together with unpaired matching.
-%% BIG CHANGE: three differences stated; leak size and training cost added
+
 Three properties separate the attack from the alignment attacks on pooled embeddings.
 First, it acts on per-token hidden states, the quantity that a split inference client transmits, and not on one vector per text.
 Second, its leak is small: \vf{90} rows from \vf{10} prompts, about \vf{90} words on NQ, whereas Huang et al. train on 8,000 leaked texts and the scores of Chen et al. rise up to 1,000. % src: ch4 s1 (90 rows, 10 prompts); Sec. 2.3 above
 Third, it is lightweight: the attack trains one affine map and leaves the hub and its decoders frozen, whereas Huang et al. train a surrogate encoder and an inverter, and Jha et al. train adapters under adversarial and cycle-consistency losses. % src: ch4 s2
-Jha et al. need no pairs at all, yet their evaluation covers pooled embeddings only; the dissertation measures instead how far a counted leak carries reconstruction, and what unpaired matching adds to it.
-Two qualifications bound those statements.
-A row is a token group of a leaked text span, not an isolated pair of hidden state and token, and the settings of the attack were selected on prompts with known text outside the leak.
-The adversary of Chapter~\ref{ch:attack} also holds the hub trained on public models, the tokenizer of the target model, and unpaired data from the domain under attack.
+Jha et al. need no pairs at all, but they evaluate pooled embeddings only.
+The dissertation asks a different question: how much of a prompt a leak of \vf{90} rows reconstructs from per-token hidden states, and how much unpaired matching adds to that leak.
+Three qualifications bound the comparison.
+First, a row is a token group of a leaked text span, not an isolated pair of hidden state and token.
+Second, the settings of the attack were selected on additional prompts with known text, so the \vf{90} rows are not the only text behind the result.
+Third, the adversary of Chapter~\ref{ch:attack} also holds the hub trained on public models, the tokenizer of the target model, and unpaired data from the domain under attack.
