@@ -44,7 +44,6 @@ $\mathcal{L}_{\text{match}}$ averages $\ell_i$ over the batch and adds the same 
 The hub outputs are fixed, so both directions train only the map.
 The soft nearest neighbor supplies the positive pair of each mapped state, so the term requires no correspondence between the two pools.
 Taken over both directions, the loss measures how close the matching is to a bijection: two mapped states that share one soft nearest neighbor cannot both be identified by it.
-%% BIG CHANGE 2026-11-19: added sentence, the limit of the term and the role of the leak
 A bijection need not be the correct correspondence (Section~\ref{sec:attack:blind}), and the supervised term on the leak anchors it.
 
 \paragraph{Temperature.} The temperature $\tau$ sets the sharpness of both steps of the round trip, the weights $p_{ij}$ and the identification of Equation~\ref{eq:attack:return}.
