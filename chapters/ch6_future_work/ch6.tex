@@ -1,1 +1,31 @@
+\providecommand{\vf}[1]{\textcolor{blue}{#1}}
 \chapter{Future Work}\label{ch:future}
+
+The attack of Chapter~\ref{ch:attack} reads one hidden state at a time, at one block of the target model.
+The hidden states of a prompt hold more than that, and two directions follow from what the attack leaves unread.
+A third direction turns from the attack to the representations themselves.
+
+\paragraph{Hidden states from several depths.} Different blocks may hold different parts of a token: its identity near the input, and its role in the sentence further on.
+The first question is whether a map that reads several depths together recovers tokens that a single block loses.
+The test compares reconstruction from each block alone with reconstruction from the blocks combined, at the same leak of \vf{90} rows and with the hub frozen, so that depth is the one difference.
+Reading several depths also changes what the adversary observes.
+A server that runs the remaining blocks computes the hidden states of deeper blocks itself, whereas the adversary of Chapter~\ref{ch:attack} holds no weights of the target model.
+That work therefore has to state which blocks the adversary observes, and it has to keep the question about information across depths apart from the attack on one transmitted block.
+
+\paragraph{The sequence of tokens.} The hub and the map send each hidden state into the shared space independently, and only the frozen decoder reads the sequence.
+Yet each hidden state is computed from the tokens before it, so neighboring hidden states carry overlapping information about one token.
+A map that reads a window of hidden states could draw on that overlap where a single hidden state leaves a token ambiguous.
+The examples of Chapter~\ref{ch:attack} show wrong names, dates, and numbers inside otherwise correct reconstructions, and those tokens are the natural target.
+The sequence is already part of what the client transmits, so this direction needs no change to the threat model.
+Word-F1 ignores the order of words, so the measure for that work is the accuracy of each token at its position, reported beside word-F1 and exact match.
+
+\paragraph{Representations and privacy.} The hub shows that one shared space holds the prompt information of several models, and it does not show where in a hidden state that information sits.
+The open question is which components of a hidden state carry the identity of a token, and which carry only what the server's blocks need to continue the computation.
+Candidate components can be removed or perturbed before reconstruction, and the change in word-F1 then separates the components that reconstruction depends on from those that merely correlate with the prompt.
+Defenses that perturb token embeddings on the client trade reconstruction against the quality of the model's output~\cite{mai2024split,nguyen2026noir}.
+A defense that knows where the content of a prompt sits could suppress those components and keep the ones that inference needs.
+Any such defense has to face an adversary that fits its map again on the defended hidden states, with the same leak.
+Without that second fit, a lower score shows only that the old map no longer reads the hidden states, not that the information is gone.
+The same study extends the evidence to further target models and blocks, since the present results cover one undefended target model.
+
+Each direction asks the same question from another side: how much of a prompt its hidden states carry, and how much of that a client can withhold.
