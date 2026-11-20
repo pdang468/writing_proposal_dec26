@@ -9,7 +9,7 @@ It receives the three reconstructions of the hybrid fit at the \vf{90}-row leak,
 Its instruction reads ``You get three noisy copies of the same question. Copy 1 is the most reliable; start from it and apply majority rules where the copies disagree. Fix spelling, broken words and repeats. Reply with the text only, inside \texttt{<text></text>}.''
 On the two legal datasets the instruction says ``SEC filing excerpt'' in place of ``question''.
 The language model receives no hidden state and no part of the true prompt.
-Of the \vf{500} selection prompts, \vf{50} served to choose the instruction, and the remaining \vf{450} score the experiment. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
+The results are reported on \vf{450} selection prompts that played no part in choosing the instruction. % src: same files (prompts_reported 450); attacker_run.py (selection sample: first 50 prompt ids)
 
 \paragraph{Score.} The language model adds capital letters and punctuation that the prompts lack.
 Word-F1 in this section is therefore computed on lower-cased words without edge punctuation, for the decoders and for the rewrites alike.
