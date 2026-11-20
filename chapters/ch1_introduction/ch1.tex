@@ -28,8 +28,7 @@ Because prior attacks rest on access, it is tempting to conclude that a client t
 Yet the Platonic Representation Hypothesis proposes that models trained on similar data converge toward similar representations~\cite{huh2024platonic}.
 The approach draws on that hypothesis: if it holds for language models, a simple map may relate the hidden states of a target model to those of public models.
 An adversary could then build an inverter entirely from public models and connect the target model to it afterwards.
-%% BIG CHANGE: second half reworded
-Similar representations do not by themselves expose a prompt: a map can preserve the meaning of a prompt and still lose its exact words, such as a name, a date, or a negation.
+Similar representations do not by themselves expose a prompt: a map can preserve the meaning of a prompt and still lose its exact words.
 Prompt reconstruction is therefore a direct test of what survives the map between models.
 The dissertation argues that representations shared across models support inversion across models, and that unpaired matching improves reconstruction when a small leak supplies the correspondences.
 
@@ -46,7 +45,7 @@ A map trained on the leak alone is the supervised fit, and a map trained on the 
 \paragraph{Results.} Both steps are evaluated on NQ, the query strings of Natural Questions, and on two datasets of legal text.
 The score is word-F1, the overlap between the words of the reconstruction and the words of the prompt, without regard to their order.
 The hub supports reconstruction across models: mean cross-model word-F1 is \vf{0.944} on NQ and \vf{0.977} on each legal dataset, against mismatched-prompt controls of at most \vf{0.152}. % src: ch3 s4, s5, s6
-For the target model, a leak of \vf{90} rows, about \vf{90} words on NQ, gives the supervised fit a word-F1 of \vf{0.35} and the hybrid fit \vf{0.77}. % src: ch4 s0, s4
+For the target model, a leak of about \vf{90} words on NQ gives the supervised fit a word-F1 of \vf{0.35} and the hybrid fit \vf{0.77}. % src: ch4 s0, s4
 On the legal datasets the matching term raises word-F1 from \vf{0.19} to \vf{0.60} and from \vf{0.10} to \vf{0.32}. % src: ch4 s0
 Without a leak, the matching term reaches a word-F1 of \vf{0.061} on NQ, against \vf{0.067} for its mismatched-prompt control. % src: ch4 s7
 Reconstruction is also partial: exact match under the hybrid fit is \vf{0.21} on NQ and near zero on the legal datasets. % src: ch4 s4
@@ -57,8 +56,7 @@ Reconstruction is also partial: exact match under the hybrid fit is \vf{0.21} on
 \item \textbf{An inversion attack without the target model.} An adversary with no weights of the target model and no query access reconstructs prompts through one affine map, trained on a leak of \vf{90} rows and on unpaired hidden states.
 \item \textbf{A measurement of what unpaired matching adds.} At the same leak, the matching term raises word-F1 on all three datasets; the gain is largest at leaks of \vf{45} to \vf{90} rows and shrinks as the leak grows, and matching without a leak fails in the tested NQ setting.
 \end{itemize}
-The evidence covers one target model observed at one block, and the settings of the attack were selected on prompts with known text outside the leak.
-The dissertation evaluates no defended system.
+These results are a first measurement, not a general break of split inference: the evidence covers one target model observed at one block, the settings of the attack were selected on prompts with known text outside the leak, and no defended system is evaluated.
 
 \paragraph{Outline.} Chapter~\ref{ch:lit} reviews inversion attacks, cross-model alignment, and defenses, and positions the dissertation among them.
 Chapter~\ref{ch:hub} presents the translation hub.
