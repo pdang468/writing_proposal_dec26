@@ -12,18 +12,15 @@ The result covers \vf{22} blind maps, one target model, and one dataset, and it 
 
 \subsection{Composition of the leak}\label{sec:attack:leak}
 
-A leak of \vf{90} rows can come from few prompts or from many.
-Three such leaks are compared on legal100t, the one dataset whose prompts are long enough to supply \vf{90} rows from \vf{2} prompts.
-The first leak takes \vf{90} rows from \vf{2} prompts, the second takes \vf{9} rows from each of \vf{10} prompts, and the third takes \vf{1} row from each of \vf{90} prompts.
-Both fits score higher as the leak spreads over more prompts (Figure~\ref{fig:attack:shape}).
-The hybrid fit scores \vf{0.255}, \vf{0.299}, and \vf{0.328}, and the supervised fit scores \vf{0.049}, \vf{0.094}, and \vf{0.108}. % src: results/legal128w/v7_2/main/mixed-w46-std-L90-composition.json seeds.1.cells (L90-random 0.3284, L90-prefix 0.2546; supervised 0.1084, 0.0487); mixed-w46-std.json seeds.1.cells (L90-span9 0.2993; supervised 0.0938)
-The gain from matching therefore stays near \vf{0.21} for all three leaks.
+On legal100t, a leak of \vf{90} rows yields a higher word-F1 when it is spread over more prompts, and the gain from matching stays near \vf{0.21} however the rows are spread (Figure~\ref{fig:attack:shape}).
+Three leaks take \vf{90} rows from \vf{2} prompts, \vf{9} rows from each of \vf{10} prompts, and \vf{1} row from each of \vf{90} prompts; only legal100t has prompts long enough for the first.
+From the first leak to the third, the supervised fit rises from \vf{0.049} to \vf{0.094} to \vf{0.108}, and the hybrid fit rises from \vf{0.255} to \vf{0.299} to \vf{0.328}. % src: results/legal128w/v7_2/main/mixed-w46-std-L90-composition.json seeds.1.cells (L90-random 0.3284, L90-prefix 0.2546; supervised 0.1084, 0.0487); mixed-w46-std.json seeds.1.cells (L90-span9 0.2993; supervised 0.0938)
 
-The content of the rows also matters.
-Two further leaks of \vf{90} rows carry little content, one of stop words and one of a single repeated word.
-With stop words, the hybrid fit reaches \vf{0.115} against \vf{0.056} for the supervised fit.
-With one repeated word, the two fits are level, at \vf{0.061} and \vf{0.057}. % src: same file, cells L90-one_word (0.0611, 0.0568), L90-stop (0.1149, 0.0555)
-Each leak is drawn once, so the comparison does not separate the number of prompts from the content of the particular prompts drawn.
+The gain shrinks when the rows carry little content.
+A leak of \vf{90} stop-word rows gives the hybrid fit \vf{0.115} against \vf{0.056} for the supervised fit.
+A leak of one repeated word leaves both fits near their mismatched-prompt controls, at \vf{0.061} and \vf{0.057}. % src: same file, cells L90-one_word (0.0611, 0.0568; controls 0.0489, 0.0469), L90-stop (0.1149, 0.0555)
+
+Each leak is drawn once, on one dataset, so the comparison does not separate the number of prompts from the content of the particular prompts drawn.
 
 \begin{figure}[ht]
 \centering
