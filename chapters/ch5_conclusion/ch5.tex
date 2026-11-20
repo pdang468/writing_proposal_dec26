@@ -1,10 +1,9 @@
 \providecommand{\vf}[1]{\textcolor{blue}{#1}}
 \chapter{Conclusion}\label{ch:conclusion}
 
-Keeping the client's blocks private does not by itself protect a prompt in split inference.
-Split inference sends the server hidden states in place of text, and prior inversion attacks hold the weights of the model that produced those hidden states, or query it.
-It is therefore tempting to conclude that an adversary with neither form of access learns nothing from the hidden states.
-Yet the results of this dissertation show that such an adversary still reconstructs a prompt in part, from the hidden states and a small leak of text.
+This dissertation shows that hidden states still reveal part of the prompt in split inference, where a client sends hidden states to the server instead of the text of its prompt.
+Prior inversion attacks hold the weights of the model that produced the hidden states, or query it.
+The adversary studied here has neither, and it reconstructs a prompt in part from the hidden states and a small leak of text.
 
 The attack rests on representations that models share.
 A translation hub maps the hidden states of three open-weight language models into one shared space, and each of the three models, kept frozen, reconstructs a prompt from the hub outputs of the other two.
@@ -12,7 +11,7 @@ Mean cross-model word-F1 is \vf{0.944} on NQ, against at most \vf{0.152} for the
 One shared space therefore holds the prompt information of all three models.
 
 A target model outside the hub reaches that space through a single affine map.
-Two sources train the map: a leak of \vf{90} rows, about \vf{90} words on NQ, and a matching term that aligns unpaired hidden states with unpaired hub outputs and reads no text of the client.
+Two sources train the map: a leak of \vf{90} rows and a matching term that aligns unpaired hidden states with unpaired hub outputs and reads no text of the client.
 The leak alone carries reconstruction on NQ to a word-F1 of \vf{0.35}, and the matching term lifts it to \vf{0.77}.
 The matching term raises word-F1 on both legal datasets as well, and its contribution shrinks as the leak grows.
 Without a leak, the matching term stays at the level of its control in the tested NQ setting.

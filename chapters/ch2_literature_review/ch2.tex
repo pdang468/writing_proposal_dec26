@@ -119,7 +119,7 @@ To the author's knowledge, prior work has not evaluated query-free prompt recons
 
 Three properties separate the attack from the alignment attacks on pooled embeddings.
 First, it acts on per-token hidden states, the quantity that a split inference client transmits, and not on one vector per text.
-Second, its leak is small: \vf{90} rows from \vf{10} prompts, about \vf{90} words on NQ, whereas Huang et al. train on 8,000 leaked texts and the scores of Chen et al. rise up to 1,000.
+Second, its leak is small: \vf{90} rows from \vf{10} prompts, whereas Huang et al. train on 8,000 leaked texts and the scores of Chen et al. rise up to 1,000.
 Third, it is lightweight: the attack trains one affine map and leaves the hub and its decoders frozen, whereas Huang et al. train a surrogate encoder and an inverter, and Jha et al. train adapters under adversarial and cycle-consistency losses.
 Jha et al. need no pairs at all, but they evaluate pooled embeddings only.
 The dissertation asks a different question: how much of a prompt a leak of \vf{90} rows reconstructs from per-token hidden states, and how much unpaired matching adds to that leak.
