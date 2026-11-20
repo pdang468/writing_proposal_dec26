@@ -2,7 +2,7 @@
 
     python figures/scripts/make_figures.py /path/to/representation_alignment
 
-Writes figures/ch4/{budget_curve,grid_search,standard_cell,rewriting,cross_entropy,leak_shape,grid_leak_size,budget_curve_legal}.{pdf,png}.
+Writes figures/ch4/{attack_map,budget_curve,grid_search,standard_cell,rewriting,cross_entropy,leak_shape,grid_leak_size,budget_curve_legal}.{pdf,png}.
 Sources: results/v7_2/main/mixed-v7_9-s5.json and, for the hub reference, results/v7_2/main/factorial.json
 (controls.true_olmo_code). Seeds, prompt counts and cell names are read from those files.
 """
@@ -59,6 +59,63 @@ def gap(ax, x, low, high):
                 va="center", fontsize=8, color=INK2)
 
 
+def attack_map():
+    """The attack of Chapter 4 as a diagram, in the style of ch3/hub_architecture: no result file is read."""
+    from matplotlib.patches import FancyBboxPatch
+    fig, ax = plt.subplots(figsize=(6.4, 2.75))
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 44)
+    ax.axis("off")
+    top, bottom, h = 32, 9, 8.5
+    light = "#eeeeec"
+
+    def box(x, y, w, text, fill, dashed=False):
+        ax.add_patch(FancyBboxPatch((x, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1",
+                                    fc=fill, ec=INK2, lw=0.8, ls=(0, (3, 2)) if dashed else "-"))
+        ax.text(x + w / 2, y, text, ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+
+    def arrow(x0, y0, x1, y1, color=INK2, style="-|>", ls="-"):
+        ax.annotate("", (x1, y1), (x0, y0), arrowprops=dict(arrowstyle=style, color=color, lw=0.9 if color != INK2 else 0.8,
+                                                            ls=ls, shrinkA=0, shrinkB=0, mutation_scale=7))
+
+    def vector(x, y, fill):
+        w, cells, ch = 2.2, 6, 1.7
+        for k in range(cells):
+            ax.add_patch(plt.Rectangle((x, y - cells * ch / 2 + k * ch), w, ch, fc=fill, ec=INK2, lw=0.6))
+        return y - cells * ch / 2, y + cells * ch / 2
+
+    # Top lane: the target model, the one trained module, and the frozen read-out of the hub.
+    box(0, top, 17, "Pythia-1B\nblock 12, 2048", "#ffffff", dashed=True)
+    box(22, top, 15, "affine map\n2048 $\\to$ 512", light)
+    arrow(17, top, 22, top)
+    vx = 46
+    lo_t, hi_t = vector(vx, top, "#fbd9cc")
+    arrow(37, top, vx, top)
+    ax.text(vx + 1.1, hi_t + 1.0, "mapped state $\\hat{m}_t$", ha="center", va="bottom", fontsize=7.5, color=INK)
+    box(62, top, 17, "hub projectors\nand decoders", "#ffffff", dashed=True)
+    arrow(vx + 2.2, top, 62, top)
+    arrow(79, top, 84, top)
+    ax.text(92, top, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+    # Bottom lane: the hub, frozen, run by the adversary on OLMo.
+    box(0, bottom, 17, "OLMo-2-1B\nblock 12, 2048", "#ffffff", dashed=True)
+    box(22, bottom, 15, "hub adapter\nand backbone", "#ffffff", dashed=True)
+    arrow(17, bottom, 22, bottom)
+    lo_b, hi_b = vector(vx, bottom, "#cde2fb")
+    arrow(37, bottom, vx, bottom)
+    ax.text(vx + 1.1, lo_b - 1.0, "hub output $m_t$", ha="center", va="top", fontsize=7.5, color=INK)
+    # The two terms that train the map, between the mapped states and the hub outputs.
+    arrow(vx + 0.4, hi_b, vx + 0.4, lo_t, color=SUPERVISED, style="<|-|>")
+    arrow(vx + 1.8, hi_b, vx + 1.8, lo_t, color=HYBRID, style="<|-|>", ls=(0, (3, 2)))
+    mid = (hi_b + lo_t) / 2
+    ax.text(vx - 1.2, mid, "supervised term\nleaked rows, same text", ha="right", va="center", fontsize=7,
+            color=SUPERVISED, linespacing=1.25)
+    ax.text(vx + 3.4, mid, "matching term\nunpaired pools, different prompts", ha="left", va="center", fontsize=7,
+            color=HYBRID, linespacing=1.25)
+    ax.text(8.5, 41, "hidden state $s_t$", ha="center", fontsize=7.5, color=INK2)
+    fig.subplots_adjust(0.01, 0.02, 0.99, 0.98)
+    save(fig, "ch4/attack_map")
+
+
 def budget():
     d = json.loads((ROOT / "results/v7_2/main/mixed-v7_9-s5.json").read_text())
     reference = json.loads((ROOT / "results/v7_2/main/factorial.json").read_text())
@@ -102,6 +159,7 @@ def budget():
     save(fig, "ch4/budget_curve")
 
 
+attack_map()
 budget()
 
 

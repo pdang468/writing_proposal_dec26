@@ -1,6 +1,6 @@
 \section{Method}\label{sec:attack:method}
 
-The attack trains a single affine map and leaves the hub frozen.
+The attack trains a single affine map and leaves the hub frozen (Figure~\ref{fig:attack:map}).
 The map sends each hidden state $s_t$ of the target model to a point $\hat m_t$ of the hub,
 \begin{equation}
 \hat m_t = W(s_t - \mu) + c ,
@@ -9,6 +9,16 @@ The map sends each hidden state $s_t$ of the target model to a point $\hat m_t$ 
 where $\mu$ is the mean hidden state of the unpaired pool, $W$ is a matrix from \vf{2048} to \vf{512} dimensions, and $c$ is a bias. % src: src/v7/adapter.py; src/v7_2/preprocess.py (centering on pool U); configs/v7.yaml (width 2048, hub_dim 512)
 The frozen projectors and decoders of the hub then reconstruct the prompt from the mapped states.
 Like the hub, the map acts on one hidden state at a time (Section~\ref{sec:hub:design}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{ch4/attack_map}
+\caption{The attack trains one affine map between the target model and the frozen hub.
+The map sends each hidden state of the target model to a mapped state in the hub, and the frozen projectors and decoders of the hub reconstruct the prompt from the mapped states.
+The supervised term compares a mapped state with the hub output of the same leaked row; the matching term aligns mapped states with hub outputs of different prompts, drawn from the two unpaired pools.
+The shaded box is the only trained module, and dashed boxes are frozen.}
+\label{fig:attack:map}
+\end{figure}
 
 \paragraph{Objective.} The objective combines a supervised term on the leak with a matching term on the unpaired pools,
 \begin{equation}
