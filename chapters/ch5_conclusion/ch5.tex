@@ -2,25 +2,26 @@
 \chapter{Conclusion}\label{ch:conclusion}
 
 This dissertation shows that hidden states still reveal part of the prompt in split inference, where a client sends hidden states to the server instead of the text of its prompt.
-Prior inversion attacks hold the weights of the model that produced the hidden states, or query it.
+Prior attacks on per-token hidden states hold the weights of the model that produced them, or query it.
 The adversary studied here has neither, and it reconstructs a prompt in part from the hidden states and a small leak of text.
 
 The attack rests on the similarity of representations across models.
 A translation hub builds on that similarity: it maps the hidden states of three open-weight language models into one shared space, and each of the three models, kept frozen, reconstructs a prompt from the hub outputs of the other two.
-Mean cross-model word-F1 is \vf{0.944} on NQ, against at most \vf{0.152} for the mismatched-prompt control.
+Mean cross-model word-F1 is \vf{0.944} on NQ, against \vf{0.120} for the mismatched-prompt control.
 The hub's shared space therefore holds the prompt information of all three models.
 
 A target model outside the hub reaches that space through a single affine map.
 The map learns from two sources: a leak of \vf{90} rows and a matching term.
 The matching term aligns unpaired hidden states with unpaired hub outputs and reads no text of the client.
 The leak alone carries reconstruction on NQ to a word-F1 of \vf{0.35}, and the matching term lifts it to \vf{0.77}.
-That gain holds on both legal datasets as well.
-It depends on the size of the leak: it shrinks as the leak grows, and without a leak the matching term stays at the level of its control in the tested NQ setting.
-Unpaired matching thus extends a small leak and does not replace it.
+The hybrid fit also exceeds the supervised fit on both legal datasets.
+The gain depends on the size of the leak: it is largest at \vf{45} to \vf{90} rows.
+Without a leak, the matching term stays at the level of its control in the tested NQ setting.
+In the tested settings, unpaired matching thus extends a small leak and does not replace it.
 
 Three properties distinguish the attack from prior work.
 First, it operates on per-token hidden states, the representation that a split inference client transmits, and it requires neither white-box nor query access to the target model.
-Second, it is lightweight: it requires a leak of \vf{90} rows, public models, and one affine map as the only trained module.
-Third, it quantifies what unpaired matching adds to a fixed leak, a question that prior alignment attacks leave open.
+Second, it is lightweight: one affine map is the only module trained for the target model, fitted on a leak of \vf{90} rows and on unpaired hidden states, with the hub frozen.
+Third, it quantifies what unpaired matching adds to a fixed leak, a question that, to the author's knowledge, prior alignment attacks have not evaluated on per-token hidden states.
 Full recovery remains challenging, with an exact match of \vf{0.21} on NQ, and the evidence covers one undefended target model observed at one block; Chapter~\ref{ch:future} takes up both.
 The results therefore shift where the privacy of split inference rests: on what the representations of different models share, and not only on who holds the weights.

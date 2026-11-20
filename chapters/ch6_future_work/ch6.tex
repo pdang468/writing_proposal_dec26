@@ -7,16 +7,16 @@ A third direction studies how to improve the information that models share in th
 
 \paragraph{Hidden states from several blocks.} Each block represents the same token in a different way, together with its context in the prompt.
 The first question is whether a map that reads several blocks together recovers tokens that a single block loses.
-The test compares reconstruction from each block alone with reconstruction from the blocks combined, at the same leak of \vf{90} rows and with the hub frozen, so that the number of blocks is the one difference.
+The test compares reconstruction from each block alone with reconstruction from the blocks combined, at the same leak of \vf{90} rows and with the hub frozen.
 Reading several blocks also changes what the adversary observes.
-A server that runs the remaining blocks computes the hidden states of deeper blocks itself, whereas the adversary of Chapter~\ref{ch:attack} holds no weights of the target model.
+A server that runs the remaining blocks computes the hidden states of deeper blocks itself, whereas the attack of Chapter~\ref{ch:attack} takes the hidden states of one block as its only input.
 That work therefore has to state which blocks the adversary observes, and it has to keep the question about information across blocks apart from the attack on one transmitted block.
 
 \paragraph{The sequence of tokens.} The hub and the map send each hidden state into the shared space independently, and only the frozen decoder reads the sequence.
 Yet each hidden state is computed from the tokens before it, so neighboring hidden states carry overlapping information about one token.
 A map that reads a window of hidden states could draw on that overlap where a single hidden state leaves a token ambiguous.
 The examples of Chapter~\ref{ch:attack} show wrong names, dates, and numbers inside otherwise correct reconstructions, and those tokens are the natural target.
-That information is already present in the transmitted hidden states, and the current attack does not exploit it.
+That overlap is already present in the transmitted hidden states, and the current map does not exploit it.
 
 \paragraph{Representations and privacy.} The hub shows that one shared space holds the prompt information of several models, but it does not show how to improve that shared information or how to recover the most useful part of it.
 Two questions follow.
@@ -27,5 +27,5 @@ The second question is which part of the shared information matters most.
 Word-F1 counts every word of a prompt equally, yet a name, a date, or a number can matter more to a client than the words around it.
 A map and a decoder trained to recover those words first would direct the attack at the content that a client most needs to protect.
 The same ranking would tell a defense which information to remove from the hidden states, and that defense would then face an adversary that fits its map again on the defended hidden states.
-To address that limit, both questions will be studied on defended systems and on further target models and blocks, since the present results cover one undefended target model.
-Those studies will show how far the privacy risk of cross-model alignment extends in split inference.
+Both questions will also be studied on defended systems and on further target models and blocks, since the present results cover one undefended target model.
+Those studies will test how far the privacy risk of cross-model alignment extends in split inference.
