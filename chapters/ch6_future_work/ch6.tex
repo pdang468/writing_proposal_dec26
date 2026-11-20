@@ -3,7 +3,7 @@
 
 The attack of Chapter~\ref{ch:attack} maps one hidden state at a time, taken from one block of the target model.
 Future work can extend it in two ways: by reading hidden states from several blocks, and by reading the hidden states of a prompt as a sequence.
-A third direction studies which parts of a hidden state carry the prompt, and what that means for defenses.
+A third direction studies how to improve the information that models share in the hub, and how to recover the part of a prompt that matters most.
 
 \paragraph{Hidden states from several blocks.} Each block represents the same token in a different way, together with its context in the prompt.
 The first question is whether a map that reads several blocks together recovers tokens that a single block loses.
@@ -18,13 +18,15 @@ A map that reads a window of hidden states could draw on that overlap where a si
 The examples of Chapter~\ref{ch:attack} show wrong names, dates, and numbers inside otherwise correct reconstructions, and those tokens are the natural target.
 That information is already present in the transmitted hidden states, and the current attack does not exploit it.
 
-\paragraph{Representations and privacy.} The hub shows that one shared space holds the prompt information of several models, and it does not show where in a hidden state that information sits.
-The open question is which components of a hidden state carry the identity of a token, and which carry only what the server's blocks need to continue the computation.
-Candidate components can be removed or perturbed before reconstruction, and the change in word-F1 then separates the components that reconstruction depends on from those that merely correlate with the prompt.
-Defenses that perturb token embeddings on the client trade reconstruction against the quality of the model's output~\cite{mai2024split,nguyen2026noir}.
-A defense that knows where the content of a prompt sits could suppress those components and keep the ones that inference needs.
-Any such defense has to face an adversary that fits its map again on the defended hidden states, with the same leak.
-Without that second fit, a lower score shows only that the old map no longer reads the hidden states, not that the information is gone.
-The same study extends the evidence to further target models and blocks, since the present results cover one undefended target model.
+\paragraph{Representations and privacy.} The hub shows that one shared space holds the prompt information of several models, but it does not show how to improve that shared information or how to recover the most useful part of it.
+Two questions follow.
+The first is how much information about a prompt the models share, and whether a hub can hold more of it.
+A direct measure of the information common to the hidden states of two models would separate what the present hub fails to capture from what the models do not share.
+Hubs trained on more models and on other blocks would then test whether that shared information grows.
+The second question is which part of the shared information matters most.
+Word-F1 counts every word of a prompt equally, yet a name, a date, or a number can matter more to a client than the words around it.
+A map and a decoder trained to recover those words first would direct the attack at the content that a client most needs to protect.
+The same ranking would tell a defense which information to remove from the hidden states, and that defense would then face an adversary that fits its map again on the defended hidden states.
+Both questions extend the evidence to defended systems and to further target models and blocks, since the present results cover one undefended target model.
 
 Each direction asks the same question from another side: how much of a prompt its hidden states carry, and how much of that a client can withhold.
