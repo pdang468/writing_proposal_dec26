@@ -3,10 +3,10 @@ An adversary has no such access to a target model: it observes the hidden states
 This chapter connects that target model to the frozen hub through an affine map.
 The frozen projectors and decoders of the hub then reconstruct the target model's prompts from the output of the map.
 
-The map learns first from a small leak, a set of short text spans with both their text and the target model's hidden states, which supervises the map directly.
-The leak alone cannot fit the map well, because a few spans cannot show how the hidden states of a whole corpus correspond to the hub.
+The map learns first from a small leak: a few short pieces of text for which the adversary holds both the words and the target model's hidden states.
+The leak alone is too small to fit the map well, because a few pieces of text cannot show how the hidden states of a whole corpus fit into the hub.
 Yet hidden states without their text are plentiful, because the server receives the hidden states of every prompt that the client sends.
-The adversary is also assumed to hold natural text from the same distribution as those prompts, with no correspondence to any of them.
-Neither collection says which hidden state belongs to which text, but if the target model and the hub share structure, the two distributions may still guide the map beyond the leaked spans.
-A matching term therefore aligns the distribution of the mapped hidden states with the distribution of hub outputs for that text, in the shared space of the hub.
-The chapter measures what that alignment adds to training on the leak alone: with a small leak, it more than doubles mean word-F1 on all three datasets.
+The adversary is also assumed to hold ordinary text of the same kind as those prompts, with no link to any of them.
+Nothing says which hidden state goes with which text, but if the target model and the hub organize text in a similar way, the two collections should look alike once the map is right.
+A matching term therefore trains the map so that the mapped hidden states, taken together, look like the hub outputs of that text.
+The chapter measures what the matching term adds to the leak: with a small leak, it more than doubles mean word-F1 on all three datasets.
