@@ -49,7 +49,8 @@ Figure~\ref{fig:intro:approach} shows both steps.
 \includegraphics[width=\textwidth]{ch1/approach_overview}
 \caption{A map trained on a small leak and on distribution matching sends the hidden states that the server receives into a pretrained translation hub, whose decoders reconstruct the private prompt.
 Red marks what the adversary does not know, the target model and its hidden states; blue marks the pretrained hub, its outputs for public prompts, and its decoders; yellow marks the map and the mapped states, fitted to match red to blue.
-The two vertical lines are the comparisons that train the map: on a small leak, where the pairing is known, and by distribution matching, where it is not.}
+The two vertical lines are the comparisons that train the map: on a small leak, where the pairing is known, and by distribution matching, where it is not.
+Solid boxes are trained, the hub in step 1 and the map in step 2; dashed boxes are frozen language models.}
 \label{fig:intro:approach}
 \end{figure}
 

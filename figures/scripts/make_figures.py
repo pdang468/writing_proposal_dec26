@@ -130,7 +130,7 @@ def overview():
 
     def box(x, y, w, text, fill, dashed=False):
         ax.add_patch(FancyBboxPatch((x, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1",
-                                    fc=fill, ec=INK2, lw=0.8, ls="-"))
+                                    fc=fill, ec=INK2, lw=0.8, ls=(0, (3, 2)) if dashed else "-"))
         ax.text(x + w / 2, y, text, ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
 
     def arrow(x0, y0, x1, y1, color=INK2, style="-|>", ls="-"):
@@ -161,7 +161,7 @@ def overview():
     ax.text(10.7, 38.6, "client", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
     ax.text(3.2, bottom, "private\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
     arrow(6.6, bottom, 8.5, bottom)
-    box(8.5, bottom, 11.5, "target\nmodel", red_box)
+    box(8.5, bottom, 11.5, "target\nmodel", red_box, dashed=True)
     lo_s, hi_s = vector(vs, bottom, red)
     arrow(20, bottom, vs, bottom)
     ax.text(vs + 1.1, lo_s - 1.0, "hidden states", ha="center", va="top", fontsize=7.5, color=INK)
@@ -170,7 +170,7 @@ def overview():
     lo_b, hi_b = vector(vx, bottom, yellow)
     arrow(46, bottom, vx, bottom)
     ax.text(vx + 1.1, lo_b - 1.0, "mapped states", ha="center", va="top", fontsize=7.5, color=INK)
-    box(63, bottom, 14, "hub\ndecoders", blue_box)
+    box(63, bottom, 14, "hub\ndecoders", blue_box, dashed=True)
     arrow(vx + 2.2, bottom, 63, bottom)
     arrow(77, bottom, 82, bottom)
     ax.text(91, bottom, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
