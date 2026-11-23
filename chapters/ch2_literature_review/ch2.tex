@@ -80,6 +80,7 @@ Feyisetan et al.~\cite{feyisetan2020privacy}, Qu et al.~\cite{qu2021natural}, an
 Mai et al.~\cite{mai2024split} add noise to the client's token embeddings under local differential privacy and denoise the model's output on the client.
 Nguyen et al.~\cite{nguyen2026noir} report that noise drawn for every prompt degrades generation; NOIR instead randomizes the token embeddings of the vocabulary once, so that a token keeps one embedding across prompts, and hides the token indices behind a secret tokenizer on the client.
 NOIR is evaluated against the embedding inversion of Morris et al.~\cite{morris2023text} and against BiSR~\cite{chen2024unveiling}, an attack on split fine-tuning that reconstructs the client's data from the transmitted activations and the returned gradients with the pre-trained weights as prior knowledge.
+Under those attacks, the success rate of prompt reconstruction on the MBPP training prompts without test cases falls from 96 percent with no defense to 7 percent on average with NOIR, and to zero on HumanEval.
 
 A second family hides the hidden states behind a secret permutation, as in PermLLM, STIP, and Centaur~\cite{zheng2024permllm,yuan2023secure,luo2025centaur}.
 Thomas et al.~\cite{thomas2025hidden} show that all three are insecure, since the matching of hidden states to vocabulary candidates can be made invariant to the permutation, and propose Cascade, which divides the token sequence among servers that must not collude.
@@ -89,31 +90,29 @@ The evaluations of Thomas et al. and Dong et al. assume an adversary that holds 
 
 \section{Position of the Dissertation}\label{sec:lit:position}
 
-Table~\ref{tab:lit:position} summarizes the access that each group of attacks assumes and what each attack trains for the target.
+Table~\ref{tab:lit:position} lists what each attack exploits: the representation under attack, the weights of the model, queries to it, and leaked pairs of text and representation.
 The attacks on language models listed in the table fall into two groups.
-In the first, the attacks act on pooled sentence embeddings, with queries to the encoder or, through alignment, without them.
+In the first, the attacks act on sentence embeddings, with queries to the encoder or, through alignment, without them.
 In the second, the adversary holds or queries the model that produced the per-token hidden states.
 
 \begin{table}[ht]
-\caption{The listed attacks hold or query the target model, or act on pooled embeddings; the dissertation fits a map from per-token hidden states without the target model's weights and without queries.
-The settings of the dissertation's attack were selected on additional prompts with known text.}
+\caption{The listed attacks hold or query the target model, or act on sentence embeddings; the dissertation attacks per-token hidden states without the target model's weights and without queries.
+Each column states whether the attack exploits that resource.}
 \label{tab:lit:position}
 \centering
 \ssp\small
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.27\textwidth}cc>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.42\textwidth}lccc@{}}
 \toprule
-Attack & Weights & Queries & Leaked pairs & Trained for the target \\
+Attack & Representation & Weights & Queries & Leaks \\
 \midrule
-\multicolumn{5}{@{}l}{\textit{Pooled sentence embeddings, one vector per text}} \\
-Morris et al.~\cite{morris2023text} & no & yes & from queries & inverter \\
-Huang et al.~\cite{huang2024transferable} & no & no & 8,000 & surrogate encoder and inverter \\
-Chen et al.~\cite{chen2025algen} & no & no & 1 to 8,000 & linear map \\
-Jha et al.~\cite{jha2025harnessing} & no & no & none & adapters under adversarial training \\
+Morris et al.~\cite{morris2023text} & sentence & no & yes & no \\
+Huang et al.~\cite{huang2024transferable} & sentence & no & no & yes \\
+Chen et al.~\cite{chen2025algen} & sentence & no & no & yes \\
+Jha et al.~\cite{jha2025harnessing} & sentence & no & no & no \\
 \midrule
-\multicolumn{5}{@{}l}{\textit{Per-token hidden states, the quantity a split inference client transmits}} \\
-Qu, Thomas, Nikolaou et al.~\cite{qu2025prompt,thomas2025hidden,nikolaou2026language} & yes & no & none & nothing; search per prompt \\
-Luo, Dong et al.~\cite{luo2025prompt,dong2025depth} & no & yes & from queries & inverter \\
-This dissertation & no & no & \vf{90} rows & one affine map \\
+Qu, Thomas, Nikolaou et al.~\cite{qu2025prompt,thomas2025hidden,nikolaou2026language} & token & yes & no & no \\
+Luo, Dong et al.~\cite{luo2025prompt,dong2025depth} & token & no & yes & no \\
+This dissertation & token & no & no & yes \\
 \bottomrule
 \end{tabular}
 \end{table}

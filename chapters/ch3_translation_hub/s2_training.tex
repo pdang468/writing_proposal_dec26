@@ -45,7 +45,8 @@ The loss is InfoNCE~\cite{oord2018representation} with temperature $\tau$:
 where $\mathcal{N}_i$ contains group $i$ and its negatives.
 The loss is averaged over groups within each prompt, then over prompts, over the two orders of each pair, and over the model pairs.
 
-\paragraph{Geometry loss.} The geometry loss asks the hub to keep the similarities among text spans, in two ways.
+\paragraph{Geometry loss.} The geometry loss asks the hub to keep the similarities among text spans, within a model and between models, in the way that clustering objectives treat distances within and between groups.
+The within-model term follows the vector-space preservation of Jha et al.~\cite{jha2025harnessing}, and the between-model term is added here.
 Within one model, the similarities among its hub outputs should match the similarities among its hidden states.
 Across two models, the similarities among the hub outputs of model $a$ should match the similarities among the hub outputs of model $b$ on the same token groups.
 To measure those similarities, the loss computes the group vectors of each model twice: once from its hidden states and once from its hub outputs.

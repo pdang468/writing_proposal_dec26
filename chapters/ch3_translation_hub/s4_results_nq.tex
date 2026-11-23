@@ -22,7 +22,7 @@ Table~\ref{tab:hub:examples} shows reconstructions from OLMo $\to$ Qwen.
 \begin{table}[H]
 \caption{At an intermediate score one word changes; at a low score the names are lost.
 Reconstructions from OLMo $\to$ Qwen on NQ validation prompts, selected at high, intermediate, and low word-F1; the final row is generated under the mismatched-prompt control and scored against the original prompt.
-Decoded words that match the true prompt are green; the others are orange and bold.}
+Decoded words that match the true prompt are green; the others are bold on an orange background.}
 \label{tab:hub:examples}
 \centering
 \ssp\small % single-spaced inside the table, so a wrapped line stays with its row
@@ -35,13 +35,13 @@ True prompt & who played uncle in only fools and horses & \\
 Decoded & \hit{who played uncle in only fools and horses} & \vf{1.00} \\
 \midrule
 True prompt & who has sang most songs in the world & \\
-Decoded & \hit{who has} \miss{sung} \hit{most songs in the world} & \vf{0.88} \\
+Decoded & \hit{who has} \missb{sung} \hit{most songs in the world} & \vf{0.88} \\
 \midrule
 True prompt & is floral park in queens or long island & \\
-Decoded & \hit{is} \miss{flower} \hit{park in} \miss{king} \hit{or} \miss{queen parks} & \vf{0.50} \\
+Decoded & \hit{is} \missb{flower} \hit{park in} \missb{king} \hit{or} \missb{queen} \missb{parks} & \vf{0.50} \\
 \midrule
 True prompt & who played uncle in only fools and horses & \\
-Mismatched prompt & \hit{who} \miss{plays the girl jinx} \hit{in} \miss{suicide squad} & \vf{0.25} \\
+Mismatched prompt & \hit{who} \missb{plays} \missb{the} \missb{girl} \missb{jinx} \hit{in} \missb{suicide} \missb{squad} & \vf{0.25} \\
 \bottomrule
 \end{tabular}
 \end{table}

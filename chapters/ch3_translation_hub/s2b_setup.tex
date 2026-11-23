@@ -2,6 +2,7 @@
 
 \paragraph{Models.} The experiments train the hub on $k=3$ open-weight models: Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B.
 Each contributes hidden states from the block at three quarters of its depth: block \vf{18} of \vf{24} in Qwen (width \vf{1024}), block \vf{12} of \vf{16} in OLMo (width \vf{2048}), and block \vf{18} of \vf{24} in SmolLM (width \vf{2048}).
+That depth follows an early comparison of depths in this project, and the choice of depth is left for further study.
 Three models define nine directions: six cross-model directions and three self-reconstruction directions.
 The common width is $d=\vf{1024}$ and the hub output has $d_h=\vf{512}$ dimensions.
 
