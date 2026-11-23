@@ -90,9 +90,9 @@ def architecture():
     sources = [("Qwen3.5-0.8B\nblock 18, 1024", "$\\to$ 1024"), ("OLMo-2-1B\nblock 12, 2048", "$\\to$ 2048"),
                ("SmolLM2-1.7B\nblock 18, 2048", "$\\to$ 2048")]
     decoders = ["Qwen\ndecoder", "OLMo\ndecoder", "SmolLM\ndecoder"]
-    light, dark = "#eeeeec", "#cfcfcb"
+    light, dark, public = "#fdf0c0", "#fae29a", "#e3effc"  # trained modules yellow, frozen public models blue
     for y, (src, _) in zip(rows, sources):
-        box(0, y, 17, src, SURFACE, dashed=True)
+        box(0, y, 17, src, public, dashed=True)
         box(21, y, 13, "adapter\n$\\to$ 1024", light)
         arrow(17, y, 21, y)
         arrow(34, y, 38, y)
@@ -109,7 +109,7 @@ def architecture():
     arrow(51, 19, bar_x, 19)
     for y, (_, width), dec in zip(rows, sources, decoders):
         box(69, y, 13, f"projector\n{width}", light)
-        box(86, y, 14, dec, SURFACE, dashed=True)
+        box(86, y, 14, dec, public, dashed=True)
         arrow(bar_x + bar_w, 19, 69, y)
         arrow(82, y, 86, y)
     ax.text(8.5, 38, "hidden state $s_t$", ha="center", fontsize=7.5, color=INK2)

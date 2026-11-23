@@ -7,7 +7,7 @@ The hub connects $k$ models through one shared space, with one source adapter an
 \includegraphics[width=\textwidth]{ch3/hub_architecture}
 \caption{The translation hub maps each model's hidden states into one shared space, and every frozen model decodes from it.
 Model-specific adapters and a shared backbone produce the hub output; model-specific projectors map it into the input space of each frozen decoder.
-Shaded boxes are trainable modules, dashed boxes are frozen models, and the column of cells is the hub output, a vector with no parameters of its own.}
+Yellow solid boxes are trained modules, blue dashed boxes are frozen public models, and the column of cells is the hub output, a vector with no parameters of its own.}
 \label{fig:hub:arch}
 \end{figure}
 

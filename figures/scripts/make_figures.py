@@ -67,7 +67,7 @@ def attack_map():
     ax.set_ylim(0, 44)
     ax.axis("off")
     top, bottom, h = 32, 9, 8.5
-    light = "#eeeeec"
+    red_box, blue_box, yellow_box, red, blue, yellow = "#fbe4e1", "#e3effc", "#fdf0c0", "#f6c9c4", "#cde2fb", "#fbe08a"
 
     def box(x, y, w, text, fill, dashed=False):
         ax.add_patch(FancyBboxPatch((x, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1",
@@ -85,32 +85,32 @@ def attack_map():
         return y - cells * ch / 2, y + cells * ch / 2
 
     # Top lane: the target model, the one trained module, and the frozen read-out of the hub.
-    box(0, top, 17, "Pythia-1B\nblock 12, 2048", "#ffffff", dashed=True)
-    box(22, top, 15, "affine map\n2048 $\\to$ 512", light)
+    box(0, top, 17, "Pythia-1B\nblock 12, 2048", red_box, dashed=True)
+    box(22, top, 15, "affine map\n2048 $\\to$ 512", yellow_box)
     arrow(17, top, 22, top)
     vx = 46
-    lo_t, hi_t = vector(vx, top, "#fbd9cc")
+    lo_t, hi_t = vector(vx, top, yellow)
     arrow(37, top, vx, top)
     ax.text(vx + 1.1, hi_t + 1.0, "mapped state $\\hat{m}_t$", ha="center", va="bottom", fontsize=7.5, color=INK)
-    box(62, top, 17, "hub projectors\nand decoders", "#ffffff", dashed=True)
+    box(62, top, 17, "hub projectors\nand decoders", blue_box, dashed=True)
     arrow(vx + 2.2, top, 62, top)
     arrow(79, top, 84, top)
     ax.text(92, top, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
     # Bottom lane: the hub, frozen, run by the adversary on OLMo.
-    box(0, bottom, 17, "OLMo-2-1B\nblock 12, 2048", "#ffffff", dashed=True)
-    box(22, bottom, 15, "hub adapter\nand backbone", "#ffffff", dashed=True)
+    box(0, bottom, 17, "OLMo-2-1B\nblock 12, 2048", blue_box, dashed=True)
+    box(22, bottom, 15, "hub adapter\nand backbone", blue_box, dashed=True)
     arrow(17, bottom, 22, bottom)
-    lo_b, hi_b = vector(vx, bottom, "#cde2fb")
+    lo_b, hi_b = vector(vx, bottom, blue)
     arrow(37, bottom, vx, bottom)
     ax.text(vx + 1.1, lo_b - 1.0, "hub output $m_t$", ha="center", va="top", fontsize=7.5, color=INK)
     # The two terms that train the map, between the mapped states and the hub outputs.
-    arrow(vx + 0.4, hi_b, vx + 0.4, lo_t, color=SUPERVISED, style="<|-|>")
-    arrow(vx + 1.8, hi_b, vx + 1.8, lo_t, color=HYBRID, style="<|-|>", ls=(0, (3, 2)))
+    arrow(vx + 0.4, hi_b + 0.6, vx + 0.4, lo_t - 0.6, color=INK2, style="-")
+    arrow(vx + 1.8, hi_b + 0.6, vx + 1.8, lo_t - 0.6, color=INK2, style="-", ls=(0, (3, 2)))
     mid = (hi_b + lo_t) / 2
     ax.text(vx - 1.2, mid, "supervised term\nleaked rows, same text", ha="right", va="center", fontsize=7,
-            color=SUPERVISED, linespacing=1.25)
+            color=INK2, linespacing=1.25)
     ax.text(vx + 3.4, mid, "matching term\nunpaired pools, different prompts", ha="left", va="center", fontsize=7,
-            color=HYBRID, linespacing=1.25)
+            color=INK2, linespacing=1.25)
     ax.text(8.5, 41, "hidden state $s_t$", ha="center", fontsize=7.5, color=INK2)
     fig.subplots_adjust(0.01, 0.02, 0.99, 0.98)
     save(fig, "ch4/attack_map")
@@ -148,7 +148,7 @@ def overview():
     ax.text(61, 66, "server, the adversary", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
     vs, vx = 27, 52
     ax.text(3.2, top, "public\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    box(35, top, 11, "hub\n(step 1)", blue_box)
+    box(35, top, 11, "hub\n(step 1)", yellow_box)
     arrow(6.6, top, 35, top)
     lo_t, hi_t = vector(vx, top, blue)
     arrow(46, top, vx, top)
