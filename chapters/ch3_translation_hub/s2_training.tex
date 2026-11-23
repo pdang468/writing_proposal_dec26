@@ -31,6 +31,8 @@ Suppose one tokenizer splits \emph{unbelievable} into \emph{un \textbar{} believ
 The two models agree on the boundary after \emph{un} and at the end of the word, and nowhere between.
 For each pair of models, the tokens are therefore collected into token groups: a group ends only at a character position where both tokenizers end a token (whitespace is ignored).
 The word above yields two groups: \emph{un}, with one token per model, and \emph{believable}, with one token under the first model and two under the second.
+A group is the smallest unit on which both tokenizers agree, so it never exceeds a word and is often smaller.
+On NQ, \vf{16} to \vf{18} percent of the groups are pieces of a word, and the two tokenizers of a pair disagree on \vf{1} to \vf{6} percent of the groups.
 Each model contributes one vector per group: the mean of its token vectors, weighted by character coverage and normalized to unit length.
 
 For a model pair $(a,b)$, token group $i$ covers the same text span of a prompt under both models.
