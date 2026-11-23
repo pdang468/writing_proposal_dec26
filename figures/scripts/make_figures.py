@@ -119,9 +119,9 @@ def attack_map():
 def overview():
     """The whole approach as one diagram for Chapter 1: no result file is read."""
     from matplotlib.patches import FancyBboxPatch
-    fig, ax = plt.subplots(figsize=(6.4, 3.1))
+    fig, ax = plt.subplots(figsize=(6.4, 2.85))
     ax.set_xlim(0, 100)
-    ax.set_ylim(20, 68)
+    ax.set_ylim(20, 64)
     ax.axis("off")
     fig.subplots_adjust(0.01, 0.01, 0.99, 0.99)
     h = 8.5
@@ -145,7 +145,6 @@ def overview():
 
     top, bottom = 55, 31
     # Step 1, top lane: the adversary's own text through the frozen hub.
-    ax.text(61, 66, "server, the adversary", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
     vs, vx = 27, 52
     ax.text(3.2, top, "public\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
     box(35, top, 11, "hub\n(step 1)", green_box)

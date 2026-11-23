@@ -42,12 +42,12 @@ Outside the leak, the server still receives the hidden states of every prompt, w
 The adversary is also assumed to hold natural text of the same kind as those prompts, without knowing which text matches which hidden state.
 A matching term aligns the distribution of the mapped hidden states with the distribution of hub outputs for that text.
 A map trained on the leak alone is the supervised fit, and a map trained on the leak and the matching term is the hybrid fit.
-Figure~\ref{fig:intro:approach} shows both steps.
+Figure~\ref{fig:intro:approach} shows the overall flow of the work.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch1/approach_overview}
-\caption{A map trained on a small leak and on distribution matching sends the hidden states that the server receives into a pretrained translation hub, whose decoders reconstruct the private prompt.
+\caption{The work in two steps: step 1 trains a translation hub on public prompts, and step 2 fits a map that sends the hidden states of a private prompt into the hub, where frozen models reconstruct the prompt.
 Red marks the target model and its hidden states, blue marks the public side, that is, the hub outputs for public prompts and the frozen models that decode them, and green marks what is trained: the hub in step 1 and the map in step 2, with the mapped states that the map produces.
 Solid boxes are trained and dashed boxes are frozen.
 The two vertical lines are the comparisons that train the map: on a small leak, where the pairing is known, and by distribution matching, where it is not.}
