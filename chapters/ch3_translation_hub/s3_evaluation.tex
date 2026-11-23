@@ -1,7 +1,6 @@
 \section{Evaluation}\label{sec:hub:eval}
 
 \paragraph{Free-running decoding.} Reconstruction is measured under free-running decoding.
-% Teacher forcing would hand the decoder the true previous tokens, and that prefix carries information about the next token.
 Each decoder conditions on the soft prompt and on its own generated prefix.
 Greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap of the length of the soft prompt plus \vf{32} tokens.
 

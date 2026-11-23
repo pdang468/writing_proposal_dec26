@@ -117,9 +117,9 @@ This dissertation & token & no & no & yes \\
 \end{tabular}
 \end{table}
 
-To the author's knowledge, prior work has not evaluated query-free prompt reconstruction from per-token hidden states of a language model by fitting a map on a counted leak together with unpaired matching.
+To the author's knowledge, prior work has not evaluated query-free prompt reconstruction from per-token hidden states of a language model by fitting a map on a small leak together with unpaired matching.
 
 The attack differs from the alignment attacks on pooled embeddings in the representation: it acts on per-token hidden states, the quantity that a split inference client transmits, and not on one vector per text.
-Its leak is also small: \vf{90} rows from \vf{10} prompts, whereas Huang et al. train on 8,000 leaked texts and the scores of Chen et al. rise up to 1,000.
+It also relies on a small leak, whereas Huang et al. train on 8,000 leaked texts and the scores of Chen et al. rise up to 1,000.
 Jha et al. need no pairs at all, but they evaluate pooled embeddings only.
-The dissertation asks a different question: how much of a prompt a leak of \vf{90} rows reconstructs from per-token hidden states, and how much unpaired matching adds to that leak.
+The dissertation asks a different question: how much of a prompt a small leak reconstructs from per-token hidden states, and how much unpaired matching adds to that leak.
