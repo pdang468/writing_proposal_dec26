@@ -147,10 +147,10 @@ def overview():
     ax.text(61, 66, "server, the adversary", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
     vs, vx = 27, 52
     ax.text(3.2, top, "natural\ntext", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    box(8.5, top, 37.5, "hub (step 1)", "#ffffff", dashed=True)
+    box(8.5, top, 11.5, "hub\n(step 1)", "#ffffff", dashed=True)
     arrow(6.6, top, 8.5, top)
     lo_t, hi_t = vector(vx, top, "#cde2fb")
-    arrow(46, top, vx, top)
+    arrow(20, top, vx, top)
     ax.text(vx + 4.0, top, "hub outputs", ha="left", va="center", fontsize=7.5, color=INK)
     # Step 2, bottom lane: the prompt leaves the client as hidden states; the map and the hub decoders turn them into text.
     ax.add_patch(plt.Rectangle((0, 22.5), 21.5, 18.5, fc="#f7f6f3", ec="none"))
@@ -172,11 +172,11 @@ def overview():
     arrow(77, bottom, 82, bottom)
     ax.text(91, bottom, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
     # The two terms that train the map, between the hub outputs and the mapped states.
-    arrow(vx + 0.4, hi_b, vx + 0.4, lo_t, color=SUPERVISED, style="<|-|>")
-    arrow(vx + 1.8, hi_b, vx + 1.8, lo_t, color=HYBRID, style="<|-|>", ls=(0, (3, 2)))
+    arrow(vx + 0.4, hi_b + 0.6, vx + 0.4, lo_t - 0.6, color=SUPERVISED, style="-")
+    arrow(vx + 1.8, hi_b + 0.6, vx + 1.8, lo_t - 0.6, color=HYBRID, style="-", ls=(0, (3, 2)))
     mid = (hi_b + lo_t) / 2
-    ax.text(vx - 1.2, mid, "small leak\npairing known", ha="right", va="center", fontsize=7, color=SUPERVISED, linespacing=1.25)
-    ax.text(vx + 3.4, mid, "distribution matching\npairing unknown", ha="left", va="center", fontsize=7, color=HYBRID,
+    ax.text(vx - 1.2, mid, "compared on a small leak\npairing known", ha="right", va="center", fontsize=7, color=SUPERVISED, linespacing=1.25)
+    ax.text(vx + 3.4, mid, "compared by distribution matching\npairing unknown", ha="left", va="center", fontsize=7, color=HYBRID,
             linespacing=1.25)
     # Example reconstructions, word by word: green where the word is in the true prompt.
     ax.plot([0, 100], [20, 20], color=GRID, lw=0.8)
