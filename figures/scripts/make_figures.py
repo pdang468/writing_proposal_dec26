@@ -116,6 +116,96 @@ def attack_map():
     save(fig, "ch4/attack_map")
 
 
+def overview():
+    """The whole approach as one diagram for Chapter 1, with example reconstructions from Table 4.x: no result file is read."""
+    from matplotlib.patches import FancyBboxPatch
+    fig, ax = plt.subplots(figsize=(6.4, 4.9))
+    ax.set_xlim(0, 100)
+    ax.set_ylim(-8.5, 68)
+    ax.axis("off")
+    fig.subplots_adjust(0.01, 0.01, 0.99, 0.99)
+    top, bottom, h = 54, 30, 8.5
+    light, green, miss = "#eeeeec", "#00735a", "#c44e00"
+
+    def box(x, y, w, text, fill, dashed=False):
+        ax.add_patch(FancyBboxPatch((x, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1",
+                                    fc=fill, ec=INK2, lw=0.8, ls=(0, (3, 2)) if dashed else "-"))
+        ax.text(x + w / 2, y, text, ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+
+    def arrow(x0, y0, x1, y1, color=INK2, style="-|>", ls="-"):
+        ax.annotate("", (x1, y1), (x0, y0), arrowprops=dict(arrowstyle=style, color=color, lw=0.9 if color != INK2 else 0.8,
+                                                            ls=ls, shrinkA=0, shrinkB=0, mutation_scale=7))
+
+    def vector(x, y, fill):
+        w, cells, ch = 2.2, 6, 1.7
+        for k in range(cells):
+            ax.add_patch(plt.Rectangle((x, y - cells * ch / 2 + k * ch), w, ch, fc=fill, ec=INK2, lw=0.6))
+        return y - cells * ch / 2, y + cells * ch / 2
+
+    # The client on the left, the server, which is the adversary, on the right.
+    ax.add_patch(plt.Rectangle((0, 44.5), 21.5, 22.5, fc="#f7f6f3", ec="none"))
+    ax.plot([21.5, 21.5], [20, 67], color=INK2, lw=0.7, ls=(0, (1, 2)))
+    ax.text(10.7, 65, "client", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
+    ax.text(61, 65, "server, the adversary: no weights of the target model, no queries", ha="center", va="center", fontsize=7.5,
+            color=INK2, style="italic")
+    # Top lane: the prompt leaves the client as hidden states; the map and the frozen hub turn them back into text.
+    ax.text(3.2, top, "prompt", ha="center", va="center", fontsize=7.5, color=INK)
+    arrow(6.6, top, 8.5, top)
+    box(8.5, top, 11.5, "target\nmodel", "#ffffff", dashed=True)
+    vs = 27
+    vector(vs, top, "#fbd9cc")
+    arrow(20, top, vs, top)
+    ax.text(vs + 1.1, top - 6.4, "hidden states;\nthe text stays\non the client", ha="center", va="top", fontsize=7, color=INK, linespacing=1.2)
+    box(34, top, 11, "map\n(step 2)", light)
+    arrow(vs + 2.2, top, 34, top)
+    vx = 52
+    lo_t, hi_t = vector(vx, top, "#fbd9cc")
+    arrow(45, top, vx, top)
+    ax.text(vx + 1.1, hi_t + 1.0, "mapped states", ha="center", va="bottom", fontsize=7.5, color=INK)
+    box(63, top, 17, "hub decoders,\nfrozen", "#ffffff", dashed=True)
+    arrow(vx + 2.2, top, 63, top)
+    arrow(80, top, 84.5, top)
+    ax.text(92.3, top, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+    # Bottom lane: text of the adversary's own, through public models into the hub.
+    ax.text(27.5, bottom, "natural text\nof the same kind", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+    box(36.5, bottom, 11, "hub\n(step 1)", "#ffffff", dashed=True)
+    arrow(34.3, bottom, 36.5, bottom)
+    lo_b, hi_b = vector(vx, bottom, "#cde2fb")
+    arrow(47.5, bottom, vx, bottom)
+    ax.text(vx + 1.1, lo_b - 1.0, "hub outputs", ha="center", va="top", fontsize=7.5, color=INK)
+    # The two terms that train the map.
+    arrow(vx + 0.4, hi_b, vx + 0.4, lo_t, color=SUPERVISED, style="<|-|>")
+    arrow(vx + 1.8, hi_b, vx + 1.8, lo_t, color=HYBRID, style="<|-|>", ls=(0, (3, 2)))
+    mid = (hi_b + lo_t) / 2
+    ax.text(vx - 1.2, mid, "small leak\na few text spans with\ntheir hidden states\npairing known", ha="right", va="center", fontsize=7, color=SUPERVISED, linespacing=1.25)
+    ax.text(vx + 3.4, mid, "distribution matching\nall mapped states against\nall hub outputs\npairing unknown", ha="left", va="center", fontsize=7, color=HYBRID,
+            linespacing=1.25)
+    # Example reconstructions, word by word: green where the word is in the true prompt.
+    ax.plot([0, 100], [20, 20], color=GRID, lw=0.8)
+    fig.canvas.draw()
+    renderer, inv = fig.canvas.get_renderer(), ax.transData.inverted()
+
+    def line(y, label, words):
+        ax.text(1, y, label, ha="left", va="center", fontsize=7.5, color=INK2)
+        x = 23
+        for word, ok in words:
+            t = ax.text(x, y, word, ha="left", va="center", fontsize=7.5, color=INK if ok is None else (green if ok else miss),
+                        fontweight="bold" if ok is False else "normal")
+            x = inv.transform((t.get_window_extent(renderer).x1, 0))[0] + 0.55
+
+    def split(text, ok):
+        return [(w, ok) for w in text.split()]
+
+    line(16.5, "true prompt", split("when did kindergarten start in the united states", None))
+    line(13.0, "leak alone", split("when did", True) + split("semay faqum fell", False) + split("in the", True) + split("nile greece", False))
+    line(9.5, "leak and matching", split("when did kindergarten start in the united states", True))
+    line(5.0, "true prompt", split("who played sweet daddy williams on good times", None))
+    line(1.5, "leak and matching", split("who played", True) + split("sweetheart", False) + split("williams on good times", True))
+    line(-3.0, "true prompt", split("who played robin on once upon a time", None))
+    line(-6.5, "leak and matching", split("who played", True) + split("roon", False) + split("on", True) + split("one after another", False))
+    save(fig, "ch1/approach_overview")
+
+
 def budget():
     d = json.loads((ROOT / "results/v7_2/main/mixed-v7_9-s5.json").read_text())
     reference = json.loads((ROOT / "results/v7_2/main/factorial.json").read_text())

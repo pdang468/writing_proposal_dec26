@@ -36,10 +36,23 @@ The first step builds the inverter, a translation hub (Chapter~\ref{ch:hub}).
 The hub maps the hidden states of several open-weight language models into one shared space, and each of those models, kept frozen, reconstructs the prompt from the hub outputs of any other.
 The second step connects a target model that took no part in hub training (Chapter~\ref{ch:attack}).
 A single affine map sends the hidden states of the target model into the hub, and the frozen decoders of the hub reconstruct its prompts.
-Two sources train the map: a small leak, a set of short text spans for which the adversary holds both the text and the hidden states, and a matching term that aligns unpaired hidden states with unpaired hub outputs.
+The map learns first from a small leak, a set of short text spans for which the adversary holds both the text and the hidden states.
 The leak is counted in rows: each row pairs the average hidden state of the target model with the average hub output for one token group of a leaked span.
-The matching term requires no text from the client.
+Outside the leak, the server still receives the hidden states of every prompt, without their text.
+The adversary is also assumed to hold natural text of the same kind as those prompts, without knowing which text matches which hidden state.
+A matching term aligns the distribution of the mapped hidden states with the distribution of hub outputs for that text.
 A map trained on the leak alone is the supervised fit, and a map trained on the leak and the matching term is the hybrid fit.
+Figure~\ref{fig:intro:approach} shows both steps together with selected reconstructions.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{ch1/approach_overview}
+\caption{A map trained on a small leak and on distribution matching sends the hidden states that the server receives into a frozen translation hub, whose decoders reconstruct the prompt.
+The leak pairs a few text spans with their hidden states; distribution matching compares the mapped hidden states of all prompts with hub outputs of natural text of the same kind, with no pairing between them.
+Shaded boxes are trained and dashed boxes are frozen.
+The reconstructions are selected NQ examples from Table~\ref{tab:attack:examples}: words of the true prompt are green, other words are orange and bold.}
+\label{fig:intro:approach}
+\end{figure}
 
 \paragraph{Results.} Both steps are evaluated on NQ, the query strings of Natural Questions, and on two datasets of legal text.
 The score is word-F1, the overlap between the words of the reconstruction and the words of the prompt, without regard to their order.

@@ -6,7 +6,7 @@ The frozen projectors and decoders of the hub then reconstruct the target model'
 The map learns first from a small leak, a set of short text spans with both their text and the target model's hidden states, which supervises the map directly.
 The leak alone cannot fit the map well, because a few spans cannot show how the hidden states of a whole corpus correspond to the hub.
 Yet hidden states without their text are plentiful, because the server receives the hidden states of every prompt that the client sends.
-The adversary is also assumed to hold natural text from the same distribution as those prompts, with no correspondence to any of them.
-Neither collection ties a hidden state to its text, but if the target model and the hub share structure, the two distributions should carry the same shape, and that shape can constrain the map beyond the leaked spans.
+The adversary is also assumed to hold natural text of the same kind as those prompts, without knowing which text matches which hidden state.
+If the target model and the hub share structure, the two distributions should still carry the same shape, and that shape can constrain the map beyond the leaked spans.
 A matching term therefore pulls the distribution of the mapped hidden states onto the distribution of hub outputs for that text, in the shared space of the hub.
 The chapter measures how much that distribution matching adds to the leak: with a small leak, it more than doubles mean word-F1 on all three datasets.
