@@ -38,25 +38,27 @@ The hub maps the hidden states of three open-weight language models into one sha
 The second step connects a target model that took no part in hub training (Chapter~\ref{ch:attack}).
 A single affine map sends the hidden states of the target model into the hub, and the frozen decoders of the hub reconstruct its prompts.
 Two sources train the map: a small leak, a set of short text spans for which the adversary holds both the text and the hidden states, and a matching term that aligns unpaired hidden states with unpaired hub outputs.
-The leak is counted in rows: each row pairs the average hidden state of the target model with the average hub output for one token group of a leaked span, about one word on NQ.
+The leak is counted in rows: each row pairs the average hidden state of the target model with the average hub output for one token group of a leaked span.
 The matching term requires no text from the client.
 A map trained on the leak alone is the supervised fit, and a map trained on the leak and the matching term is the hybrid fit.
 
 \paragraph{Results.} Both steps are evaluated on NQ, the query strings of Natural Questions, and on two datasets of legal text.
 The score is word-F1, the overlap between the words of the reconstruction and the words of the prompt, without regard to their order.
-The hub supports reconstruction across models: mean cross-model word-F1 is \vf{0.944} on NQ and \vf{0.977} on each legal dataset, against mismatched-prompt controls of at most \vf{0.152}.
-For the target model, a leak of \vf{90} rows on NQ gives the supervised fit a word-F1 of \vf{0.35} and the hybrid fit \vf{0.77}.
-On the legal datasets the matching term raises word-F1 from \vf{0.19} to \vf{0.60} and from \vf{0.10} to \vf{0.32}.
-Without a leak, the matching term reaches a word-F1 of \vf{0.061} on NQ, against \vf{0.067} for its mismatched-prompt control.
-Reconstruction is also partial: exact match under the hybrid fit is \vf{0.21} on NQ and near zero on the legal datasets.
 
-\paragraph{Contributions.} The dissertation makes three contributions.
+The hub supports reconstruction across models: each of its three frozen decoders reconstructs prompts from the hidden states of the other models with high accuracy, on all three datasets.
+For the target model, the leak alone carries only a small part of the recovery under supervised training.
+The matching term more than doubles that recovery on all three datasets.
+Without a leak, the matching term alone reconstructs no better than a control that feeds the decoder the hidden states of another prompt.
+Exact match remains the challenging part: the hybrid fit reconstructs few prompts word for word on NQ and nearly none on the legal datasets.
+
+\paragraph{Contributions.}
 \begin{itemize}
-\item \textbf{A translation hub for cross-model inversion.} One shared space holds the prompt information of three open-weight models, and each frozen model reconstructs prompts from the hidden states of the others.
-\item \textbf{An inversion attack without the target model.} An adversary with no weights of the target model and no query access reconstructs prompts through one affine map, trained on a leak of \vf{90} rows and on unpaired hidden states.
-\item \textbf{A measurement of what unpaired matching adds.} At a leak of \vf{90} rows, the matching term raises word-F1 on all three datasets; the gain is largest at leaks of \vf{45} to \vf{90} rows and small at \vf{9} and \vf{900} rows, and matching without a leak fails in the tested NQ setting.
+\item \textbf{An inversion framework centered on a translation hub.} The framework maps the hidden states of several language models into one shared space, the hub.
+From the hub, each model, kept frozen, reconstructs the prompts of any other model.
+That reconstruction extends to a model outside the hub: a map fitted on a small leak and on unpaired hidden states sends its hidden states into the hub, with no weights of the model and no queries to it.
+\item \textbf{A measurement of what an adversary recovers.} This dissertation measures what part of a prompt the framework recovers under different leak scenarios and under structure matching, on short and long prompts.
+The proposed work extends that characterization to the privacy methods that defend split inference.
 \end{itemize}
-These results are a first measurement, not a general break of split inference: the evidence covers one target model observed at one block, the settings of the attack were selected on prompts with known text outside the leak, and no defended system is evaluated.
 
 \paragraph{Outline.} Chapter~\ref{ch:lit} reviews inversion attacks, cross-model alignment, and defenses, and positions the dissertation among them.
 Chapter~\ref{ch:hub} presents the translation hub.
