@@ -67,7 +67,7 @@ def attack_map():
     ax.set_ylim(0, 44)
     ax.axis("off")
     top, bottom, h = 32, 9, 8.5
-    red_box, blue_box, yellow_box, red, blue, yellow = "#fbe4e1", "#e3effc", "#fdf0c0", "#f6c9c4", "#cde2fb", "#fbe08a"
+    red_box, blue_box, green_box, red, blue, green = "#fbe4e1", "#e3effc", "#dff0dc", "#f6c9c4", "#cde2fb", "#a9d6a2"
 
     def box(x, y, w, text, fill, dashed=False):
         ax.add_patch(FancyBboxPatch((x, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1",
@@ -86,10 +86,10 @@ def attack_map():
 
     # Top lane: the target model, the one trained module, and the frozen read-out of the hub.
     box(0, top, 17, "Pythia-1B\nblock 12, 2048", red_box, dashed=True)
-    box(22, top, 15, "affine map\n2048 $\\to$ 512", yellow_box)
+    box(22, top, 15, "affine map\n2048 $\\to$ 512", green_box)
     arrow(17, top, 22, top)
     vx = 46
-    lo_t, hi_t = vector(vx, top, yellow)
+    lo_t, hi_t = vector(vx, top, green)
     arrow(37, top, vx, top)
     ax.text(vx + 1.1, hi_t + 1.0, "mapped state $\\hat{m}_t$", ha="center", va="bottom", fontsize=7.5, color=INK)
     box(62, top, 17, "hub projectors\nand decoders", blue_box, dashed=True)
@@ -125,8 +125,8 @@ def overview():
     ax.axis("off")
     fig.subplots_adjust(0.01, 0.01, 0.99, 0.99)
     h = 8.5
-    red, blue, yellow = "#f6c9c4", "#cde2fb", "#fbe08a"  # unknown to the adversary; pretrained hub; fitted to match the two
-    red_box, blue_box, yellow_box = "#fbe4e1", "#e3effc", "#fdf0c0"
+    red, blue, green = "#f6c9c4", "#cde2fb", "#a9d6a2"  # unknown to the adversary; pretrained hub; fitted to match the two
+    red_box, blue_box, green_box = "#fbe4e1", "#e3effc", "#dff0dc"
 
     def box(x, y, w, text, fill, dashed=False):
         ax.add_patch(FancyBboxPatch((x, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1",
@@ -148,7 +148,7 @@ def overview():
     ax.text(61, 66, "server, the adversary", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
     vs, vx = 27, 52
     ax.text(3.2, top, "public\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    box(35, top, 11, "hub\n(step 1)", yellow_box)
+    box(35, top, 11, "hub\n(step 1)", green_box)
     arrow(6.6, top, 35, top)
     lo_t, hi_t = vector(vx, top, blue)
     arrow(46, top, vx, top)
@@ -165,9 +165,9 @@ def overview():
     lo_s, hi_s = vector(vs, bottom, red)
     arrow(20, bottom, vs, bottom)
     ax.text(vs + 1.1, lo_s - 1.0, "hidden states", ha="center", va="top", fontsize=7.5, color=INK)
-    box(35, bottom, 11, "map\n(step 2)", yellow_box)
+    box(35, bottom, 11, "map\n(step 2)", green_box)
     arrow(vs + 2.2, bottom, 35, bottom)
-    lo_b, hi_b = vector(vx, bottom, yellow)
+    lo_b, hi_b = vector(vx, bottom, green)
     arrow(46, bottom, vx, bottom)
     ax.text(vx + 1.1, lo_b - 1.0, "mapped states", ha="center", va="top", fontsize=7.5, color=INK)
     box(63, bottom, 14, "frozen models\n(decoders)", blue_box, dashed=True)

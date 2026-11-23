@@ -16,7 +16,7 @@ Like the hub, the map acts on one hidden state at a time (Section~\ref{sec:hub:d
 \caption{The attack trains one affine map between the target model and the frozen hub.
 The map sends each hidden state of the target model to a mapped state in the hub, and the frozen projectors and decoders of the hub reconstruct the prompt from the mapped states.
 The supervised term compares a mapped state with the hub output of the same leaked row; the matching term aligns mapped states with hub outputs of different prompts, drawn from the two unpaired pools.
-The yellow solid box is the only trained module; dashed boxes are frozen, red for the target model and blue for the public model and the hub.}
+The green solid box is the only trained module; dashed boxes are frozen, red for the target model and blue for the public model and the hub.}
 \label{fig:attack:map}
 \end{figure}
 

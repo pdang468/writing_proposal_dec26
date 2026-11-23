@@ -90,7 +90,7 @@ def architecture():
     sources = [("Qwen3.5-0.8B\nblock 18, 1024", "$\\to$ 1024"), ("OLMo-2-1B\nblock 12, 2048", "$\\to$ 2048"),
                ("SmolLM2-1.7B\nblock 18, 2048", "$\\to$ 2048")]
     decoders = ["Qwen\ndecoder", "OLMo\ndecoder", "SmolLM\ndecoder"]
-    light, dark, public = "#fdf0c0", "#fae29a", "#e3effc"  # trained modules yellow, frozen public models blue
+    light, dark, public = "#dff0dc", "#bfe0ba", "#e3effc"  # trained modules green, frozen public models blue
     for y, (src, _) in zip(rows, sources):
         box(0, y, 17, src, public, dashed=True)
         box(21, y, 13, "adapter\n$\\to$ 1024", light)
