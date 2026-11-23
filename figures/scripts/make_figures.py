@@ -124,7 +124,7 @@ def overview():
     ax.set_ylim(-8.5, 68)
     ax.axis("off")
     fig.subplots_adjust(0.01, 0.01, 0.99, 0.99)
-    top, bottom, h = 54, 30, 8.5
+    h = 8.5
     light, green, miss = "#eeeeec", "#00735a", "#c44e00"
 
     def box(x, y, w, text, fill, dashed=False):
@@ -142,43 +142,41 @@ def overview():
             ax.add_patch(plt.Rectangle((x, y - cells * ch / 2 + k * ch), w, ch, fc=fill, ec=INK2, lw=0.6))
         return y - cells * ch / 2, y + cells * ch / 2
 
-    # The client on the left, the server, which is the adversary, on the right.
-    ax.add_patch(plt.Rectangle((0, 44.5), 21.5, 22.5, fc="#f7f6f3", ec="none"))
-    ax.plot([21.5, 21.5], [20, 67], color=INK2, lw=0.7, ls=(0, (1, 2)))
-    ax.text(10.7, 65, "client", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
-    ax.text(61, 65, "server, the adversary: no weights of the target model, no queries", ha="center", va="center", fontsize=7.5,
-            color=INK2, style="italic")
-    # Top lane: the prompt leaves the client as hidden states; the map and the frozen hub turn them back into text.
-    ax.text(3.2, top, "prompt", ha="center", va="center", fontsize=7.5, color=INK)
-    arrow(6.6, top, 8.5, top)
-    box(8.5, top, 11.5, "target\nmodel", "#ffffff", dashed=True)
-    vs = 27
-    vector(vs, top, "#fbd9cc")
-    arrow(20, top, vs, top)
-    ax.text(vs + 1.1, top - 6.4, "hidden states;\nthe text stays\non the client", ha="center", va="top", fontsize=7, color=INK, linespacing=1.2)
-    box(34, top, 11, "map\n(step 2)", light)
-    arrow(vs + 2.2, top, 34, top)
-    vx = 52
-    lo_t, hi_t = vector(vx, top, "#fbd9cc")
-    arrow(45, top, vx, top)
-    ax.text(vx + 1.1, hi_t + 1.0, "mapped states", ha="center", va="bottom", fontsize=7.5, color=INK)
-    box(63, top, 17, "hub decoders,\nfrozen", "#ffffff", dashed=True)
-    arrow(vx + 2.2, top, 63, top)
-    arrow(80, top, 84.5, top)
-    ax.text(92.3, top, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    # Bottom lane: text of the adversary's own, through public models into the hub.
-    ax.text(27.5, bottom, "natural text\nof the same kind", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    box(36.5, bottom, 11, "hub\n(step 1)", "#ffffff", dashed=True)
-    arrow(34.3, bottom, 36.5, bottom)
-    lo_b, hi_b = vector(vx, bottom, "#cde2fb")
-    arrow(47.5, bottom, vx, bottom)
-    ax.text(vx + 1.1, lo_b - 1.0, "hub outputs", ha="center", va="top", fontsize=7.5, color=INK)
-    # The two terms that train the map.
+    top, bottom = 55, 31
+    # Step 1, top lane: the adversary's own text through the frozen hub.
+    ax.text(61, 66, "server, the adversary", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
+    vs, vx = 27, 52
+    ax.text(vs + 1.1, top, "natural text", ha="center", va="center", fontsize=7.5, color=INK)
+    box(36, top, 10, "hub\n(step 1)", "#ffffff", dashed=True)
+    arrow(33.6, top, 36, top)
+    lo_t, hi_t = vector(vx, top, "#cde2fb")
+    arrow(46, top, vx, top)
+    ax.text(vx + 4.0, top, "hub outputs", ha="left", va="center", fontsize=7.5, color=INK)
+    # Step 2, bottom lane: the prompt leaves the client as hidden states; the map and the hub decoders turn them into text.
+    ax.add_patch(plt.Rectangle((0, 22.5), 21.5, 18.5, fc="#f7f6f3", ec="none"))
+    ax.plot([21.5, 21.5], [22.5, 41], color=INK2, lw=0.7, ls=(0, (1, 2)))
+    ax.text(10.7, 38.6, "client", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
+    ax.text(3.2, bottom, "prompt", ha="center", va="center", fontsize=7.5, color=INK)
+    arrow(6.6, bottom, 8.5, bottom)
+    box(8.5, bottom, 11.5, "target\nmodel", "#ffffff", dashed=True)
+    lo_s, hi_s = vector(vs, bottom, "#fbd9cc")
+    arrow(20, bottom, vs, bottom)
+    ax.text(vs + 1.1, lo_s - 1.0, "hidden states", ha="center", va="top", fontsize=7.5, color=INK)
+    box(35, bottom, 11, "map\n(step 2)", light)
+    arrow(vs + 2.2, bottom, 35, bottom)
+    lo_b, hi_b = vector(vx, bottom, "#fbd9cc")
+    arrow(46, bottom, vx, bottom)
+    ax.text(vx + 1.1, lo_b - 1.0, "mapped states", ha="center", va="top", fontsize=7.5, color=INK)
+    box(63, bottom, 14, "hub\ndecoders", "#ffffff", dashed=True)
+    arrow(vx + 2.2, bottom, 63, bottom)
+    arrow(77, bottom, 82, bottom)
+    ax.text(91, bottom, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+    # The two terms that train the map, between the hub outputs and the mapped states.
     arrow(vx + 0.4, hi_b, vx + 0.4, lo_t, color=SUPERVISED, style="<|-|>")
     arrow(vx + 1.8, hi_b, vx + 1.8, lo_t, color=HYBRID, style="<|-|>", ls=(0, (3, 2)))
     mid = (hi_b + lo_t) / 2
-    ax.text(vx - 1.2, mid, "small leak\na few text spans with\ntheir hidden states\npairing known", ha="right", va="center", fontsize=7, color=SUPERVISED, linespacing=1.25)
-    ax.text(vx + 3.4, mid, "distribution matching\nall mapped states against\nall hub outputs\npairing unknown", ha="left", va="center", fontsize=7, color=HYBRID,
+    ax.text(vx - 1.2, mid, "small leak\npairing known", ha="right", va="center", fontsize=7, color=SUPERVISED, linespacing=1.25)
+    ax.text(vx + 3.4, mid, "distribution matching\npairing unknown", ha="left", va="center", fontsize=7, color=HYBRID,
             linespacing=1.25)
     # Example reconstructions, word by word: green where the word is in the true prompt.
     ax.plot([0, 100], [20, 20], color=GRID, lw=0.8)
