@@ -19,18 +19,17 @@ With query access, the adversary submits its own text, collects the resulting hi
 
 A second line of work inverts sentence embeddings, one pooled vector per text, and again relies on queries to the encoder~\cite{song2020information,li2023sentence,morris2023text}.
 Recent attacks on sentence embeddings remove the queries: they align the embeddings of the target encoder with those of an encoder the adversary holds, from thousands of leaked pairs~\cite{huang2024transferable}, from a few~\cite{chen2025algen}, or from none~\cite{jha2025harnessing}.
-Those attacks apply to pooled vectors.
+The Platonic Representation Hypothesis offers a broader motivation for alignment across models: models trained on similar data may converge toward similar representations~\cite{huh2024platonic}.
+Those alignment attacks apply to pooled vectors.
 To the author's knowledge, no attack of that kind has been evaluated on the per-token hidden states of a language model, the quantity that a split inference client transmits.
 
-\paragraph{Research question.} This dissertation studies an adversary with neither form of access: it holds no weights of the client's blocks and has no means to query them.
-The question is how much of a prompt such an adversary reconstructs from the hidden states alone, given a small leak of text.
-Because prior attacks rest on access, it is tempting to conclude that a client that keeps its blocks private also keeps its prompts private.
-Yet the Platonic Representation Hypothesis proposes that models trained on similar data converge toward similar representations~\cite{huh2024platonic}.
-The approach draws on that hypothesis: if it holds for language models, a simple map may relate the hidden states of a target model to those of public models.
-An adversary could then build an inverter entirely from public models and connect the target model to it afterwards.
-Similar representations do not by themselves expose a prompt: a map can preserve the meaning of a prompt and still lose its exact words.
-Prompt reconstruction is therefore a direct test of what survives the map between models.
-The dissertation argues that representations shared across models support inversion across models, and that unpaired matching improves reconstruction when a small leak supplies the correspondences.
+\paragraph{Research question.} If models trained on similar data do converge toward similar representations, the hidden states of one model carry structure that other models also hold.
+This dissertation asks what information about a prompt is recoverable by matching that shared structure.
+Seen from privacy, the question is what a split inference client exposes to a server that holds neither the weights of the client's blocks nor query access to them.
+Seen from the models themselves, the same question is how much of what one model encodes about a prompt another model can read.
+Neither answer follows from similarity alone: a map can preserve the meaning of a prompt and still lose its exact words.
+Prompt reconstruction therefore gives both views one test, the words that remain accessible after the map between models.
+The dissertation carries out that test on per-token hidden states, where a small leak of text supplies correspondences and unpaired matching supplies further constraints on the map.
 
 \paragraph{Approach.} The dissertation develops that attack in two steps.
 The first step builds the inverter, a translation hub (Chapter~\ref{ch:hub}).
