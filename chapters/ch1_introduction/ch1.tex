@@ -23,15 +23,15 @@ The Platonic Representation Hypothesis offers a broader motivation for alignment
 Those alignment attacks apply to pooled vectors.
 To the author's knowledge, no attack of that kind has been evaluated on the per-token hidden states of a language model, the quantity that a split inference client transmits.
 
-\paragraph{Research question.} If models trained on similar data do converge toward similar representations, the hidden states of one model carry structure that other models also hold.
-This dissertation asks what information about a prompt is recoverable by matching that shared structure.
+\paragraph{Research question.} If language models converge toward similar representations, another model can learn to read what one model encodes.
+This dissertation asks what information about a prompt is recoverable by matching the structure that the models share.
 Seen from privacy, the question is what a split inference client exposes to a server that holds neither the weights of the client's blocks nor query access to them.
 Seen from the models themselves, the same question is how much of what one model encodes about a prompt another model can read.
 Neither answer follows from similarity alone: a map can preserve the meaning of a prompt and still lose its exact words.
 Prompt reconstruction therefore gives both views one test, the words that remain accessible after the map between models.
 The dissertation carries out that test on per-token hidden states, where a small leak of text supplies correspondences and unpaired matching supplies further constraints on the map.
 
-\paragraph{Approach.} The dissertation develops that attack in two steps.
+\paragraph{Approach.} The dissertation approaches that question with an attack in two steps.
 The first step builds the inverter, a translation hub (Chapter~\ref{ch:hub}).
 The hub maps the hidden states of three open-weight language models into one shared space, and each of the three models, kept frozen, reconstructs the prompt from the hub outputs of any other.
 The second step connects a target model that took no part in hub training (Chapter~\ref{ch:attack}).
