@@ -146,9 +146,9 @@ def overview():
     # Step 1, top lane: the adversary's own text through the frozen hub.
     ax.text(61, 66, "server, the adversary", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
     vs, vx = 27, 52
-    ax.text(vs + 1.1, top, "natural text", ha="center", va="center", fontsize=7.5, color=INK)
-    box(36, top, 10, "hub\n(step 1)", "#ffffff", dashed=True)
-    arrow(33.6, top, 36, top)
+    ax.text(3.2, top, "natural\ntext", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+    box(8.5, top, 37.5, "hub (step 1)", "#ffffff", dashed=True)
+    arrow(6.6, top, 8.5, top)
     lo_t, hi_t = vector(vx, top, "#cde2fb")
     arrow(46, top, vx, top)
     ax.text(vx + 4.0, top, "hub outputs", ha="left", va="center", fontsize=7.5, color=INK)
