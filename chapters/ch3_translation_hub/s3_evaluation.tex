@@ -1,6 +1,6 @@
 \section{Evaluation}\label{sec:hub:eval}
 
-\paragraph{Free-running decoding.} The hypothesis is tested under free-running decoding.
+\paragraph{Free-running decoding.} Reconstruction is measured under free-running decoding.
 % Teacher forcing would hand the decoder the true previous tokens, and that prefix carries information about the next token.
 Each decoder conditions on the soft prompt and on its own generated prefix.
 Greedy generation starts at the start token and stops at the end-of-sequence token or at the generation cap of the length of the soft prompt plus \vf{32} tokens.
@@ -18,7 +18,7 @@ A score above the control shows that the decoder recovers words from the prompt'
 
 \paragraph{Evaluation metric.}
 The primary metric is mean cross-model word-F1, averaged over the six cross-model directions on the validation set.
-The hypothesis is evaluated against the mismatched-prompt control on the same set.
+Each score is compared with the mismatched-prompt control on the same set.
 Since the validation set also determines checkpoint selection, all reported results are validation scores.
 The NQ test set remains unevaluated.
 

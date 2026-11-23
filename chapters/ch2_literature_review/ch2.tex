@@ -7,6 +7,10 @@ Section~\ref{sec:lit:position} places the dissertation among them.
 
 \section{Inversion of Hidden States in Split Inference}\label{sec:lit:split}
 
+In principle, the hidden states of a language model determine the prompt.
+Nikolaou et al.~\cite{nikolaou2026language} prove that a decoder-only transformer maps different prompts to different hidden states almost surely, that is, with probability one over its random initialization.
+Whether an adversary recovers the prompt in practice then depends on what the adversary holds, and this section orders the attacks by that access.
+
 Early work on the inversion of intermediate representations studied images.
 He et al.~\cite{he2019model} split a convolutional network between a client and a server and recover the input image from the activations at the split layer, in three settings: with the model's weights, with queries to the model, and with neither.
 Pasquini et al.~\cite{pasquini2021unleashing} attack split learning, the training counterpart: a malicious server steers the client's network during training until its activations can be inverted, with a public dataset and no knowledge of the client's data.
@@ -17,8 +21,7 @@ Qu et al.~\cite{qu2025prompt} optimize an input embedding until its hidden state
 A grey-box variant, in which the adversary knows the base weights and only its own part of the fine-tuned weights, reaches 85.4 percent on Guanaco-65B.
 Dong et al.~\cite{dong2025depth} invert both shallow and deep layers of six language models by a two-phase optimization, and report a token F1 of 86.88 on a medical prompt of 4,112 tokens from a middle layer of Llama-3.
 Thomas et al.~\cite{thomas2025hidden} compute the hidden states of candidate tokens from the vocabulary, match each observed hidden state against them, and recover prompts with nearly perfect accuracy, also when the hidden states are permuted.
-Nikolaou et al.~\cite{nikolaou2026language} prove that a decoder-only transformer maps different prompts to different hidden states almost surely, that is, with probability one over its random initialization.
-Their algorithm SipIt then recovers the exact prompt one token at a time, demonstrated on GPT-2 Small.
+With the weights, the algorithm SipIt of Nikolaou et al.~\cite{nikolaou2026language} recovers the exact prompt one token at a time, demonstrated on GPT-2 Small.
 Wan et al.~\cite{wan2024information} study a malicious model provider and train a transformer inverter for the hidden states of deep layers.
 With the model in hand, the adversary can therefore compare candidate prompts with the observed hidden states, and recovery is close to exact in some of the evaluated settings.
 
@@ -51,7 +54,7 @@ Alignment offers another route: the adversary maps the representations of the ta
 Huh et al.~\cite{huh2024platonic} hypothesize that they do: as vision models and language models grow, they measure the distance between inputs in increasingly similar ways.
 Moschella et al.~\cite{moschella2023relative} represent each input by its cosine similarities to a fixed set of anchor inputs, and components trained on that relative representation combine across models without further training.
 Maiorca et al.~\cite{maiorca2023latent} estimate a direct linear or orthogonal map between two representation spaces in closed form from paired anchors.
-For this dissertation the hypothesis is a motivation and not a guarantee: similar structure does not imply that one affine map preserves the identity of each token.
+The hypothesis does not state how closely two models agree, so whether the agreement suffices to recover the tokens of a prompt remains an empirical question.
 
 \paragraph{Alignment with little or no supervision.} How many paired examples a map requires has a long history in bilingual word embeddings.
 Artetxe et al.~\cite{artetxe2017learning} start from a seed dictionary of 25 word pairs, fit a map, induce a larger dictionary from the mapped embeddings, and repeat; the results are comparable to those of systems with richer bilingual resources.

@@ -2,7 +2,7 @@
 
 NQ prompts are short questions.
 Two legal datasets repeat the test on legal text, one with prompts of \vf{10} words and one with prompts of about \vf{68} words.
-A separate hub is trained per dataset, with the architecture and objective of Sections~\ref{sec:hub:design} and~\ref{sec:hub:training}.
+A separate hub is trained per dataset, with the architecture, objective, and settings of Sections~\ref{sec:hub:design} to~\ref{sec:hub:setup}.
 
 \paragraph{Datasets.} Both datasets are cut from the same documents of Pile of Law, a collection of contracts, SEC filings, credit-card agreements, and terms of service~\cite{henderson2022pile}.
 Each prompt starts at a word drawn uniformly over its document.
@@ -11,7 +11,7 @@ A legal100t prompt is longer and grows word by word until it reaches \vf{100} to
 Such a prompt averages \vf{68} words on the validation split.
 Each dataset has \vf{40{,}000} training and \vf{5{,}000} validation prompts, and no document crosses a split.
 
-\paragraph{Results.} Both legal hubs support the hypothesis (Table~\ref{tab:hub:legal}).
+\paragraph{Results.} Cross-model reconstruction holds on both legal datasets (Table~\ref{tab:hub:legal}).
 Mean cross-model word-F1 is \vf{0.977} on each dataset, against mismatched-prompt controls of \vf{0.071} on legal10w and \vf{0.152} on legal100t.
 The lowest cross-model direction is Qwen $\to$ OLMo on legal100t, at \vf{0.955} (Figure~\ref{fig:hub:legal-directions}).
 The lower scores into Qwen on NQ do not recur: the cross-model directions into Qwen score \vf{0.975} to \vf{0.986}.

@@ -17,7 +17,7 @@ A second round extends the attack beyond the map, with no further access to the 
 In that round, a language model rewrites the three reconstructions of the hub's decoders into one text, without any hidden state.
 The rewrite raises word-F1 over the best single decoder on legal10w and legal100t, where the decoders are weakest, and adds \vf{0.008} on NQ.
 
-\paragraph{Limitations.} Two limitations bound the claims.
+\paragraph{Limitations.}
 \begin{itemize}
 \item \textbf{Settings chosen with known domain.} The supervision fraction and the temperature were selected by word-F1 on \vf{500} prompts of the known domain.
 \item \textbf{Models and layer.} The results cover one block of one target model and three hub models.

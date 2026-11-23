@@ -1,7 +1,7 @@
 The Platonic Representation Hypothesis proposes that models trained on similar data converge toward similar representations~\cite{huh2024platonic}.
-If the representations are similar, the hidden states that different models produce for the same prompt are correlated.
-This work therefore investigates whether a decoder that reconstructs a prompt from one model's hidden states also reconstructs it from another's, once both are mapped into a shared space.
-This chapter builds that shared space, the translation hub, from three open-weight language models and tests cross-model reconstruction.
-
-\paragraph{Hypothesis: shared representations support cross-model inversion.} A token-wise hub trained on three open-weight models preserves enough input information for each frozen model to reconstruct the prompt from any other model's hub outputs.
+If the hypothesis holds, each model departs in its own way from a structure that all of them share.
+Two models may then differ more from each other than either differs from the average of several models.
+That possibility is plausible and is not established here; it motivates a hub, one shared space trained on several models at once, in place of a direct map between two models.
+This chapter builds such a hub, the translation hub, from $k$ language models.
+The chapter then asks whether each frozen model reconstructs a prompt from the hidden states of any other model, once both are mapped into the hub.
 

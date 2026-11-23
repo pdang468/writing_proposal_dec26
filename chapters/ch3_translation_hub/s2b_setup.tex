@@ -1,0 +1,20 @@
+\section{Experimental Setup}\label{sec:hub:setup}
+
+\paragraph{Models.} The experiments train the hub on $k=3$ open-weight models: Qwen3.5-0.8B, OLMo-2-1B, and SmolLM2-1.7B.
+Each contributes hidden states from the block at three quarters of its depth: block \vf{18} of \vf{24} in Qwen (width \vf{1024}), block \vf{12} of \vf{16} in OLMo (width \vf{2048}), and block \vf{18} of \vf{24} in SmolLM (width \vf{2048}).
+Three models define nine directions: six cross-model directions and three self-reconstruction directions.
+The common width is $d=\vf{1024}$ and the hub output has $d_h=\vf{512}$ dimensions.
+
+\paragraph{Dataset.} The hub is trained and evaluated on NQ, a dataset of query strings from Natural Questions.
+The dataset is split into \vf{40{,}000} training, \vf{5{,}000} validation, and \vf{5{,}000} test prompts.
+Near-duplicate questions never cross a split.
+The validation prompts average \vf{9} words and range from \vf{6} to \vf{19}.
+
+\paragraph{Loss weights.} The weights of Equation~\ref{eq:hub:loss} are $\lambda_{c}=\vf{0.1}$ and $\lambda_{g}=\vf{1.0}$, and the temperature of Equation~\ref{eq:hub:infonce} is $\tau=\vf{0.05}$.
+With $k=3$, Equation~\ref{eq:hub:dec} gives each cross-model direction a weight of $1/7$ and each self-reconstruction direction a weight of $1/21$.
+
+\paragraph{Schedule and checkpoint selection.} The hub is trained for \vf{2{,}500} AdamW updates of \vf{32} training prompts each.
+Teacher-forced Acc@1 selects the checkpoint.
+Acc@1 is the fraction of prompt tokens that the decoder ranks first given the ground-truth prefix, averaged over the \vf{5{,}000} validation prompts and the six cross-model directions.
+The selected checkpoint is update \vf{2{,}250}, at Acc@1 \vf{0.954}.
+
