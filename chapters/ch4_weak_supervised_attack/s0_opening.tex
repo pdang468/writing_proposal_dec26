@@ -4,7 +4,8 @@ This chapter connects that target model to the frozen hub through an affine map.
 The frozen projectors and decoders of the hub then reconstruct the target model's prompts from the output of the map.
 
 The map learns first from a small leak, a set of short text spans with both their text and the target model's hidden states, which supervises the map directly.
-Such a leak is scarce, whereas hidden states without their text are plentiful: the server observes every prompt that the client sends.
+A leak that small is not enough on its own: a few leaked spans cannot show how the hidden states of a whole corpus correspond to the hub.
+Yet hidden states without their text are plentiful, because the server observes every prompt that the client sends.
 The adversary is also assumed to hold natural text from the same distribution as those prompts, with no correspondence to any of them.
 A matching term then aligns the distribution of the mapped hidden states with the distribution of hub outputs for that text, in the shared space of the hub.
 The chapter measures what the matching term adds to the leak: with a small leak, it more than doubles mean word-F1 on all three datasets.
