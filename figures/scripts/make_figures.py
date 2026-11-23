@@ -170,7 +170,7 @@ def overview():
     lo_b, hi_b = vector(vx, bottom, yellow)
     arrow(46, bottom, vx, bottom)
     ax.text(vx + 1.1, lo_b - 1.0, "mapped states", ha="center", va="top", fontsize=7.5, color=INK)
-    box(63, bottom, 14, "hub\ndecoders", blue_box, dashed=True)
+    box(63, bottom, 14, "frozen models\n(decoders)", blue_box, dashed=True)
     arrow(vx + 2.2, bottom, 63, bottom)
     arrow(77, bottom, 82, bottom)
     ax.text(91, bottom, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
