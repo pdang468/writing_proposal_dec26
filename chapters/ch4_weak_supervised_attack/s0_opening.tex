@@ -1,13 +1,11 @@
-Chapter~\ref{ch:hub} trained the translation hub with full access to the hidden states of its three models.
-This chapter adds a target model and connects it to the frozen hub through an affine map.
-The frozen projectors and decoders then reconstruct the target model's prompts from the output of the map.
+Chapter~\ref{ch:hub} trained the translation hub with full access to the hidden states of its models.
+An adversary has no such access to a target model: it observes the hidden states that the client transmits, and it holds neither the weights of the model nor a way to query it.
+This chapter connects that target model to the frozen hub through an affine map.
+The frozen projectors and decoders of the hub then reconstruct the target model's prompts from the output of the map.
 
-Two sources of information train the map.
-First, a small leak, a set of short text spans with both their text and the target model's hidden states, supervises the map directly.
-Second, a matching term aligns unpaired hidden states of the target model and hub outputs with no correspondence between them.
-The chapter tests whether the matching term improves reconstruction over the leak alone.
-With a leak of \vf{90} rows, the matching term raises mean word-F1 on NQ from \vf{0.35} to \vf{0.77}.
-On the two legal datasets, mean word-F1 rises from \vf{0.19} to \vf{0.60} on legal10w and from \vf{0.10} to \vf{0.32} on legal100t.
-
-\paragraph{Hypothesis: matching improves reconstruction from a small leak.}\label{sec:attack:hypotheses}
-With a leak of \vf{90} rows, a map trained on the leak and the matching term achieves a higher word-F1 than a map trained on the leak alone.
+The map learns first from a small leak, a set of short text spans with both their text and the target model's hidden states, which supervises the map directly.
+A leak that small leaves the map underdetermined, since it holds fewer rows than a hidden state has dimensions.
+Yet hidden states without their text are plentiful, because the server observes every prompt that the client sends.
+The adversary is also assumed to hold natural text from the same distribution as those prompts, with no correspondence to any of them.
+A matching term then aligns the distribution of the mapped hidden states with the distribution of hub outputs for that text, in the shared space of the hub.
+The chapter measures what the matching term adds to the leak: with a small leak, it more than doubles mean word-F1 on all three datasets.
