@@ -125,11 +125,12 @@ def overview():
     ax.axis("off")
     fig.subplots_adjust(0.01, 0.01, 0.99, 0.99)
     h = 8.5
-    light = "#eeeeec"
+    red, blue, yellow = "#f6c9c4", "#cde2fb", "#fbe08a"  # unknown to the adversary; pretrained hub; fitted to match the two
+    red_box, blue_box, yellow_box = "#fbe4e1", "#e3effc", "#fdf0c0"
 
     def box(x, y, w, text, fill, dashed=False):
         ax.add_patch(FancyBboxPatch((x, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1",
-                                    fc=fill, ec=INK2, lw=0.8, ls=(0, (3, 2)) if dashed else "-"))
+                                    fc=fill, ec=INK2, lw=0.8, ls="-"))
         ax.text(x + w / 2, y, text, ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
 
     def arrow(x0, y0, x1, y1, color=INK2, style="-|>", ls="-"):
@@ -146,10 +147,10 @@ def overview():
     # Step 1, top lane: the adversary's own text through the frozen hub.
     ax.text(61, 66, "server, the adversary", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
     vs, vx = 27, 52
-    ax.text(3.2, top, "natural\ntext", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    box(35, top, 11, "hub\n(step 1)", "#ffffff", dashed=True)
+    ax.text(3.2, top, "public\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+    box(35, top, 11, "hub\n(step 1)", blue_box)
     arrow(6.6, top, 35, top)
-    lo_t, hi_t = vector(vx, top, "#cde2fb")
+    lo_t, hi_t = vector(vx, top, blue)
     arrow(46, top, vx, top)
     ax.text(vx + 1.1, hi_t + 1.0, "hub outputs", ha="center", va="bottom", fontsize=7.5, color=INK)
     ax.plot([vx + 2.2, 70], [top, top], color=INK2, lw=0.8, solid_capstyle="butt")
@@ -158,27 +159,27 @@ def overview():
     ax.add_patch(plt.Rectangle((0, 22.5), 21.5, 18.5, fc="#f7f6f3", ec="none"))
     ax.plot([21.5, 21.5], [22.5, 41], color=INK2, lw=0.7, ls=(0, (1, 2)))
     ax.text(10.7, 38.6, "client", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
-    ax.text(3.2, bottom, "prompt", ha="center", va="center", fontsize=7.5, color=INK)
+    ax.text(3.2, bottom, "private\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
     arrow(6.6, bottom, 8.5, bottom)
-    box(8.5, bottom, 11.5, "target\nmodel", "#ffffff", dashed=True)
-    lo_s, hi_s = vector(vs, bottom, "#fbd9cc")
+    box(8.5, bottom, 11.5, "target\nmodel", red_box)
+    lo_s, hi_s = vector(vs, bottom, red)
     arrow(20, bottom, vs, bottom)
     ax.text(vs + 1.1, lo_s - 1.0, "hidden states", ha="center", va="top", fontsize=7.5, color=INK)
-    box(35, bottom, 11, "map\n(step 2)", light)
+    box(35, bottom, 11, "map\n(step 2)", yellow_box)
     arrow(vs + 2.2, bottom, 35, bottom)
-    lo_b, hi_b = vector(vx, bottom, "#fbd9cc")
+    lo_b, hi_b = vector(vx, bottom, yellow)
     arrow(46, bottom, vx, bottom)
     ax.text(vx + 1.1, lo_b - 1.0, "mapped states", ha="center", va="top", fontsize=7.5, color=INK)
-    box(63, bottom, 14, "hub\ndecoders", "#ffffff", dashed=True)
+    box(63, bottom, 14, "hub\ndecoders", blue_box)
     arrow(vx + 2.2, bottom, 63, bottom)
     arrow(77, bottom, 82, bottom)
     ax.text(91, bottom, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
     # The two terms that train the map, between the hub outputs and the mapped states.
-    arrow(vx + 0.4, hi_b + 0.6, vx + 0.4, lo_t - 0.6, color=SUPERVISED, style="-")
-    arrow(vx + 1.8, hi_b + 0.6, vx + 1.8, lo_t - 0.6, color=HYBRID, style="-", ls=(0, (3, 2)))
+    arrow(vx + 0.4, hi_b + 0.6, vx + 0.4, lo_t - 0.6, color=INK2, style="-")
+    arrow(vx + 1.8, hi_b + 0.6, vx + 1.8, lo_t - 0.6, color=INK2, style="-", ls=(0, (3, 2)))
     mid = (hi_b + lo_t) / 2
-    ax.text(vx - 1.2, mid + 2.6, "small leak, pairing known", ha="right", va="center", fontsize=7, color=SUPERVISED)
-    ax.text(vx - 1.2, mid - 0.6, "distribution matching, pairing unknown", ha="right", va="center", fontsize=7, color=HYBRID)
+    ax.text(vx - 1.2, mid + 2.6, "small leak, pairing known", ha="right", va="center", fontsize=7, color=INK2)
+    ax.text(vx - 1.2, mid - 0.6, "distribution matching, pairing unknown", ha="right", va="center", fontsize=7, color=INK2)
     save(fig, "ch1/approach_overview")
 
 
