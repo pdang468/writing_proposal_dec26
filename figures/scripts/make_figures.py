@@ -117,15 +117,15 @@ def attack_map():
 
 
 def overview():
-    """The whole approach as one diagram for Chapter 1, with example reconstructions from Table 4.x: no result file is read."""
+    """The whole approach as one diagram for Chapter 1: no result file is read."""
     from matplotlib.patches import FancyBboxPatch
-    fig, ax = plt.subplots(figsize=(6.4, 4.9))
+    fig, ax = plt.subplots(figsize=(6.4, 3.1))
     ax.set_xlim(0, 100)
-    ax.set_ylim(-8.5, 68)
+    ax.set_ylim(20, 68)
     ax.axis("off")
     fig.subplots_adjust(0.01, 0.01, 0.99, 0.99)
     h = 8.5
-    light, green, miss = "#eeeeec", "#00735a", "#c44e00"
+    light = "#eeeeec"
 
     def box(x, y, w, text, fill, dashed=False):
         ax.add_patch(FancyBboxPatch((x, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1",
@@ -147,11 +147,13 @@ def overview():
     ax.text(61, 66, "server, the adversary", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
     vs, vx = 27, 52
     ax.text(3.2, top, "natural\ntext", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    box(8.5, top, 11.5, "hub\n(step 1)", "#ffffff", dashed=True)
-    arrow(6.6, top, 8.5, top)
+    box(35, top, 11, "hub\n(step 1)", "#ffffff", dashed=True)
+    arrow(6.6, top, 35, top)
     lo_t, hi_t = vector(vx, top, "#cde2fb")
-    arrow(20, top, vx, top)
-    ax.text(vx + 4.0, top, "hub outputs", ha="left", va="center", fontsize=7.5, color=INK)
+    arrow(46, top, vx, top)
+    ax.text(vx + 1.1, hi_t + 1.0, "hub outputs", ha="center", va="bottom", fontsize=7.5, color=INK)
+    ax.plot([vx + 2.2, 70], [top, top], color=INK2, lw=0.8, solid_capstyle="butt")
+    arrow(70, top, 70, bottom + h / 2)
     # Step 2, bottom lane: the prompt leaves the client as hidden states; the map and the hub decoders turn them into text.
     ax.add_patch(plt.Rectangle((0, 22.5), 21.5, 18.5, fc="#f7f6f3", ec="none"))
     ax.plot([21.5, 21.5], [22.5, 41], color=INK2, lw=0.7, ls=(0, (1, 2)))
@@ -175,32 +177,8 @@ def overview():
     arrow(vx + 0.4, hi_b + 0.6, vx + 0.4, lo_t - 0.6, color=SUPERVISED, style="-")
     arrow(vx + 1.8, hi_b + 0.6, vx + 1.8, lo_t - 0.6, color=HYBRID, style="-", ls=(0, (3, 2)))
     mid = (hi_b + lo_t) / 2
-    ax.text(vx - 1.2, mid, "compared on a small leak\npairing known", ha="right", va="center", fontsize=7, color=SUPERVISED, linespacing=1.25)
-    ax.text(vx + 3.4, mid, "compared by distribution matching\npairing unknown", ha="left", va="center", fontsize=7, color=HYBRID,
-            linespacing=1.25)
-    # Example reconstructions, word by word: green where the word is in the true prompt.
-    ax.plot([0, 100], [20, 20], color=GRID, lw=0.8)
-    fig.canvas.draw()
-    renderer, inv = fig.canvas.get_renderer(), ax.transData.inverted()
-
-    def line(y, label, words):
-        ax.text(1, y, label, ha="left", va="center", fontsize=7.5, color=INK2)
-        x = 23
-        for word, ok in words:
-            t = ax.text(x, y, word, ha="left", va="center", fontsize=7.5, color=INK if ok is None else (green if ok else miss),
-                        fontweight="bold" if ok is False else "normal")
-            x = inv.transform((t.get_window_extent(renderer).x1, 0))[0] + 0.55
-
-    def split(text, ok):
-        return [(w, ok) for w in text.split()]
-
-    line(16.5, "true prompt", split("when did kindergarten start in the united states", None))
-    line(13.0, "leak alone", split("when did", True) + split("semay faqum fell", False) + split("in the", True) + split("nile greece", False))
-    line(9.5, "leak and matching", split("when did kindergarten start in the united states", True))
-    line(5.0, "true prompt", split("who played sweet daddy williams on good times", None))
-    line(1.5, "leak and matching", split("who played", True) + split("sweetheart", False) + split("williams on good times", True))
-    line(-3.0, "true prompt", split("who played robin on once upon a time", None))
-    line(-6.5, "leak and matching", split("who played", True) + split("roon", False) + split("on", True) + split("one after another", False))
+    ax.text(vx - 1.2, mid + 2.6, "small leak, pairing known", ha="right", va="center", fontsize=7, color=SUPERVISED)
+    ax.text(vx - 1.2, mid - 0.6, "distribution matching, pairing unknown", ha="right", va="center", fontsize=7, color=HYBRID)
     save(fig, "ch1/approach_overview")
 
 
