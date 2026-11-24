@@ -117,25 +117,28 @@ def attack_map():
 
 
 def overview():
-    """The whole approach as one diagram for Chapter 1: no result file is read."""
-    from matplotlib.patches import FancyBboxPatch
-    fig, ax = plt.subplots(figsize=(6.4, 2.85))
-    ax.set_xlim(0, 100)
-    ax.set_ylim(20, 64)
-    ax.axis("off")
-    fig.subplots_adjust(0.01, 0.01, 0.99, 0.99)
-    h = 8.5
-    red, blue, green = "#f6c9c4", "#cde2fb", "#a9d6a2"  # unknown to the adversary; pretrained hub; fitted to match the two
-    red_box, blue_box, green_box = "#fbe4e1", "#e3effc", "#dff0dc"
+    """The whole approach as one diagram for Chapter 1: no result file is read.
 
-    def box(x, y, w, text, fill, dashed=False):
-        ax.add_patch(FancyBboxPatch((x, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1",
+    Two lanes on one grid of columns (text, model, hidden states, trained module, states in the hub, decoders, text),
+    so that step 2 reads as step 1 with the target model and the map in place of the public models and the hub."""
+    from matplotlib.patches import FancyBboxPatch
+    fig, ax = plt.subplots(figsize=(6.4, 2.98))
+    ax.set_xlim(-1, 105)
+    ax.set_ylim(16, 64.5)
+    ax.axis("off")
+    fig.subplots_adjust(0.005, 0.01, 0.995, 0.99)
+    h, top, bottom = 8.5, 52, 27
+    red_box, blue_box, green_box, red, blue, green = "#fbe4e1", "#e3effc", "#dff0dc", "#f6c9c4", "#cde2fb", "#a9d6a2"
+    A, B, C, D, E, F, G = 3.5, 9, 26, 33, 50, 73, 97.5   # column anchors; boxes B and D are 12 wide, F is 14 wide
+
+    def box(x, y, w, text, fill, dashed=False, height=h):
+        ax.add_patch(FancyBboxPatch((x, y - height / 2), w, height, boxstyle="round,pad=0,rounding_size=1",
                                     fc=fill, ec=INK2, lw=0.8, ls=(0, (3, 2)) if dashed else "-"))
         ax.text(x + w / 2, y, text, ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
 
-    def arrow(x0, y0, x1, y1, color=INK2, style="-|>", ls="-"):
-        ax.annotate("", (x1, y1), (x0, y0), arrowprops=dict(arrowstyle=style, color=color, lw=0.9 if color != INK2 else 0.8,
-                                                            ls=ls, shrinkA=0, shrinkB=0, mutation_scale=7))
+    def arrow(x0, y0, x1, y1):
+        ax.annotate("", (x1, y1), (x0, y0), arrowprops=dict(arrowstyle="-|>", color=INK2, lw=0.8, shrinkA=0, shrinkB=0,
+                                                            mutation_scale=7))
 
     def vector(x, y, fill):
         w, cells, ch = 2.2, 6, 1.7
@@ -143,42 +146,40 @@ def overview():
             ax.add_patch(plt.Rectangle((x, y - cells * ch / 2 + k * ch), w, ch, fc=fill, ec=INK2, lw=0.6))
         return y - cells * ch / 2, y + cells * ch / 2
 
-    top, bottom = 55, 31
-    # Step 1, top lane: the adversary's own text through the frozen hub.
-    vs, vx = 27, 52
-    ax.text(3.2, top, "public\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    box(35, top, 11, "hub\n(step 1)", green_box)
-    arrow(6.6, top, 35, top)
-    lo_t, hi_t = vector(vx, top, blue)
-    arrow(46, top, vx, top)
-    ax.text(vx + 1.1, hi_t + 1.0, "hub outputs", ha="center", va="bottom", fontsize=7.5, color=INK)
-    ax.plot([vx + 2.2, 70], [top, top], color=INK2, lw=0.8, solid_capstyle="butt")
-    arrow(70, top, 70, bottom + h / 2)
-    # Step 2, bottom lane: the prompt leaves the client as hidden states; the map and the hub decoders turn them into text.
-    ax.add_patch(plt.Rectangle((0, 22.5), 21.5, 18.5, fc="#f7f6f3", ec="none"))
-    ax.plot([21.5, 21.5], [22.5, 41], color=INK2, lw=0.7, ls=(0, (1, 2)))
-    ax.text(10.7, 38.6, "client", ha="center", va="center", fontsize=7.5, color=INK2, style="italic")
-    ax.text(3.2, bottom, "private\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    arrow(6.6, bottom, 8.5, bottom)
-    box(8.5, bottom, 11.5, "target\nmodel", red_box, dashed=True)
-    lo_s, hi_s = vector(vs, bottom, red)
-    arrow(20, bottom, vs, bottom)
-    ax.text(vs + 1.1, lo_s - 1.0, "hidden states", ha="center", va="top", fontsize=7.5, color=INK)
-    box(35, bottom, 11, "map\n(step 2)", green_box)
-    arrow(vs + 2.2, bottom, 35, bottom)
-    lo_b, hi_b = vector(vx, bottom, green)
-    arrow(46, bottom, vx, bottom)
-    ax.text(vx + 1.1, lo_b - 1.0, "mapped states", ha="center", va="top", fontsize=7.5, color=INK)
-    box(63, bottom, 14, "frozen models\n(decoders)", blue_box, dashed=True)
-    arrow(vx + 2.2, bottom, 63, bottom)
-    arrow(77, bottom, 82, bottom)
-    ax.text(91, bottom, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
-    # The two terms that train the map, between the hub outputs and the mapped states.
-    arrow(vx + 0.4, hi_b + 0.6, vx + 0.4, lo_t - 0.6, color=INK2, style="-")
-    arrow(vx + 1.8, hi_b + 0.6, vx + 1.8, lo_t - 0.6, color=INK2, style="-", ls=(0, (3, 2)))
+    def lane(y, text, model, model_fill, states, module, out_fill):
+        ax.text(A, y, text, ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+        arrow(A + 3.6, y, B, y)
+        box(B, y, 12, model, model_fill, dashed=True)
+        arrow(B + 12, y, C, y)
+        vector(C, y, states)
+        arrow(C + 2.2, y, D, y)
+        box(D, y, 12, module, green_box)
+        arrow(D + 12, y, E, y)
+        low, high = vector(E, y, out_fill)
+        arrow(E + 2.2, y, F, y)
+        return low, high
+
+    # The client's side of step 2, drawn first so that it lies behind the lane.
+    ax.add_patch(plt.Rectangle((-0.5, 17.6), 23.2, 16.6, fc="#f4f3ef", ec="none"))
+    ax.text(11.1, 19.4, "client", ha="center", va="center", fontsize=7, color=INK2, style="italic")
+    lo_t, hi_t = lane(top, "public\nprompt", "public\nmodels", blue_box, blue, "hub", blue)
+    lo_b, hi_b = lane(bottom, "private\nprompt", "target\nmodel", red_box, red, "map", green)
+    ax.text(-0.5, 62.6, "Step 1   train the hub on public prompts", ha="left", va="center", fontsize=7.5, color=INK, fontweight="bold")
+    ax.text(-0.5, 37.6, "Step 2   fit a map for the target model", ha="left", va="center", fontsize=7.5, color=INK, fontweight="bold")
+    ax.text(C + 1.1, hi_t + 1.0, "hidden states", ha="center", va="bottom", fontsize=7, color=INK2)
+    ax.text(E + 1.1, hi_t + 1.0, "hub outputs", ha="center", va="bottom", fontsize=7, color=INK2)
+    ax.text(C + 1.1, lo_b - 1.0, "hidden states", ha="center", va="top", fontsize=7, color=INK2)
+    ax.text(E + 1.1, lo_b - 1.0, "mapped states", ha="center", va="top", fontsize=7, color=INK2)
+    # One block of frozen decoders reads both lanes.
+    box(F, (top + bottom) / 2, 14, "frozen\nmodels\n(decoders)", blue_box, dashed=True, height=top - bottom + h)
+    arrow(F + 14, (top + bottom) / 2, F + 17.5, (top + bottom) / 2)
+    ax.text(G, (top + bottom) / 2, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
+    # The two comparisons that train the map: lines, not arrows, since nothing flows between the two columns.
+    ax.plot([E + 0.5, E + 0.5], [hi_b + 0.7, lo_t - 0.7], color=INK2, lw=0.9)
+    ax.plot([E + 1.7, E + 1.7], [hi_b + 0.7, lo_t - 0.7], color=INK2, lw=0.9, ls=(0, (3, 2)))
     mid = (hi_b + lo_t) / 2
-    ax.text(vx - 1.2, mid + 2.6, "small leak, pairing known", ha="right", va="center", fontsize=7, color=INK2)
-    ax.text(vx - 1.2, mid - 0.6, "distribution matching, pairing unknown", ha="right", va="center", fontsize=7, color=INK2)
+    ax.text(E - 1.0, mid, "small leak\npaired", ha="right", va="center", fontsize=7, color=INK2, linespacing=1.2)
+    ax.text(E + 3.2, mid, "distribution matching\nunpaired", ha="left", va="center", fontsize=7, color=INK2, linespacing=1.2)
     save(fig, "ch1/approach_overview")
 
 

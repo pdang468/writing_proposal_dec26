@@ -47,10 +47,10 @@ Figure~\ref{fig:intro:approach} shows the overall flow of the work.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch1/approach_overview}
-\caption{The work in two steps: step 1 trains a translation hub on public prompts, and step 2 fits a map that sends the hidden states of a private prompt into the hub, where frozen models reconstruct the prompt.
-Red marks the target model and its hidden states, blue marks the public side, that is, the hub outputs for public prompts and the frozen models that decode them, and green marks what is trained: the hub in step 1 and the map in step 2, with the mapped states that the map produces.
-Solid boxes are trained and dashed boxes are frozen.
-The two vertical lines are the comparisons that train the map: on a small leak, where the pairing is known, and by distribution matching, where it is not.}
+\caption{The work in two steps on one layout: step 2 repeats step 1 with the target model in place of the public models and a map in place of the hub.
+Step 1 trains the hub so that frozen models reconstruct a public prompt from the hub outputs of any of them.
+Step 2 fits a map that sends the hidden states of a private prompt into the hub, where the same frozen models reconstruct it; the two vertical lines are the comparisons that train the map, on a small leak with known pairing and by distribution matching without pairing.
+Red marks the target model and its hidden states, blue the public models and their states, and green what is trained; solid boxes are trained and dashed boxes are frozen.}
 \label{fig:intro:approach}
 \end{figure}
 
