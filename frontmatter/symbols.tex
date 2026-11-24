@@ -2,7 +2,9 @@
 \listofsymbols{\begin{table}[H]
 \textbf{Latin}\\ \\
 \begin{tabular}{ m{2.2cm}  m{12cm} }
-$d$ & Dimension of the hub \\ \\
+$d$ & Common width of the source adapters \\ \\
+$d_h$ & Dimension of the hub output \\ \\
+$k$ & Number of models in the hub \\ \\
 \end{tabular}
 \end{table}
 \begin{table}[H]
@@ -10,6 +12,8 @@ $d$ & Dimension of the hub \\ \\
 \begin{tabular}{ m{2.2cm}  m{12cm} }
 $\alpha$ & Supervision fraction \\ \\
 $\lambda$ & Ridge penalty weight \\ \\
-$\tau$ & Temperature of the matching loss \\ \\
+$\lambda_{c}$, $\lambda_{g}$ & Weights of the contrastive loss and the geometry loss \\ \\
+$\rho_H$ & Root-mean-square distance of the hub outputs from their mean \\ \\
+$\tau$ & Temperature of the contrastive loss and of the matching term \\ \\
 \end{tabular}
 \end{table}}
