@@ -6,18 +6,19 @@ For each prompt, the client sends the server a sequence of hidden states from th
 By observing those hidden states, the adversary aims to reconstruct the prompt.
 The adversary cannot query the target model, and it has no knowledge of the text or the token identities of that prompt.
 
-Four resources are available to the adversary.
+The adversary holds the following resources.
 \begin{itemize}
-\item \textbf{The hub.} The frozen hub of Chapter~\ref{ch:hub} with its source adapters, its projectors, and its three decoders (Qwen, OLMo, SmolLM).
+\item \textbf{The hub.} The frozen hub of Chapter~\ref{ch:hub} with its source adapters, its projectors, and its decoders.
 \item \textbf{Two unpaired pools.} The first pool holds hidden states of the target model for prompts of the domain under attack, without their text.
-The second holds hub outputs of OLMo for different prompts of the same domain.
+The second holds hub outputs for different prompts of the same domain, which the adversary computes with one model of the hub, the reference model.
 \item \textbf{A leak.} A small set of short text spans for which the adversary holds both the text and the target model's hidden states.
-The standard leak holds \vf{90} rows, the first \vf{9} rows of each of \vf{10} prompts, and the adversary holds no other text of those prompts.
+The adversary holds no other text of the prompts from which the spans come.
+An example is the leak of the main experiment (Section~\ref{sec:attack:experiments}), the opening span of each of ten prompts.
 \item \textbf{The tokenizer of the target model}, applied to the leaked spans only.
 \end{itemize}
 
-\paragraph{Rows.} The adversary runs OLMo on each leaked span and obtains its hub outputs.
-The target model and OLMo tokenize the text differently, so their tokens are collected into token groups (Section~\ref{sec:hub:training}).
+\paragraph{Rows.} The adversary runs the reference model on each leaked span and obtains its hub outputs.
+One reference model gives every leaked span a single target in the hub; the experiments take OLMo, a choice fixed before any result on the target model was inspected.
+The target model and the reference model tokenize the text differently, so their tokens are collected into token groups (Section~\ref{sec:hub:training}).
 Each token group yields a row: the average hidden state of the target model, paired with the average hub output of that group.
 The size of a leak is counted in rows.
-On NQ a row covers about \vf{1} word, so the standard leak of \vf{90} rows holds about \vf{90} words.
