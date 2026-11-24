@@ -49,7 +49,7 @@ Figure~\ref{fig:intro:approach} shows the overall flow of the work.
 \includegraphics[width=\textwidth]{ch1/approach_overview}
 \caption{Step 1 trains a translation hub on public prompts, so that frozen models reconstruct a prompt from hub outputs.
 Step 2 fits a map that sends the hidden states of a private prompt into the hub, where the same frozen models reconstruct it.
-The map is trained on a small leak of paired text and hidden states, and by distribution matching against the hub outputs of unpaired public prompts.}
+The two vertical lines show how the map is trained: mapped states are compared with hub outputs, pair by pair on a small leak (solid line) and as whole distributions where no pairing is known (dashed line).}
 \label{fig:intro:approach}
 \end{figure}
 
