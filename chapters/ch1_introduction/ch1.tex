@@ -1,4 +1,5 @@
 \providecommand{\vf}[1]{\textcolor{blue}{#1}}
+\providecommand{\missb}[1]{{\setlength{\fboxsep}{1.5pt}\colorbox[RGB]{255,221,196}{\textcolor[RGB]{150,50,0}{\textbf{#1}}}}}
 \chapter{Introduction}\label{ch:intro}
 
 A client that sends its prompts to a language model in the cloud exposes their text to the service provider.
@@ -47,11 +48,33 @@ Figure~\ref{fig:intro:approach} shows the overall flow of the work.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch1/approach_overview}
-\caption{Step 1 trains a translation hub on public prompts, so that frozen models reconstruct a prompt from hub outputs.
-Step 2 fits a map that sends the hidden states of a private prompt into the hub, where the same frozen models reconstruct it.
-The two vertical lines show how the map is trained: mapped states are compared with hub outputs, pair by pair on a small leak (solid line) and as whole distributions where no pairing is known (dashed line).}
+\caption{Step 1 trains a translation hub on public prompts, so that frozen models reconstruct a prompt from its hub outputs.
+Step 2 fits a map that sends the hidden states of a private prompt into the space of the hub outputs, where the same frozen models reconstruct it.
+The map is trained on a small paired leak and by distribution matching on unpaired prompts.}
 \label{fig:intro:approach}
 \end{figure}
+
+Table~\ref{tab:intro:examples} gives one reconstruction from each step.
+
+\begin{table}[ht]
+\caption{One selected NQ reconstruction per step: the hub changes one word across two models, and the attack changes one name.
+The examples come from Tables~\ref{tab:hub:examples} and~\ref{tab:attack:examples}; words that differ from the prompt are highlighted.}
+\label{tab:intro:examples}
+\centering
+\ssp\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\multicolumn{2}{@{}l}{\textit{Step 1, translation hub: one public model to another}} \\
+Prompt & who has sang most songs in the world \\
+Reconstruction & who has \missb{sung} most songs in the world \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Step 2, attack: target model to the hub, with a small leak and matching}} \\
+Private prompt & who played sweet daddy williams on good times \\
+Reconstruction & who played \missb{sweetheart} williams on good times \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \paragraph{Results.} Both steps are evaluated on NQ, the query strings of Natural Questions, and on two datasets of legal text.
 The score is word-F1, the overlap between the words of the reconstruction and the words of the prompt, without regard to their order.
