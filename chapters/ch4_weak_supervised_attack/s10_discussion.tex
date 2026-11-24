@@ -10,8 +10,8 @@ The resulting gains are \vf{0.411}, \vf{0.407}, and \vf{0.219}.
 The gain also peaks near this leak size, at \vf{45} to \vf{90} tokens.
 Despite those gains, full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t.
 
-The attack behind those gains is lightweight, since it trains only one affine map.
-The gains thus suggest that one such map can align the hidden states of the target model with the hub, even though the target model took no part in hub training.
+Those gains come from a single map fitted for the target model, with the hub frozen.
+They suggest that the hidden states of the target model can be aligned with the hub, even though the target model took no part in hub training.
 
 A second round extends the attack beyond the map, with no further access to the target model.
 In that round, a language model rewrites the three reconstructions of the hub's decoders into one text, without any hidden state.
