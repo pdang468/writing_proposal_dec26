@@ -15,7 +15,7 @@ Like the hub, the map acts on one hidden state at a time (Section~\ref{sec:hub:d
 \includegraphics[width=\textwidth]{ch4/attack_map}
 \caption{The attack trains one affine map between the target model and the frozen hub.
 The map sends each hidden state of the target model to a mapped state in the hub, and the frozen projectors and decoders of the hub reconstruct the prompt from the mapped states.
-The supervised term compares a mapped state with the hub output of the same leaked row; the matching term aligns mapped states with hub outputs of different prompts, drawn from the two unpaired pools.
+The supervised term compares a mapped state with the hub output of the same leaked token; the matching term aligns mapped states with hub outputs of different prompts, drawn from the two unpaired pools.
 The solid box is the only trained module, and dashed boxes are frozen.}
 \label{fig:attack:map}
 \end{figure}
@@ -30,7 +30,7 @@ At $\alpha = 1$ only the supervised term and its ridge penalty remain, and the r
 At $0 < \alpha < 1$ both terms act, and the result is the hybrid fit.
 At $\alpha = 0$ only the matching term remains, and the result is a blind map.
 
-\paragraph{Supervised term.} $\mathcal{L}_{\text{sup}}$ is the mean squared distance between the mapped hidden state and the hub output of the same row, divided by $\rho_H^2$.
+\paragraph{Supervised term.} $\mathcal{L}_{\text{sup}}$ is the mean squared distance between the mapped hidden state and the hub output of the same leaked token, divided by $\rho_H^2$.
 The constant $\rho_H$ is the root-mean-square distance of the pooled hub outputs from their mean, and the division makes the term independent of the scale of the hub.
 The ridge penalty $\mathcal{R}$ is the squared Frobenius norm of $W$ divided by $\rho_H^2$, with $\lambda = 1$.
 
@@ -61,5 +61,5 @@ The temperature is expressed as a multiple of a scale $d$ measured on the hub al
 For each hub output, the gap is the difference between its highest and second-highest scores against the other hub outputs of its batch.
 The scale $d$ is the median gap over \vf{100} batches of \vf{512} hub outputs.
 
-\paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates, each on \vf{512} rows drawn from the leak with replacement and $B$ elements from each unpaired pool.
+\paragraph{Training.} Every fit runs \vf{3{,}000} AdamW updates, each on \vf{512} tokens drawn from the leak with replacement and $B$ elements from each unpaired pool.
 The map after the last update is evaluated, without checkpoint selection.

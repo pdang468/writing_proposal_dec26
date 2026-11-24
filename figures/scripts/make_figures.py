@@ -107,7 +107,7 @@ def attack_map():
     arrow(vx + 0.4, hi_b + 0.6, vx + 0.4, lo_t - 0.6, color=INK2, style="-")
     arrow(vx + 1.8, hi_b + 0.6, vx + 1.8, lo_t - 0.6, color=INK2, style="-", ls=(0, (3, 2)))
     mid = (hi_b + lo_t) / 2
-    ax.text(vx - 1.2, mid, "supervised term\nleaked rows, same text", ha="right", va="center", fontsize=7,
+    ax.text(vx - 1.2, mid, "supervised term\nleaked tokens, same text", ha="right", va="center", fontsize=7,
             color=INK2, linespacing=1.25)
     ax.text(vx + 3.4, mid, "matching term\nunpaired pools, different prompts", ha="left", va="center", fontsize=7,
             color=INK2, linespacing=1.25)
@@ -219,7 +219,7 @@ def budget():
     ax.set_xticklabels([f"{r:,}" for r in rows])
     ax.minorticks_off()
     ax.set_ylim(0, 1.02)
-    ax.set_xlabel("leaked rows")
+    ax.set_xlabel("leaked tokens")
     ax.set_ylabel("word-F1 (mean of three decoders)")
     ax.grid(axis="y")
     ax.legend(loc="center right", fontsize=8, handlelength=2.6)
@@ -407,9 +407,9 @@ def leak_shape():
     f1 = lambda c: c["final"]["macro_f1"]
     comp = f"{L}/mixed-w46-std-L90-composition.json"
     specs = [
-        ("2 prompts\n90 rows", comp, f"b90/{H}/L90-prefix", "b90/a1/r1/L90-prefix"),
-        ("10 prompts\n9 rows each", f"{L}/mixed-w46-std.json", f"b90/{H}/L90-span9", "b90/a1/r1/L90-span9"),
-        ("90 prompts\n1 row each", comp, f"b90/{H}/L90-random", "b90/a1/r1/L90-random"),
+        ("2 prompts\n90 tokens", comp, f"b90/{H}/L90-prefix", "b90/a1/r1/L90-prefix"),
+        ("10 prompts\n9 tokens each", f"{L}/mixed-w46-std.json", f"b90/{H}/L90-span9", "b90/a1/r1/L90-span9"),
+        ("90 prompts\n1 token each", comp, f"b90/{H}/L90-random", "b90/a1/r1/L90-random"),
     ]
     groups = []
     for name, rel, hk, sk in specs:
@@ -459,7 +459,7 @@ def budget_legal(corpus="legal128w", out="ch4/budget_curve_legal"):
     ax.set_xticklabels([f"{b:,}" for b in budgets], fontsize=7.5)
     ax.minorticks_off()
     ax.set_ylim(0, 1.05)
-    ax.set_xlabel("leaked rows")
+    ax.set_xlabel("leaked tokens")
     ax.set_ylabel("word-F1 (mean of three decoders)")
     ax.grid(axis="y")
     ax.legend(loc="center right", fontsize=8, handlelength=2.6)
@@ -499,7 +499,7 @@ def leak_size_three():
         ax.axhline(g2, color=INK2, lw=0.8, ls=":")
         ax.annotate(f"hub reference {g2:.3f}", (xs[0], g2), xytext=(0, 3), textcoords="offset points", fontsize=7.5, color=INK2)
         ax.set_xscale("log"); ax.set_xticks(xs); ax.set_xticklabels([f"{x:,}" for x in xs], fontsize=7.5); ax.minorticks_off()
-        ax.set_ylim(0, 1.05); ax.set_xlabel("leaked rows"); ax.set_title(name, fontsize=9); ax.grid(axis="y")
+        ax.set_ylim(0, 1.05); ax.set_xlabel("leaked tokens"); ax.set_title(name, fontsize=9); ax.grid(axis="y")
         print(name, xs, "sup", [round(v, 3) for v in sup], "hyb", [round(v, 3) for v in hyb], "gain", [round(h - s_, 3) for h, s_ in zip(hyb, sup)])
     axes[0].set_ylabel("word-F1 (mean of three decoders)")
     axes[0].legend(loc="center right", fontsize=8, handlelength=2.6)
@@ -535,7 +535,7 @@ def leak_size_span9():
         ax.axhline(g2, color=INK2, lw=0.8, ls=":")
         ax.annotate(f"hub reference {g2:.3f}", (sizes[0], g2), xytext=(0, 3), textcoords="offset points", fontsize=7.5, color=INK2)
         ax.set_xscale("log"); ax.set_xticks(sizes); ax.set_xticklabels([str(s) for s in sizes], fontsize=7.5); ax.minorticks_off()
-        ax.set_xlim(6.5, 1250); ax.set_ylim(0, 1.05); ax.set_xlabel("leaked rows"); ax.set_title(name, fontsize=9); ax.grid(axis="y")
+        ax.set_xlim(6.5, 1250); ax.set_ylim(0, 1.05); ax.set_xlabel("leaked tokens"); ax.set_title(name, fontsize=9); ax.grid(axis="y")
         print(name, xs, "sup", [round(v, 3) for v in sup], "hyb", [round(v, 3) for v in hyb], "gain", [round(h - s_, 3) for h, s_ in zip(hyb, sup)])
     axes[0].set_ylabel("word-F1 (mean of three decoders)")
     axes[0].legend(loc="center left", fontsize=8, handlelength=2.6)

@@ -1,22 +1,22 @@
 \section{Size of the Leak}\label{sec:attack:budget}
 
-Across the six leak sizes tested, the gain from matching rises with the leak, is largest at \vf{45} or \vf{90} rows, and falls as the leak grows further (Figure~\ref{fig:attack:budget}).
-The comparison repeats the main comparison at six leak sizes, the first \vf{9} rows of \vf{1}, \vf{3}, \vf{5}, \vf{10}, \vf{30}, and \vf{100} prompts, or \vf{9} to \vf{900} rows.
+Across the six leak sizes tested, the gain from matching rises with the leak, is largest at \vf{45} or \vf{90} tokens, and falls as the leak grows further (Figure~\ref{fig:attack:budget}).
+The comparison repeats the main comparison at six leak sizes, the first \vf{9} tokens of \vf{1}, \vf{3}, \vf{5}, \vf{10}, \vf{30}, and \vf{100} prompts, or \vf{9} to \vf{900} tokens.
 The setting stays at $\alpha = 0.9$, $\tau = 2d$, and $B = 8{,}192$, and each fit is scored on the selection prompts.
-On NQ, the gain is \vf{0.354} at \vf{27} rows, peaks at \vf{0.418} at \vf{45} rows, and falls to \vf{0.089} at \vf{900} rows.
-The gain on legal10w follows the same course, with a peak of \vf{0.379} at \vf{90} rows and a fall to \vf{0.089} at \vf{900} rows.
-The gain on legal100t peaks lower, at \vf{0.206} at \vf{90} rows, and falls to \vf{0.018} at \vf{900} rows.
+On NQ, the gain is \vf{0.354} at \vf{27} tokens, peaks at \vf{0.418} at \vf{45} tokens, and falls to \vf{0.089} at \vf{900} tokens.
+The gain on legal10w follows the same course, with a peak of \vf{0.379} at \vf{90} tokens and a fall to \vf{0.089} at \vf{900} tokens.
+The gain on legal100t peaks lower, at \vf{0.206} at \vf{90} tokens, and falls to \vf{0.018} at \vf{900} tokens.
 
 The gain is small at the two ends of the curve for different reasons.
-At \vf{9} rows, a single prompt gives either fit too little to learn from.
+At \vf{9} tokens, a single prompt gives either fit too little to learn from.
 The hybrid fit then scores \vf{0.195} on NQ, a gain of \vf{0.036}, and on the two legal datasets it scores below the supervised fit, \vf{0.061} against \vf{0.081} on legal10w and \vf{0.021} against \vf{0.044} on legal100t.
-At \vf{900} rows, the leak alone carries the supervised fit to \vf{0.743} on NQ and \vf{0.655} on legal10w, and little remains for matching to add.
+At \vf{900} tokens, the leak alone carries the supervised fit to \vf{0.743} on NQ and \vf{0.655} on legal10w, and little remains for matching to add.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch4/leak_size_three}
-\caption{The gain from matching is largest at leaks of \vf{45} to \vf{90} rows and small at \vf{9} and \vf{900} rows.
-Word-F1 averaged over three decoders on the \vf{500} selection prompts, for the supervised fit and the hybrid fit of the main comparison ($\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$); each leak holds the first \vf{9} rows of \vf{1} to \vf{100} prompts, and the number above each point is the gain.
+\caption{The gain from matching is largest at leaks of \vf{45} to \vf{90} tokens and small at \vf{9} and \vf{900} tokens.
+Word-F1 averaged over three decoders on the \vf{500} selection prompts, for the supervised fit and the hybrid fit of the main comparison ($\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$); each leak holds the first \vf{9} tokens of \vf{1} to \vf{100} prompts, and the number above each point is the gain.
 The dotted line is the hub reference.}
 \label{fig:attack:budget}
 \end{figure}

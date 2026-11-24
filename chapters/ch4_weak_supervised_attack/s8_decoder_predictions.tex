@@ -22,12 +22,12 @@ The excess cross-entropy of the language-model baseline marks the level that a s
 \centering
 \includegraphics[width=0.8\textwidth]{ch4/cross_entropy}
 \caption{Under teacher forcing, the hybrid fit has a lower excess cross-entropy than the supervised fit on all three datasets.
-Excess cross-entropy in nats per content word at the \vf{90}-row leak, \vf{500} selection prompts, three decoders; the gray bar is the language-model baseline, the decoder with no soft prompt.
+Excess cross-entropy in nats per content word at the \vf{90}-token leak, \vf{500} selection prompts, three decoders; the gray bar is the language-model baseline, the decoder with no soft prompt.
 Hybrid fit of the main comparison ($\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$).}
 \label{fig:attack:ce}
 \end{figure}
 
-\paragraph{Matching lowers the excess cross-entropy.} At the \vf{90}-row leak, the hybrid fit has the lower excess cross-entropy on all three datasets (Figure~\ref{fig:attack:ce}).
+\paragraph{Matching lowers the excess cross-entropy.} At the \vf{90}-token leak, the hybrid fit has the lower excess cross-entropy on all three datasets (Figure~\ref{fig:attack:ce}).
 The excess falls from \vf{7.73} nats per content word under the supervised fit to \vf{1.36} under the hybrid fit on NQ, from \vf{10.41} to \vf{3.35} on legal10w, and from \vf{5.58} to \vf{5.11} on legal100t.
 The language-model baseline separates the two fits.
 Its excess is \vf{6.08} nats on NQ, \vf{9.56} on legal10w, and \vf{5.29} on legal100t.
@@ -39,7 +39,7 @@ The matching term therefore improves the decoder's next-token predictions on eve
 % \paragraph{Training the map on the decoder's predictions.}\label{sec:attack:decoderkl} A further step places the decoder inside the objective.
 % Starting from a hybrid fit on legal100t ($\alpha = 0.99$, $\tau = d$), the step trains the affine map through the frozen SmolLM decoder on the prompts of the leak, with the KL divergence defined above as its training loss.
 % On the \vf{4{,}500} held-out prompts, the KL divergence and the cross-entropy of SmolLM both fall at every leak size (Table~\ref{tab:attack:decoderkl}).
-% The cross-entropy falls by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at leaks of \vf{856}, \vf{2{,}569}, and \vf{8{,}612} rows.
+% The cross-entropy falls by \vf{0.19}, \vf{0.15}, and \vf{0.26} nats per content word at leaks of \vf{856}, \vf{2{,}569}, and \vf{8{,}612} tokens.
 % Word-F1 rises by at most \vf{0.023} at the same leak sizes.
 % A lower training loss thus lowers the cross-entropy and the KL divergence but adds little word-F1.
 %

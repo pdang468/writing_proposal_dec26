@@ -5,24 +5,24 @@ They vary the presence of the leak and its composition.
 
 \subsection{Matching without a leak}\label{sec:attack:blind}
 
-The matching term alone, without any leaked row, does not connect the target model.
+The matching term alone, without any leaked token, does not connect the target model.
 At $\alpha = 0$, with the temperature and batch size of the main comparison, the map scores \vf{0.061} word-F1 on the selection prompts of NQ, against \vf{0.067} for its mismatched-prompt control.
 The result covers one target model and one dataset.
 
 \subsection{Composition of the leak}\label{sec:attack:leak}
 
-On legal100t, a leak of \vf{90} rows yields a higher word-F1 when it is spread over more prompts, and the gain from matching stays near \vf{0.21} on the three leaks tested (Figure~\ref{fig:attack:shape}).
-Three leaks take \vf{90} rows from \vf{2} prompts, \vf{9} rows from each of \vf{10} prompts, and \vf{1} row from each of \vf{90} prompts; only legal100t has prompts long enough for the first.
+On legal100t, a leak of \vf{90} tokens yields a higher word-F1 when it is spread over more prompts, and the gain from matching stays near \vf{0.21} on the three leaks tested (Figure~\ref{fig:attack:shape}).
+Three leaks take \vf{90} tokens from \vf{2} prompts, \vf{9} tokens from each of \vf{10} prompts, and \vf{1} token from each of \vf{90} prompts; only legal100t has prompts long enough for the first.
 On the three leaks, the supervised fit scores \vf{0.049}, \vf{0.094}, and \vf{0.108}, and the hybrid fit scores \vf{0.255}, \vf{0.299}, and \vf{0.328}.
 
-The gain shrinks when the rows carry little content.
-A leak of \vf{90} stop-word rows gives the hybrid fit \vf{0.115} against \vf{0.056} for the supervised fit.
+The gain shrinks when the leaked tokens carry little content.
+A leak of \vf{90} stop-word tokens gives the hybrid fit \vf{0.115} against \vf{0.056} for the supervised fit.
 A leak of one repeated word leaves both fits near their mismatched-prompt controls, at \vf{0.061} and \vf{0.057}.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.8\textwidth]{ch4/leak_shape}
-\caption{With \vf{90} leaked rows on legal100t, both fits score higher when the leak is spread over more prompts, and the gain from matching stays near \vf{0.21}.
+\caption{With \vf{90} leaked tokens on legal100t, both fits score higher when the leak is spread over more prompts, and the gain from matching stays near \vf{0.21}.
 Word-F1 averaged over three decoders, \vf{500} selection prompts, hybrid fit of the main comparison ($\alpha = 0.9$, $\tau = 2d$, $B = 8{,}192$).
 Each bracket gives the gain of the hybrid fit.}
 \label{fig:attack:shape}

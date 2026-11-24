@@ -7,7 +7,7 @@ A third direction studies how to improve the information that models share in th
 
 \paragraph{Hidden states from several blocks.} Each block represents the same token in a different way, together with its context in the prompt.
 The first question is whether a map that reads several blocks together recovers tokens that a single block loses.
-The test compares reconstruction from each block alone with reconstruction from the blocks combined, at the same leak of \vf{90} rows and with the hub frozen.
+The test compares reconstruction from each block alone with reconstruction from the blocks combined, at the same leak of \vf{90} tokens and with the hub frozen.
 Reading several blocks also changes what the adversary observes.
 A server that runs the remaining blocks computes the hidden states of deeper blocks itself, whereas the attack of Chapter~\ref{ch:attack} takes the hidden states of one block as its only input.
 That work therefore has to state which blocks the adversary observes, and it has to keep the question about information across blocks apart from the attack on one transmitted block.

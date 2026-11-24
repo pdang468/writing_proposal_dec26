@@ -2,12 +2,12 @@
 
 This chapter asked whether an adversary can reconstruct prompts from the hidden states of a model outside the hub.
 The adversary is a server that receives those hidden states and cannot query the target model.
-Its resources are the frozen hub, two unpaired pools from the domain under attack, the tokenizer of the target model, and a leak of \vf{90} rows.
+Its resources are the frozen hub, two unpaired pools from the domain under attack, the tokenizer of the target model, and a leak of \vf{90} tokens.
 
 With that leak, unpaired matching improves reconstruction.
 On the evaluation prompts, the hybrid fit raises word-F1 over the supervised fit from \vf{0.354} to \vf{0.766} on NQ, from \vf{0.192} to \vf{0.599} on legal10w, and from \vf{0.102} to \vf{0.321} on legal100t.
 The resulting gains are \vf{0.411}, \vf{0.407}, and \vf{0.219}.
-The gain also peaks near this leak size, at \vf{45} to \vf{90} rows.
+The gain also peaks near this leak size, at \vf{45} to \vf{90} tokens.
 Despite those gains, full recovery remains challenging: exact match under the hybrid fit is \vf{0.21} on NQ and \vf{0.02} on legal10w, and it rounds to zero on legal100t.
 
 The attack behind those gains is lightweight, since it trains only one affine map.

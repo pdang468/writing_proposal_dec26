@@ -5,12 +5,12 @@
 \paragraph{Datasets and pools.} The experiments run on the three datasets of Chapter~\ref{ch:hub}, NQ, legal10w, and legal100t, each with its own frozen hub.
 The \vf{40{,}000} training prompts of a dataset are divided once, at random, into two halves of \vf{20{,}000}.
 One half supplies the target model's unpaired pool as hidden states, and the other half supplies the hub's unpaired pool as hub outputs of OLMo. 
-A leak draws its prompts at random from all \vf{40{,}000} training prompts and skips a prompt of fewer than \vf{9} rows.
+A leak draws its prompts at random from all \vf{40{,}000} training prompts and skips a prompt of fewer than \vf{9} tokens.
 
-\paragraph{The 90-row leak.} In the main experiment, the adversary obtains a leak of \vf{90} rows, the first \vf{9} rows of each of \vf{10} prompts.
-The same \vf{9} rows expose a different fraction of a prompt on each dataset.
-On NQ and legal10w, where a prompt holds about \vf{9} and \vf{13} rows, they expose most of the prompt.
-On legal100t, where a prompt holds about \vf{86} rows, they expose only its opening words.
+\paragraph{The 90-token leak.} In the main experiment, the adversary obtains a leak of \vf{90} tokens, the first \vf{9} tokens of each of \vf{10} prompts.
+The same \vf{9} tokens expose a different fraction of a prompt on each dataset.
+On NQ and legal10w, where a prompt holds about \vf{9} and \vf{13} token groups, they expose most of the prompt.
+On legal100t, where a prompt holds about \vf{86} token groups, they expose only its opening words.
 
 \paragraph{Score.} Evaluation follows Section~\ref{sec:hub:eval}.
 Each of the three decoders generates greedily from the projected output of the map, up to the length of the soft prompt plus \vf{32} tokens.

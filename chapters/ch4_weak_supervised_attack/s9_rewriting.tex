@@ -5,7 +5,7 @@ A language model receives the three reconstructions and rewrites them into one t
 The experiment is exploratory.
 
 \paragraph{Protocol.} The language model is Claude Haiku~\vf{5.5}.
-It receives the three reconstructions of the hybrid fit at the \vf{90}-row leak, with the SmolLM reconstruction first, and returns one text.
+It receives the three reconstructions of the hybrid fit at the \vf{90}-token leak, with the SmolLM reconstruction first, and returns one text.
 Its instruction reads ``You get three noisy copies of the same question. Copy 1 is the most reliable; start from it and apply majority rules where the copies disagree. Fix spelling, broken words and repeats. Reply with the text only, inside \texttt{<text></text>}.''
 On the two legal datasets the instruction says ``SEC filing excerpt'' in place of ``question''.
 The language model receives no hidden state and no part of the true prompt.
@@ -31,7 +31,7 @@ Under the mismatched-prompt control, rewriting adds at most \vf{0.021}, so the i
 \includegraphics[width=0.85\textwidth]{ch4/rewriting}
 \caption{Rewriting all three reconstructions exceeds the best single decoder by \vf{0.12} word-F1 on legal100t and by \vf{0.06} on legal10w, and by \vf{0.01} on NQ.
 The number above each group is the improvement of the rewrite of all three reconstructions over SmolLM alone.
-Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompts, hybrid fit of the main comparison at the \vf{90}-row leak, rewriting by Claude Haiku~\vf{5.5}.}
+Word-F1 on lower-cased words without edge punctuation, \vf{450} selection prompts, hybrid fit of the main comparison at the \vf{90}-token leak, rewriting by Claude Haiku~\vf{5.5}.}
 \label{fig:attack:rewriting}
 \end{figure}
 

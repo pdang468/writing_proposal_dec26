@@ -17,8 +17,8 @@ An example is the leak of the main experiment (Section~\ref{sec:attack:experimen
 \item \textbf{The tokenizer of the target model}, applied to the leaked spans only.
 \end{itemize}
 
-\paragraph{Rows.} The adversary runs the reference model on each leaked span and obtains its hub outputs.
+\paragraph{Leaked tokens.} The adversary runs the reference model on each leaked span and obtains its hub outputs.
 One reference model gives every leaked span a single target in the hub; the experiments take OLMo, a choice fixed before any result on the target model was inspected.
 The target model and the reference model tokenize the text differently, so their tokens are collected into token groups (Section~\ref{sec:hub:training}).
-Each token group yields a row: the average hidden state of the target model, paired with the average hub output of that group.
-The size of a leak is counted in rows.
+Each token group yields one training pair: the average hidden state of the target model and the average hub output of that group.
+Such a pair is called a leaked token, since a token group is the smallest unit on which the two tokenizers agree, and the size of a leak is counted in leaked tokens.

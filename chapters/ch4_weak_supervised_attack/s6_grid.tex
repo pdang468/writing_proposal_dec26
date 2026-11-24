@@ -1,10 +1,10 @@
 \section{Supervision Fraction and Temperature}\label{sec:attack:grid}
 
-The setting of the main comparison comes from a grid over the supervision fraction and the temperature at \vf{90} rows, and a second grid tests the setting at \vf{900} rows.
+The setting of the main comparison comes from a grid over the supervision fraction and the temperature at \vf{90} tokens, and a second grid tests the setting at \vf{900} tokens.
 
-\subsection{The grid at 90 rows}\label{sec:attack:grid90}
+\subsection{The grid at 90 leaked tokens}\label{sec:attack:grid90}
 
-The grid runs on the \vf{90}-row leak and the \vf{500} selection prompts of each dataset (Figure~\ref{fig:attack:grid}).
+The grid runs on the \vf{90}-token leak and the \vf{500} selection prompts of each dataset (Figure~\ref{fig:attack:grid}).
 The selection rule takes the cell with the highest mean word-F1 over NQ and legal100t.
 That cell is $\alpha = 0.9$, $\tau = 2d$, with a mean of \vf{0.534}.
 The cell is the best on NQ, at \vf{0.768}.
@@ -20,24 +20,24 @@ One setting serves all three datasets, although finding it required prompts with
 \centering
 \includegraphics[width=\textwidth]{ch4/grid_search}
 \caption{One setting, $\alpha = 0.9$ and $\tau = 2d$ (outlined), has the highest mean word-F1 over NQ and legal100t, the two datasets of the selection rule, and is the best cell on legal10w.
-Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns), on the \vf{90}-row leak, \vf{500} selection prompts per dataset, $B = 8{,}192$.
+Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns), on the \vf{90}-token leak, \vf{500} selection prompts per dataset, $B = 8{,}192$.
 The titles give the supervised fit on the same leak.}
 \label{fig:attack:grid}
 \end{figure}
 
-\subsection{The grid at 900 rows}\label{sec:attack:grid900}
+\subsection{The grid at 900 leaked tokens}\label{sec:attack:grid900}
 
-The advantage of matching remains at \vf{900} rows, but it is smaller than at \vf{90} rows (Figure~\ref{fig:attack:grid-size}).
-The grid is repeated on the selection prompts with the leak of \vf{9} rows from each of \vf{100} prompts.
-The best cell gains \vf{0.089} over the supervised fit on NQ, \vf{0.104} on legal10w, and \vf{0.118} on legal100t, against \vf{0.401}, \vf{0.379}, and \vf{0.206} for the setting at \vf{90} rows.
+The advantage of matching remains at \vf{900} tokens, but it is smaller than at \vf{90} tokens (Figure~\ref{fig:attack:grid-size}).
+The grid is repeated on the selection prompts with the leak of \vf{9} tokens from each of \vf{100} prompts.
+The best cell gains \vf{0.089} over the supervised fit on NQ, \vf{0.104} on legal10w, and \vf{0.118} on legal100t, against \vf{0.401}, \vf{0.379}, and \vf{0.206} for the setting at \vf{90} tokens.
 The setting of the main comparison remains the best cell on NQ and scores about \vf{0.015} below it on legal10w, and on legal100t the best cell moves to $\alpha = 0.95$, $\tau = d$.
 The best cell is chosen on the prompts that score it, so its gain is an upper estimate.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{ch4/grid_leak_size}
-\caption{At \vf{900} leaked rows the setting of the main comparison (solid outline) stays the best cell on NQ and within \vf{0.02} of it on legal10w, and on legal100t the best cell (dashed outline) moves to a higher supervision fraction and a lower temperature.
-Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns), for a leak of \vf{9} rows from each of \vf{100} prompts, \vf{500} selection prompts, $B = 8{,}192$.
+\caption{At \vf{900} leaked tokens the setting of the main comparison (solid outline) stays the best cell on NQ and within \vf{0.02} of it on legal10w, and on legal100t the best cell (dashed outline) moves to a higher supervision fraction and a lower temperature.
+Word-F1 of the hybrid fit by supervision fraction (rows) and temperature (columns), for a leak of \vf{9} tokens from each of \vf{100} prompts, \vf{500} selection prompts, $B = 8{,}192$.
 The titles give the supervised fit on the same leak.}
 \label{fig:attack:grid-size}
 \end{figure}
