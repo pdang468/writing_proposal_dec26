@@ -11,9 +11,9 @@ The adversary holds the following resources.
 \item \textbf{The hub.} The frozen hub of Chapter~\ref{ch:hub} with its source adapters, its projectors, and its decoders.
 \item \textbf{Two unpaired pools.} The first pool holds hidden states of the target model for prompts of the domain under attack, without their text.
 The second holds hub outputs for different prompts of the same domain, which the adversary computes with one model of the hub, the reference model.
-\item \textbf{A leak.} A small set of short text spans for which the adversary holds both the text and the target model's hidden states.
-The adversary holds no other text of the prompts from which the spans come.
-An example is the leak of the main experiment (Section~\ref{sec:attack:experiments}), the opening span of each of ten prompts.
+\item \textbf{A leak.} A small set of text spans paired with the target model's hidden states for those spans.
+The adversary sees no other text of the client.
+An example leak considered in this chapter is the first nine tokens of each of ten prompts (Section~\ref{sec:attack:experiments}).
 \item \textbf{The tokenizer of the target model}, applied to the leaked spans only.
 \end{itemize}
 
