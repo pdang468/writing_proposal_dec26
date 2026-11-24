@@ -89,8 +89,8 @@ Even with the leak, exact reconstruction remains rare: the hybrid fit recovers f
 \item \textbf{An inversion framework centered on a translation hub.} The framework maps the hidden states of several language models into one shared space, the hub.
 From the hub, each model, kept frozen, reconstructs the prompts of any other model.
 That reconstruction extends to a model outside the hub: a map fitted on a small leak and on unpaired hidden states sends its hidden states into the hub, with no weights of the model and no queries to it.
-\item \textbf{A measurement of what an adversary recovers.} This dissertation measures what part of a prompt the framework recovers under different leak scenarios and under structure matching, on short and long prompts.
-The proposed work extends that characterization to the privacy methods that defend split inference.
+\item \textbf{A measurement of what an adversary recovers.} With that framework, the dissertation measures what part of a prompt an adversary recovers as the leak changes in size and composition, with and without the matching term, on short and long prompts.
+Those measurements cover undefended hidden states; the proposed work extends them to the privacy methods that defend split inference.
 \end{itemize}
 
 \paragraph{Outline.} Chapter~\ref{ch:lit} reviews inversion attacks, cross-model alignment, and defenses, and positions the dissertation among them.
