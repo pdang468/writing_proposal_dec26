@@ -7,6 +7,7 @@ Greedy generation starts at the start token and stops at the end-of-sequence tok
 \paragraph{Metrics.} Two metrics score a reconstruction against its source prompt.
 Word-F1 counts the words that the two texts share, repeats included, ignores their order, and averages the resulting score over prompts.
 Exact match is the fraction of reconstructions identical to their source prompt after Unicode and whitespace normalization.
+Both metrics count words; measures of the information that a reconstruction recovers, such as which words carry the content of a prompt, belong to the proposed work of Chapter~\ref{ch:future}.
 
 \paragraph{Mismatched-prompt control.} Prompts of one dataset share common words.
 A decoder can therefore match some words of a prompt with no information about that prompt.

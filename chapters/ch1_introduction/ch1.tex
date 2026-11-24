@@ -20,30 +20,29 @@ With query access, the adversary submits its own text, collects the resulting hi
 
 A second line of work inverts sentence embeddings, one pooled vector per text, and again relies on queries to the encoder~\cite{song2020information,li2023sentence,morris2023text}.
 Recent attacks on sentence embeddings remove the queries: they align the embeddings of the target encoder with those of an encoder the adversary holds, from thousands of leaked pairs~\cite{huang2024transferable}, from a few~\cite{chen2025algen}, or from none~\cite{jha2025harnessing}.
-The Platonic Representation Hypothesis offers a broader motivation for alignment across models: models trained on similar data may converge toward similar representations~\cite{huh2024platonic}.
 Those alignment attacks apply to pooled vectors.
 To the author's knowledge, no attack of that kind has been evaluated on the per-token hidden states of a language model, the quantity that a split inference client transmits.
+The Platonic Representation Hypothesis offers a broader motivation for alignment across models: models trained on similar data may converge toward similar representations~\cite{huh2024platonic}.
 
 \paragraph{Research question.} If language models converge toward similar representations, another model can learn to read what one model encodes.
 This dissertation asks what information about a prompt is recoverable by matching the structure that the models share.
 Seen from privacy, the question is what a split inference client exposes to a server that holds neither the weights of the client's blocks nor query access to them.
-Seen from the models themselves, the same question is how much of what one model encodes about a prompt another model can read.
+Seen from the models themselves, the question is how far one model can read another.
 Neither answer follows from similarity alone: a map can preserve the meaning of a prompt and still lose its exact words.
 Prompt reconstruction therefore gives both views one test, the words that remain accessible after the map between models.
-The dissertation carries out that test on per-token hidden states, where a small leak of text supplies correspondences and unpaired matching supplies further constraints on the map.
+The dissertation carries out that test on per-token hidden states, where a small leak of text supplies correspondences and distribution matching on unpaired text supplies further constraints on the map.
 
 \paragraph{Approach.} The dissertation approaches that question with an attack in two steps.
 The first step builds the inverter, a translation hub (Chapter~\ref{ch:hub}).
 The hub maps the hidden states of several open-weight language models into one shared space, and each of those models, kept frozen, reconstructs the prompt from the hub outputs of any other.
 The second step connects a target model that took no part in hub training (Chapter~\ref{ch:attack}).
-A single affine map sends the hidden states of the target model into the hub, and the frozen decoders of the hub reconstruct its prompts.
+A single affine map sends the hidden states of the target model into the hub, and the frozen models of the hub reconstruct its prompts.
 The map learns first from a small leak, a set of short text spans for which the adversary holds both the text and the hidden states.
-The leak is counted in rows: each row pairs the average hidden state of the target model with the average hub output for one token group of a leaked span.
 Outside the leak, the server still receives the hidden states of every prompt, without their text.
-The adversary is also assumed to hold natural text of the same kind as those prompts, without knowing which text matches which hidden state.
-A matching term aligns the distribution of the mapped hidden states with the distribution of hub outputs for that text.
+The adversary is also assumed to hold public prompts, natural text of the same kind as the client's prompts, without knowing which text matches which hidden state.
+A matching term aligns the distribution of the mapped hidden states with the distribution of hub outputs for those public prompts.
 A map trained on the leak alone is the supervised fit, and a map trained on the leak and the matching term is the hybrid fit.
-Figure~\ref{fig:intro:approach} shows the overall flow of the work.
+Figure~\ref{fig:intro:approach} shows the overall flow of the work, and Table~\ref{tab:intro:examples} gives one reconstruction from each step.
 
 \begin{figure}[ht]
 \centering
@@ -53,8 +52,6 @@ Step 2 fits a map that sends the hidden states of a private prompt into the spac
 The map is trained on a small paired leak and by distribution matching on unpaired prompts.}
 \label{fig:intro:approach}
 \end{figure}
-
-Table~\ref{tab:intro:examples} gives one reconstruction from each step.
 
 \begin{table}[ht]
 \caption{One selected NQ reconstruction per step: the hub changes one word across two models, and the attack changes one name.
@@ -81,6 +78,7 @@ The score is word-F1, the overlap between the words of the reconstruction and th
 In step 1, the hub reaches a high word-F1 across models: each frozen decoder reconstructs prompts from the hidden states of the other models, on all three datasets.
 In step 2, the supervised fit, trained on the leak alone, reaches only a low word-F1 for the target model.
 The hybrid fit, which adds the matching term, more than doubles that word-F1 on all three datasets.
+The gain depends on the size of the leak: it is largest at intermediate sizes and small at the smallest and the largest leaks tested.
 Without a leak, the matching term alone scores no higher than a control that feeds the decoder the hidden states of another prompt.
 Even with the leak, exact reconstruction remains rare: the hybrid fit recovers few prompts word for word on NQ and nearly none on the legal datasets.
 
@@ -88,7 +86,7 @@ Even with the leak, exact reconstruction remains rare: the hybrid fit recovers f
 \begin{itemize}
 \item \textbf{An inversion framework centered on a translation hub.} The framework maps the hidden states of several language models into one shared space, the hub.
 From the hub, each model, kept frozen, reconstructs the prompts of any other model.
-That reconstruction extends to a model outside the hub: a map fitted on a small leak and on unpaired hidden states sends its hidden states into the hub, with no weights of the model and no queries to it.
+That reconstruction extends to a model outside the hub: a map fitted on a small leak and by distribution matching sends its hidden states into the hub, with no weights of the model and no queries to it.
 \item \textbf{A measurement of what an adversary recovers.} With that framework, the dissertation measures what part of a prompt an adversary recovers as the leak changes in size and composition, with and without the matching term, on short and long prompts.
 Those measurements cover undefended hidden states; the proposed work extends them to the privacy methods that defend split inference.
 \end{itemize}

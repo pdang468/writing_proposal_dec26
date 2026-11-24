@@ -60,7 +60,7 @@ The hypothesis does not state how closely two models agree, so whether the agree
 Artetxe et al.~\cite{artetxe2017learning} start from a seed dictionary of 25 word pairs, fit a map, induce a larger dictionary from the mapped embeddings, and repeat; the results are comparable to those of systems with richer bilingual resources.
 Conneau et al.~\cite{conneau2018word} and Artetxe et al.~\cite{artetxe2018robust} remove the seed dictionary, the first by adversarial training followed by Procrustes refinement, the second by an initialization from the similarity distributions of the two spaces.
 Ormazabal et al.~\cite{ormazabal2019analyzing} examine the limits of that approach: embeddings of two languages learned jointly are more isomorphic than embeddings trained separately and then mapped.
-The attack of Chapter~\ref{ch:attack} follows the same pattern, a small paired seed extended by unpaired matching, on the contextual hidden states of language models.
+The attack of Chapter~\ref{ch:attack} follows the same pattern, a small paired seed extended by distribution matching on unpaired data, on the contextual hidden states of language models.
 Its matching term adapts the approximate bijective correspondence loss of Murphy et al.~\cite{murphy2022abc}, which learns image representations from set membership, without paired correspondences.
 
 \paragraph{Alignment as an inversion attack.} Three recent attacks apply alignment to sentence embeddings and need no queries.
@@ -117,9 +117,9 @@ This dissertation & token & no & no & yes \\
 \end{tabular}
 \end{table}
 
-To the author's knowledge, prior work has not evaluated query-free prompt reconstruction from per-token hidden states of a language model by fitting a map on a small leak together with unpaired matching.
+To the author's knowledge, prior work has not evaluated query-free prompt reconstruction from per-token hidden states of a language model by fitting a map on a small leak together with distribution matching.
 
 The attack differs from the alignment attacks on pooled embeddings in the representation: it acts on per-token hidden states, the quantity that a split inference client transmits, and not on one vector per text.
 It also relies on a small leak, whereas Huang et al. train on 8,000 leaked texts and the scores of Chen et al. rise up to 1,000.
 Jha et al. need no pairs at all, but they evaluate pooled embeddings only.
-The dissertation asks a different question: how much of a prompt a small leak reconstructs from per-token hidden states, and how much unpaired matching adds to that leak.
+The dissertation asks a different question: how much of a prompt a small leak reconstructs from per-token hidden states, and how much distribution matching adds to that leak.
