@@ -123,13 +123,13 @@ def overview():
     so that step 2 reads as step 1 with the target model and the map in place of the public models and the hub."""
     from matplotlib.patches import FancyBboxPatch
     fig, ax = plt.subplots(figsize=(6.4, 2.98))
-    ax.set_xlim(-1, 105)
+    ax.set_xlim(-6.5, 99.5)
     ax.set_ylim(16, 64.5)
     ax.axis("off")
     fig.subplots_adjust(0.005, 0.01, 0.995, 0.99)
     h, top, bottom = 8.5, 52, 27
     red_box, blue_box, green_box, red, blue, green = "#fbe4e1", "#e3effc", "#dff0dc", "#f6c9c4", "#cde2fb", "#a9d6a2"
-    A, B, C, D, E, F, G = 3.5, 9, 26, 33, 50, 73, 97.5   # column anchors; boxes B and D are 12 wide, F is 14 wide
+    A, B, C, D, E, F, G = 3.5, 9, 26, 33, 50, 61, 87   # column anchors; boxes B and D are 12 wide, F is 14 wide
 
     def box(x, y, w, text, fill, dashed=False, height=h):
         ax.add_patch(FancyBboxPatch((x, y - height / 2), w, height, boxstyle="round,pad=0,rounding_size=1",
@@ -155,9 +155,7 @@ def overview():
         arrow(C + 2.2, y, D, y)
         box(D, y, 12, module, green_box)
         arrow(D + 12, y, E, y)
-        low, high = vector(E, y, out_fill)
-        arrow(E + 2.2, y, F, y)
-        return low, high
+        return vector(E, y, out_fill)
 
     # The client's side of step 2, drawn first so that it lies behind the lane.
     ax.add_patch(plt.Rectangle((-0.5, 17.6), 23.2, 16.6, fc="#f4f3ef", ec="none"))
@@ -171,15 +169,18 @@ def overview():
     ax.text(C + 1.1, lo_b - 1.0, "hidden states", ha="center", va="top", fontsize=7, color=INK2)
     ax.text(E + 1.1, lo_b - 1.0, "mapped states", ha="center", va="top", fontsize=7, color=INK2)
     # One block of frozen decoders reads both lanes.
-    box(F, (top + bottom) / 2, 14, "frozen\nmodels\n(decoders)", blue_box, dashed=True, height=top - bottom + h)
-    arrow(F + 14, (top + bottom) / 2, F + 17.5, (top + bottom) / 2)
+    centre = (top + bottom) / 2
+    box(F, centre, 15, "frozen models\n(decoders)", blue_box, dashed=True)
+    arrow(E + 2.2, top, F, centre + 2.2)
+    arrow(E + 2.2, bottom, F, centre - 2.2)
+    arrow(F + 15, centre, F + 18.5, centre)
     ax.text(G, (top + bottom) / 2, "reconstructed\nprompt", ha="center", va="center", fontsize=7.5, color=INK, linespacing=1.25)
     # The two comparisons that train the map: lines, not arrows, since nothing flows between the two columns.
     ax.plot([E + 0.5, E + 0.5], [hi_b + 0.7, lo_t - 0.7], color=INK2, lw=0.9)
     ax.plot([E + 1.7, E + 1.7], [hi_b + 0.7, lo_t - 0.7], color=INK2, lw=0.9, ls=(0, (3, 2)))
     mid = (hi_b + lo_t) / 2
-    ax.text(E - 1.0, mid, "small leak\npaired", ha="right", va="center", fontsize=7, color=INK2, linespacing=1.2)
-    ax.text(E + 3.2, mid, "distribution matching\nunpaired", ha="left", va="center", fontsize=7, color=INK2, linespacing=1.2)
+    ax.text(E - 1.0, mid + 4.4, "small leak, paired", ha="right", va="center", fontsize=7, color=INK2)
+    ax.text(E - 1.0, mid + 1.6, "distribution matching, unpaired", ha="right", va="center", fontsize=7, color=INK2)
     save(fig, "ch1/approach_overview")
 
 
