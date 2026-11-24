@@ -24,6 +24,9 @@
 \input{frontmatter/biography}
 \dedication{\input{frontmatter/dedication}}
 \acknowledgment{\input{frontmatter/acknowledgment}}
+%% Dedication and acknowledgment pages are hidden in the proposal; delete the next two lines to show them.
+\renewcommand{\makededication}{}
+\renewcommand{\makeacknowledgment}{}
 \input{frontmatter/symbols}
 \input{frontmatter/glossary}
 \initthesis
