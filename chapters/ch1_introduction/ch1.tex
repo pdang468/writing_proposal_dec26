@@ -26,9 +26,9 @@ The Platonic Representation Hypothesis offers a broader motivation for alignment
 
 \paragraph{Research question.} If language models converge toward similar representations, another model can learn to read what one model encodes.
 This dissertation asks what information about a prompt is recoverable by matching the structure that the models share.
-Seen from privacy, the question is what a split inference client exposes to a server that holds neither the weights of the client's blocks nor query access to them.
-Seen from the models themselves, the question is how far one model can read another.
-Neither answer follows from similarity alone: a map can preserve the meaning of a prompt and still lose its exact words.
+From a privacy perspective, the answer quantifies the information that a split inference client leaks to a server that holds neither the weights of the client's blocks nor query access to them.
+From a representation perspective, it quantifies the extent to which the hidden states of one model transfer to another.
+However, similar representations alone do not imply either: a map can preserve the meaning of a prompt and still lose its exact words.
 Prompt reconstruction therefore gives both views one test, the words that remain accessible after the map between models.
 The dissertation carries out that test on per-token hidden states, where a small leak of text supplies correspondences and distribution matching on unpaired text supplies further constraints on the map.
 
