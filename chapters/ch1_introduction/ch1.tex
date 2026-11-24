@@ -78,12 +78,11 @@ Reconstruction & who played \missb{sweetheart} williams on good times \\
 
 \paragraph{Results.} Both steps are evaluated on NQ, the query strings of Natural Questions, and on two datasets of legal text.
 The score is word-F1, the overlap between the words of the reconstruction and the words of the prompt, without regard to their order.
-
-The hub supports reconstruction across models: each of its three frozen decoders reconstructs prompts from the hidden states of the other models with high accuracy, on all three datasets.
-For the target model, the leak alone carries only a small part of the recovery under supervised training.
-The matching term more than doubles that recovery on all three datasets.
-Without a leak, the matching term alone reconstructs no better than a control that feeds the decoder the hidden states of another prompt.
-Exact match remains the challenging part: the hybrid fit reconstructs few prompts word for word on NQ and nearly none on the legal datasets.
+In step 1, the hub reaches a high word-F1 across models: each frozen decoder reconstructs prompts from the hidden states of the other models, on all three datasets.
+In step 2, the supervised fit, trained on the leak alone, reaches only a low word-F1 for the target model.
+The hybrid fit, which adds the matching term, more than doubles that word-F1 on all three datasets.
+Without a leak, the matching term alone scores no higher than a control that feeds the decoder the hidden states of another prompt.
+Even with the leak, exact reconstruction remains rare: the hybrid fit recovers few prompts word for word on NQ and nearly none on the legal datasets.
 
 \paragraph{Contributions.}
 \begin{itemize}
