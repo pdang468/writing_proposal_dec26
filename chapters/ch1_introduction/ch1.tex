@@ -29,7 +29,7 @@ This dissertation asks what information about a prompt is recoverable by matchin
 From a privacy perspective, the answer quantifies the information that a split inference client leaks to a server that holds neither the weights of the client's blocks nor query access to them.
 From a representation perspective, it quantifies the extent to which the hidden states of one model transfer to another.
 However, similar representations alone do not imply either: a map can preserve the meaning of a prompt and still lose its exact words.
-Prompt reconstruction therefore gives both views one test, the words that remain accessible after the map between models.
+Prompt reconstruction therefore gives both perspectives one test, the words that remain accessible after the map between models.
 The dissertation carries out that test on per-token hidden states, where a small leak of text supplies correspondences and distribution matching on unpaired text supplies further constraints on the map.
 
 \paragraph{Approach.} The dissertation approaches that question with an attack in two steps.
@@ -75,11 +75,11 @@ Reconstruction & who played \missb{sweetheart} williams on good times \\
 
 \paragraph{Results.} Both steps are evaluated on NQ, the query strings of Natural Questions, and on two datasets of legal text.
 The score is word-F1, the overlap between the words of the reconstruction and the words of the prompt, without regard to their order.
-In step 1, the hub reaches a high word-F1 across models: each frozen decoder reconstructs prompts from the hidden states of the other models, on all three datasets.
+In step 1, the hub reaches a high word-F1 across models: each frozen model reconstructs prompts from the hidden states of the other models, on all three datasets.
 In step 2, the supervised fit, trained on the leak alone, reaches only a low word-F1 for the target model.
 The hybrid fit, which adds the matching term, more than doubles that word-F1 on all three datasets.
 The gain depends on the size of the leak: it is largest at intermediate sizes and small at the smallest and the largest leaks tested.
-Without a leak, the matching term alone scores no higher than a control that feeds the decoder the hidden states of another prompt.
+Without a leak, the matching term alone scores no higher than a control that feeds the frozen models the hidden states of another prompt.
 Even with the leak, exact reconstruction remains rare: the hybrid fit recovers few prompts word for word on NQ and nearly none on the legal datasets.
 
 \paragraph{Contributions.}
