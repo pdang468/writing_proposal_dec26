@@ -58,7 +58,7 @@ The hypothesis does not state how closely two models agree, so whether the agree
 
 \paragraph{Alignment with little or no supervision.} How many paired examples a map requires has a long history in bilingual word embeddings.
 Artetxe et al.~\cite{artetxe2017learning} start from a seed dictionary of 25 word pairs, fit a map, induce a larger dictionary from the mapped embeddings, and repeat; the results are comparable to those of systems with richer bilingual resources.
-Conneau et al.~\cite{conneau2018word} and Artetxe et al.~\cite{artetxe2018robust} remove the seed dictionary, the first by adversarial training followed by Procrustes refinement, the second by an initialization from the similarity distributions of the two spaces.
+Lample et al.~\cite{conneau2018word} and Artetxe et al.~\cite{artetxe2018robust} remove the seed dictionary, the first by adversarial training followed by Procrustes refinement, the second by an initialization from the similarity distributions of the two spaces.
 Ormazabal et al.~\cite{ormazabal2019analyzing} examine the limits of that approach: embeddings of two languages learned jointly are more isomorphic than embeddings trained separately and then mapped.
 The attack of Chapter~\ref{ch:attack} follows the same pattern, a small paired seed extended by distribution matching on unpaired data, on the contextual hidden states of language models.
 Its matching term adapts the approximate bijective correspondence loss of Murphy et al.~\cite{murphy2022abc}, which learns image representations from set membership, without paired correspondences.
